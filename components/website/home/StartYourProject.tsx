@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function StartYourProject() {
   return (
-    <section className="py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6" style={{ background: 'linear-gradient(to bottom, #1e3a8a, #000000)' }}>
+    <section className="pt-16 sm:pt-20 md:pt-24 pb-0 px-1 sm:px-2 md:px-4 lg:px-6" style={{ background: 'linear-gradient(to bottom, #1e3a8a, #000000)' }}>
       <div className="max-w-[95%] mx-auto">
         {/* Top Section */}
         <div className="text-center mb-12 md:mb-16">
