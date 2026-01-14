@@ -31,20 +31,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       // Call logout API - handle network errors gracefully
       try {
-        const response = await fetch("http://localhost:8000/api/v1/logout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        });
+      const response = await fetch("http://localhost:8000/api/v1/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
 
         // Only try to parse JSON if response is ok, otherwise just log
         if (response.ok) {
           try {
-            const data = await response.json();
-            console.log("Logout response:", data);
+      const data = await response.json();
+      console.log("Logout response:", data);
           } catch (parseError) {
             // Response might be empty or not JSON, that's okay
             console.log("Logout successful (no response body)");

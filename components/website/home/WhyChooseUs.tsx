@@ -3,40 +3,102 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 
+interface Tab {
+  id: number;
+  title: string;
+  description: string;
+  order: number;
+}
+
+interface SectionData {
+  section_title: string;
+  background_image: string | null;
+  image_1: string | null;
+  image_2: string | null;
+}
+
 export default function WhyChooseUs() {
   const [scrollPosition, setScrollPosition] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [sectionData, setSectionData] = useState<SectionData | null>(null);
+  const [tabs, setTabs] = useState<Tab[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const features = [
-    {
-      title: "Affordable Pricing",
-      description:
-        "We offer competitive and transparent pricing without compromising on quality. Get professional signage solutions that fit your budget and exceed your expectations.",
-    },
-    {
-      title: "Quality Assurance",
-      description:
-        "Every sign we create undergoes rigorous quality testing to ensure durability, visibility, and long-lasting performance. We stand behind our work with comprehensive warranties.",
-    },
-    {
-      title: "Quick Turnarounds",
-      description:
-        "We understand time is money. Our efficient production process ensures fast turnaround times without compromising quality, helping you meet your deadlines.",
-    },
-    {
-      title: "Expert Team",
-      description:
-        "Our experienced team combines creativity with technical expertise to deliver signage solutions that perfectly match your vision and business needs.",
-    },
-  ];
+  // Fetch section data
+  useEffect(() => {
+    fetchSectionData();
+    fetchTabsData();
+  }, []);
 
-  // Duplicate features for seamless scrolling
-  const duplicatedFeatures = [...features, ...features];
+  const fetchSectionData = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/why-choose-us-section", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.why_choose_us_section) {
+          setSectionData({
+            section_title: data.data.why_choose_us_section.section_title || "Why Choose Us",
+            background_image: data.data.why_choose_us_section.background_image || null,
+            image_1: data.data.why_choose_us_section.image_1 || null,
+            image_2: data.data.why_choose_us_section.image_2 || null,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching section data:", err);
+    }
+  };
+
+  const fetchTabsData = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/why-choose-us-tabs", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          const tabsData = Array.isArray(data.data) 
+            ? data.data 
+            : (data.data.tabs || data.data.why_choose_us_tabs || []);
+          
+          const sortedTabs = tabsData
+            .map((tab: any) => ({
+              id: tab.id,
+              title: tab.title || "",
+              description: tab.description || "",
+              order: tab.order || 0,
+            }))
+            .sort((a: Tab, b: Tab) => a.order - b.order);
+          
+          setTabs(sortedTabs);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching tabs data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Duplicate tabs for seamless scrolling
+  const duplicatedTabs = tabs.length > 0 ? [...tabs, ...tabs] : [];
 
   // Auto-scroll feature boxes
   useEffect(() => {
+    if (tabs.length === 0) return;
+
     const cardHeight = 180; // Approximate height of each card (including gap)
-    const maxScroll = features.length * cardHeight;
+    const maxScroll = tabs.length * cardHeight;
 
     const interval = setInterval(() => {
       setScrollPosition((prev) => {
@@ -50,20 +112,55 @@ export default function WhyChooseUs() {
     }, 16); // ~60fps smooth scrolling
 
     return () => clearInterval(interval);
-  }, [features.length]);
+  }, [tabs.length]);
 
-  // Images
-  const images = [
+  // Get image URLs with proper formatting
+  const getImageUrl = (imagePath: string | null) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    if (imagePath.startsWith("/storage") || imagePath.startsWith("/")) {
+      return `http://localhost:8000${imagePath}`;
+    }
+    return imagePath;
+  };
+
+  const image1Url = getImageUrl(sectionData?.image_1 || null);
+  const image2Url = getImageUrl(sectionData?.image_2 || null);
+  const backgroundImageUrl = getImageUrl(sectionData?.background_image || null);
+
+  // Fallback data if API fails or no data
+  const sectionTitle = sectionData?.section_title || "Why Choose Us";
+  const fallbackImages = [
     "/assets/images/1704643966414629399_362025089872131_6843393301147201332_n.jpg",
     "/assets/images/1710846915Mecarvi-prints-login-n.png",
   ];
 
+  if (loading) {
+    return (
+      <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
+        <div className="max-w-[95%] mx-auto">
+          <div className="flex justify-center items-center py-12">
+            <div className="text-gray-600">Loading...</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
+    <section 
+      className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6"
+      style={backgroundImageUrl ? {
+        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      } : {}}
+    >
       <div className="max-w-[95%] mx-auto">
         {/* Title - Centered */}
         <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 text-center mb-12 md:mb-16">
-          Why Choose Us
+          {sectionTitle}
         </h2>
 
         {/* Main Content Container */}
@@ -72,68 +169,118 @@ export default function WhyChooseUs() {
             {/* Left Area - Composite Image Layout */}
             <div className="order-2 lg:order-1">
               <div className="relative w-full aspect-[3/2] max-w-4xl mx-auto rounded-lg overflow-hidden" style={{ backgroundColor: '#28190F', minHeight: '500px' }}>
-                {/* Top-Left: Installation Photo */}
-                <div className="absolute top-0 left-0 w-[65%] h-[60%] rounded-lg overflow-hidden">
-                  <Image
-                    src={images[0]}
-                    alt="Sign Installation"
-                    fill
-                    className="object-cover rounded-lg"
-                  />
-                </div>
+                {/* Top-Left: Image 1 */}
+                {image1Url && (
+                  <div className="absolute top-0 left-0 w-[65%] h-[60%] rounded-lg overflow-hidden">
+                    <img
+                      src={image1Url}
+                      alt="Why Choose Us"
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
                 
-                {/* Bottom-Right: Logo */}
-                <div className="absolute bottom-0 right-0 w-[45%] h-[50%] rounded-lg overflow-hidden">
-                  <Image
-                    src={images[1]}
-                    alt="Mecarvi Signs Logo"
-                    fill
-                    className="object-contain rounded-lg"
-                  />
-                </div>
+                {/* Bottom-Right: Image 2 */}
+                {image2Url ? (
+                  <div className="absolute bottom-0 right-0 w-[45%] h-[50%] rounded-lg overflow-hidden">
+                    <img
+                      src={image2Url}
+                      alt="Why Choose Us"
+                      className="w-full h-full object-contain rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : image1Url && (
+                  <div className="absolute bottom-0 right-0 w-[45%] h-[50%] rounded-lg overflow-hidden">
+                    <Image
+                      src={fallbackImages[1]}
+                      alt="Mecarvi Signs Logo"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 45vw"
+                      className="object-contain rounded-lg"
+                    />
+                  </div>
+                )}
+                
+                {/* Fallback if no images from API */}
+                {!image1Url && !image2Url && (
+                  <>
+                    <div className="absolute top-0 left-0 w-[65%] h-[60%] rounded-lg overflow-hidden">
+                      <Image
+                        src={fallbackImages[0]}
+                        alt="Sign Installation"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 65vw"
+                        className="object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="absolute bottom-0 right-0 w-[45%] h-[50%] rounded-lg overflow-hidden">
+                      <Image
+                        src={fallbackImages[1]}
+                        alt="Mecarvi Signs Logo"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 45vw"
+                        className="object-contain rounded-lg"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Right Area - Auto-scrolling Feature Cards with Red Borders */}
             <div className="order-1 lg:order-2 relative h-[600px] overflow-hidden">
-              <div
-                ref={scrollContainerRef}
-                className="space-y-6"
-                style={{
-                  transform: `translateY(-${scrollPosition}px)`,
-                  transition: "none", // Remove transition for smooth continuous scroll
-                }}
-              >
-                {duplicatedFeatures.map((feature, index) => (
-                  <div
-                    key={`${index}-${feature.title}`}
-                    className="bg-white rounded-xl p-6 shadow-lg border-2 border-red-500 hover:shadow-xl transition-shadow"
-                  >
-                    <div className="flex gap-4">
-                      {/* Red Star Icon */}
-                      <div className="flex-shrink-0 mt-1">
-                        <svg
-                          className="w-6 h-6 text-red-500"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      </div>
+              {tabs.length > 0 ? (
+                <div
+                  ref={scrollContainerRef}
+                  className="space-y-6"
+                  style={{
+                    transform: `translateY(-${scrollPosition}px)`,
+                    transition: "none", // Remove transition for smooth continuous scroll
+                  }}
+                >
+                  {duplicatedTabs.map((tab, index) => (
+                    <div
+                      key={`${tab.id}-${index}`}
+                      className="bg-white rounded-xl p-6 shadow-lg border-2 border-red-500 hover:shadow-xl transition-shadow"
+                    >
+                      <div className="flex gap-4">
+                        {/* Red Star Icon */}
+                        <div className="flex-shrink-0 mt-1">
+                          <svg
+                            className="w-6 h-6 text-red-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        </div>
 
-                      {/* Content */}
-                      <div className="flex-1">
-                        <h3 className="text-xl md:text-2xl font-bold text-red-500 mb-2 pb-2 border-b border-red-300">
-                          {feature.title}
-                        </h3>
-                        <p className="text-gray-600 text-sm md:text-base leading-relaxed">
-                          {feature.description}
-                        </p>
+                        {/* Content */}
+                        <div className="flex-1">
+                          <h3 className="text-xl md:text-2xl font-bold text-red-500 mb-2 pb-2 border-b border-red-300">
+                            {tab.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+                            {tab.description}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500">No content available</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

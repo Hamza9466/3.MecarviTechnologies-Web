@@ -15,7 +15,7 @@ interface User {
 export default function UserViewPage() {
   const router = useRouter();
   const params = useParams();
-  const userId = params?.id as string;
+  const userId = params ? (params.id as string) : null;
   
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);

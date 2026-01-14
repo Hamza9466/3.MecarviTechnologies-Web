@@ -1,52 +1,261 @@
-export default function OurFacts() {
-  const facts = [
-    {
-      percentage: "99%",
-      label: "Satisfaction Rate",
-      position: "bottom",
-    },
-    {
-      percentage: "14%",
-      label: "Years in business",
-      position: "top",
-    },
-    {
-      percentage: "15%",
-      label: "Location",
-      position: "bottom",
-    },
-  ];
+"use client";
 
-  const processSteps = [
-    {
-      number: 1,
-      title: "Information Collection",
-      description:
-        "We gather comprehensive details about your business needs, objectives, and requirements to create tailored solutions.",
-    },
-    {
-      number: 2,
-      title: "Projection Report Analysis",
-      description:
-        "Our team analyzes data and creates detailed projections to ensure optimal outcomes for your signage projects.",
-    },
-    {
-      number: 3,
-      title: "Consultation Solution",
-      description:
-        "We provide expert consultation and customized solutions that align with your vision and business goals.",
-    },
-  ];
+import { useState, useEffect } from "react";
+
+interface Fact {
+  id: number;
+  percentage: string;
+  label: string;
+  order: number;
+}
+
+interface ProcessStep {
+  id: number;
+  number: number;
+  title: string;
+  description: string;
+  order: number;
+}
+
+interface SectionData {
+  section_title: string;
+  large_number: string;
+  background_image: string | null;
+}
+
+interface PromiseData {
+  title: string;
+  description: string;
+}
+
+export default function OurFacts() {
+  const [sectionData, setSectionData] = useState<SectionData | null>(null);
+  const [facts, setFacts] = useState<Fact[]>([]);
+  const [promiseData, setPromiseData] = useState<PromiseData | null>(null);
+  const [processSteps, setProcessSteps] = useState<ProcessStep[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch data on mount
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        await Promise.all([
+          fetchSectionData(),
+          fetchFactsData(),
+          fetchPromiseData(),
+          fetchProcessStepsData(),
+        ]);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
+  }, []);
+
+  const fetchSectionData = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/our-facts-section", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.our_facts_section) {
+          setSectionData({
+            section_title: data.data.our_facts_section.section_title || "Our Facts",
+            large_number: data.data.our_facts_section.large_number || "15+",
+            background_image: data.data.our_facts_section.background_image || null,
+          });
+        } else {
+          // Set defaults if no data
+          setSectionData({
+            section_title: "Our Facts",
+            large_number: "15+",
+            background_image: null,
+          });
+        }
+      } else if (response.status === 404) {
+        // Set defaults if endpoint returns 404
+        setSectionData({
+          section_title: "Our Facts",
+          large_number: "15+",
+          background_image: null,
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching section data:", err);
+      // Set defaults on error
+      setSectionData({
+        section_title: "Our Facts",
+        large_number: "15+",
+        background_image: null,
+      });
+    }
+  };
+
+  const fetchFactsData = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/our-facts", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          const factsData = Array.isArray(data.data)
+            ? data.data
+            : data.data.facts || data.data.our_facts || [];
+          const sortedFacts = factsData
+            .map((fact: any) => ({
+              id: fact.id,
+              percentage: fact.percentage || "",
+              label: fact.label || "",
+              order: fact.order || 0,
+            }))
+            .sort((a: Fact, b: Fact) => a.order - b.order);
+          setFacts(sortedFacts);
+        }
+      } else if (response.status === 404) {
+        setFacts([]);
+      }
+    } catch (err) {
+      console.error("Error fetching facts data:", err);
+      setFacts([]);
+    }
+  };
+
+  const fetchPromiseData = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/our-promise", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.our_promise) {
+          setPromiseData({
+            title: data.data.our_promise.title || "Our Promise",
+            description: data.data.our_promise.description || "",
+          });
+        } else {
+          setPromiseData({
+            title: "Our Promise",
+            description: "We help you scale your vision and services through thoughtful planning and consultation.",
+          });
+        }
+      } else if (response.status === 404) {
+        setPromiseData({
+          title: "Our Promise",
+          description: "We help you scale your vision and services through thoughtful planning and consultation.",
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching promise data:", err);
+      setPromiseData({
+        title: "Our Promise",
+        description: "We help you scale your vision and services through thoughtful planning and consultation.",
+      });
+    }
+  };
+
+  const fetchProcessStepsData = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/process-steps", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          const stepsData = Array.isArray(data.data)
+            ? data.data
+            : data.data.steps || data.data.process_steps || [];
+          const sortedSteps = stepsData
+            .map((step: any) => ({
+              id: step.id,
+              number: step.number || 1,
+              title: step.title || "",
+              description: step.description || "",
+              order: step.order || 0,
+            }))
+            .sort((a: ProcessStep, b: ProcessStep) => a.order - b.order);
+          setProcessSteps(sortedSteps);
+        }
+      } else if (response.status === 404) {
+        setProcessSteps([]);
+      }
+    } catch (err) {
+      console.error("Error fetching process steps data:", err);
+      setProcessSteps([]);
+    }
+  };
+
+  // Get image URL with proper formatting
+  const getImageUrl = (imagePath: string | null) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    if (imagePath.startsWith("/storage") || imagePath.startsWith("/")) {
+      return `http://localhost:8000${imagePath}`;
+    }
+    return imagePath;
+  };
+
+  const backgroundImageUrl = getImageUrl(sectionData?.background_image || null);
+
+  // Fallback values
+  const largeNumber = sectionData?.large_number || "15+";
+  const sectionTitle = sectionData?.section_title || "Our Facts";
+  const promiseTitle = promiseData?.title || "Our Promise";
+  const promiseDescription =
+    promiseData?.description ||
+    "We help you scale your vision and services through thoughtful planning and consultation.";
+
+  if (loading) {
+    return (
+      <section className="bg-white py-8 sm:py-10 md:py-12">
+        <div className="flex justify-center items-center py-12">
+          <div className="text-gray-600">Loading...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="bg-white py-8 sm:py-10 md:py-12">
+    <section
+      className="bg-white py-8 sm:py-10 md:py-12"
+      style={
+        backgroundImageUrl
+          ? {
+              backgroundImage: `url(${backgroundImageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }
+          : {}
+      }
+    >
       {/* Top Row - Full Width */}
       <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 w-full">
         {/* Top Left - Pink Background with Years */}
         <div className="p-8 md:p-12 lg:p-16 flex items-center justify-center min-h-[300px] md:min-h-[400px]" style={{ backgroundColor: '#E60F77' }}>
           <div className="text-white text-center lg:text-left">
             <div className="text-9xl sm:text-9xl md:text-[10rem] lg:text-[14rem] font-bold pl-12 md:pl-12 lg:pl-30 lg:pt-35">
-              15+
+              {largeNumber}
             </div>
           </div>
         </div>
@@ -55,20 +264,27 @@ export default function OurFacts() {
         <div className="p-8 md:p-12 lg:p-16 min-h-[300px] md:min-h-[400px]" style={{ backgroundColor: '#F3F4F6' }}>
           <div className="max-w-4xl mx-auto lg:mx-0">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-700 mb-8 md:mb-12">
-              Our Facts
+              {sectionTitle}
             </h2>
             <div className="flex flex-nowrap gap-4 md:gap-6 lg:gap-8 justify-center lg:justify-start">
-              {facts.map((fact, index) => {
-                const percentage = parseInt(fact.percentage.replace('%', ''));
+              {facts.length > 0 ? (
+                facts.map((fact) => {
+                // Parse percentage - handle both "99%" and "99" formats
+                const percentageValue = parseFloat(fact.percentage.replace(/[^0-9.]/g, '')) || 0;
                 const circumference = 2 * Math.PI * 54; // radius = 54
-                const offset = circumference - (percentage / 100) * circumference;
+                const offset = circumference - (percentageValue / 100) * circumference;
                 // Calculate dot position at the end of the progress arc
-                const angle = (percentage / 100) * 360 - 90; // -90 to start from top
+                const angle = (percentageValue / 100) * 360 - 90; // -90 to start from top
                 const dotX = 60 + 54 * Math.cos((angle * Math.PI) / 180);
                 const dotY = 60 + 54 * Math.sin((angle * Math.PI) / 180);
                 
+                // Format percentage for display - ensure it has % sign
+                const displayPercentage = fact.percentage.includes('%') 
+                  ? fact.percentage 
+                  : `${fact.percentage}%`;
+                
                 return (
-                  <div key={index} className="relative flex-shrink-0 flex flex-col items-center">
+                  <div key={fact.id} className="relative flex-shrink-0 flex flex-col items-center">
                     <div className="w-36 h-36 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 relative">
                       {/* Circle Background */}
                       <svg
@@ -102,7 +318,7 @@ export default function OurFacts() {
                       {/* Percentage Text - Centered */}
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-3xl md:text-4xl lg:text-5xl font-bold text-black">
-                          {fact.percentage}
+                          {displayPercentage}
                         </div>
                       </div>
                     </div>
@@ -114,7 +330,10 @@ export default function OurFacts() {
                     </div>
                   </div>
                 );
-              })}
+              })
+              ) : (
+                <div className="text-gray-500 text-center w-full py-4">No facts available</div>
+              )}
             </div>
           </div>
         </div>
@@ -136,11 +355,10 @@ export default function OurFacts() {
                 {/* Left Side - Our Promise */}
                 <div className="flex flex-col justify-center">
                   <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4 md:mb-6">
-                    Our Promise
+                    {promiseTitle}
                   </h3>
                   <p className="text-gray-600 text-sm sm:text-base md:text-lg leading-relaxed">
-                    We help you scale your vision and services through thoughtful
-                    planning and consultation.
+                    {promiseDescription}
                   </p>
                 </div>
 
@@ -148,7 +366,8 @@ export default function OurFacts() {
                 <div className="flex flex-col justify-center w-full">
                   <div className="relative w-full">
                     <div className="flex flex-col gap-2 md:gap-3">
-                      {processSteps.map((step, index) => (
+                      {processSteps.length > 0 ? (
+                        processSteps.map((step, index) => (
                         <div key={index} className="flex items-start gap-3 sm:gap-4 py-1 sm:py-2">
                           {/* Light Pink Circular Number */}
                           <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#FEE8F4' }}>
@@ -167,7 +386,10 @@ export default function OurFacts() {
                             </p>
                           </div>
                         </div>
-                      ))}
+                      ))
+                      ) : (
+                        <div className="text-gray-500">No process steps available</div>
+                      )}
                     </div>
                   </div>
                 </div>

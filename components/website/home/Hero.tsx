@@ -116,7 +116,7 @@ export default function Hero() {
 
   return (
     <section 
-      className="min-h-screen  flex items-center justify-center px-1 sm:px-2 md:px-4 lg:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16 relative overflow-hidden"
+      className="min-h-screen  flex items-center justify-center px-1 sm:px-2 md:px-4 lg:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16 relative overflow-visible"
     >
       {/* Background Image or Gradient */}
       {displayData.background_image ? (
@@ -130,12 +130,14 @@ export default function Hero() {
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
               zIndex: 0,
+              left: 0,
+              right: 0,
             }}
           />
           {/* Overlay for better text readability */}
           <div 
             className="absolute inset-0 w-full h-full pointer-events-none bg-gradient-to-r from-blue-900/70 to-blue-800/70"
-            style={{ zIndex: 0 }}
+            style={{ zIndex: 0, left: 0, right: 0 }}
           />
         </>
       ) : (
@@ -144,7 +146,7 @@ export default function Hero() {
           className="absolute inset-0 w-full h-full pointer-events-none"
           preserveAspectRatio="none"
           viewBox="0 0 1440 800"
-          style={{ zIndex: 0 }}
+          style={{ zIndex: 0, overflow: 'hidden' }}
         >
           <defs>
             <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -159,7 +161,7 @@ export default function Hero() {
         </svg>
       )}
       
-      <div className="max-w-[95%] mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 lg:gap-10 items-center w-full mt-12 sm:mt-16 md:mt-20 lg:mt-24 relative z-10">
+      <div className="max-w-[95%] mx-auto grid grid-cols-1 md:grid-cols-[50%_50%] gap-4 sm:gap-6 md:gap-8 lg:gap-10 items-center w-full relative z-10">
         {/* Left Content */}
         <div className="text-white space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 text-center md:text-left order-2 md:order-1 px-2 sm:px-0">
           {loading ? (
@@ -207,20 +209,21 @@ export default function Hero() {
         </div>
 
         {/* Right Content - Image in Laptop Frame */}
-        <div className="relative flex items-center justify-center order-1 md:order-2 px-2 sm:px-0 ml-4 sm:ml-6 md:ml-8 lg:ml-15">
-          <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl transform -rotate-3 md:rotate-0 hover:scale-105 transition-transform duration-300">
+        <div className="relative flex items-center justify-center order-1 md:order-2 px-2 sm:px-0 ml-4 sm:ml-6 md:ml-8 lg:ml-15 w-full md:w-auto" style={{ overflow: 'visible', maxWidth: '100%', flex: '1 1 50%' }}>
+          <div className="relative w-full max-w-3xl sm:max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl transform -rotate-3 md:rotate-0 hover:scale-105 transition-transform duration-300 md:top-[80px]" style={{ marginTop: '2rem', marginBottom: '-4rem' }}>
             {loading ? (
-              <div className="relative bg-white rounded-2xl p-3 sm:p-4 shadow-2xl">
+              <div className="relative bg-white rounded-2xl p-3 sm:p-4" style={{ boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
                 <div className="bg-gray-100 rounded-lg overflow-hidden aspect-video animate-pulse"></div>
               </div>
             ) : (
-              <div className="relative bg-white rounded-2xl p-3 sm:p-4 shadow-2xl">
-                <div className="bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative bg-white rounded-2xl p-2 sm:p-3 md:p-4 lg:p-5 mr-4 sm:mr-6 md:mr-8 lg:mr-10" style={{ overflow: 'visible', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+                <div className="bg-gray-100 rounded-lg overflow-hidden" style={{ overflow: 'visible', width: '100%', height: '100%' }}>
                   {displayData.secondary_image ? (
                     <img
                       src={`http://localhost:8000${displayData.secondary_image}`}
                       alt={displayData.title || "Hero image"}
-                      className="w-full h-auto object-cover rounded-lg"
+                      className="object-cover rounded-lg"
+                      style={{ height: '100%', width: '100%', objectFit: 'cover' }}
                       onError={(e) => {
                         // Fallback to default image if API image fails
                         e.currentTarget.src = "/assets/images/08.jpg";
@@ -230,9 +233,10 @@ export default function Hero() {
                     <Image
                       src="/assets/images/08.jpg"
                       alt="Software dashboard illustration"
-                      width={800}
+                      width={1000}
                       height={600}
-                      className="w-full h-auto object-cover rounded-lg"
+                      className="w-full h-full object-cover rounded-lg"
+                      style={{ height: '100%', width: '100%', objectFit: 'cover' }}
                       priority
                     />
                   )}

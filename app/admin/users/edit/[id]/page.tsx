@@ -15,7 +15,7 @@ interface User {
 export default function UserEditPage() {
   const router = useRouter();
   const params = useParams();
-  const userId = params?.id as string;
+  const userId = params ? (params.id as string) : null;
   const isEditMode = userId && userId !== "new";
   
   const [loading, setLoading] = useState(isEditMode);

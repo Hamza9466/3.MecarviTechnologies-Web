@@ -5,6 +5,11 @@ import { useState } from "react";
 export default function FAQSection() {
   const [activeCategory, setActiveCategory] = useState("Inquery");
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [showAskQuestion, setShowAskQuestion] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    message: "",
+  });
 
   const categories = ["Inquery", "AboutUs", "ContactUs", "MoreQuestions", "FaqCategory"];
 
@@ -50,9 +55,12 @@ export default function FAQSection() {
                 {categories.map((category) => (
                   <button
                     key={category}
-                    onClick={() => setActiveCategory(category)}
+                    onClick={() => {
+                      setActiveCategory(category);
+                      setShowAskQuestion(false);
+                    }}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                      activeCategory === category
+                      activeCategory === category && !showAskQuestion
                         ? "bg-pink-500 text-white font-semibold"
                         : "text-gray-900 hover:bg-gray-100"
                     }`}
@@ -60,12 +68,91 @@ export default function FAQSection() {
                     {category}
                   </button>
                 ))}
+                
+                {/* Ask Question Button */}
+                <button
+                  onClick={() => {
+                    setShowAskQuestion(true);
+                    setActiveCategory("");
+                  }}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                    showAskQuestion
+                      ? "bg-pink-500 text-white font-semibold"
+                      : "text-gray-900 hover:bg-gray-100"
+                  }`}
+                >
+                  Ask Question
+                </button>
               </nav>
             </div>
           </div>
 
           {/* Right FAQ Display Area */}
           <div className="relative">
+            {/* Ask Question Form */}
+            {showAskQuestion ? (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 md:p-8">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    // Handle form submission here
+                    console.log("Form submitted:", formData);
+                    // You can add API call here to submit the question
+                    alert("Question submitted successfully!");
+                    setFormData({ name: "", message: "" });
+                  }}
+                  className="space-y-6"
+                >
+                  {/* Name Field */}
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-bold text-gray-900 mb-2">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Enter your name"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  {/* Message Field */}
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-bold text-gray-900 mb-2">
+                      Message
+                    </label>
+                    <textarea
+                      id="message"
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      placeholder="Write your message"
+                      rows={6}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-y"
+                      required
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
+                  >
+                    Ask Question Now
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Paragraph Text */}
+                <div className="mb-8 md:mb-12">
+                  <p className="text-black text-base md:text-lg leading-relaxed text-center font-bold">
+                    Find answers to commonly asked questions about our services, products, and processes. If you can't find what you're looking for, feel free to ask us a question using the form below.
+                  </p>
+                </div>
+
             {/* Grid Layout - 2 columns */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Column 1 */}
@@ -86,7 +173,7 @@ export default function FAQSection() {
                             onClick={() => setOpenFAQ(openFAQ === faq.id ? null : faq.id)}
                             className="w-full flex items-center justify-between text-left"
                           >
-                            <h3 className="text-gray-400 font-medium text-base md:text-lg pr-4 flex-1">
+                            <h3 className="text-black font-medium text-base md:text-lg pr-4 flex-1">
                               {faq.question}
                             </h3>
                             
@@ -145,7 +232,7 @@ export default function FAQSection() {
                             onClick={() => setOpenFAQ(openFAQ === faq.id ? null : faq.id)}
                             className="w-full flex items-center justify-between text-left"
                           >
-                            <h3 className="text-gray-400 font-medium text-base md:text-lg pr-4 flex-1">
+                            <h3 className="text-black font-medium text-base md:text-lg pr-4 flex-1">
                               {faq.question}
                             </h3>
                             
@@ -186,6 +273,8 @@ export default function FAQSection() {
                 </div>
               </div>
             </div>
+            </div>
+            )}
           </div>
         </div>
       </div>
