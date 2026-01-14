@@ -396,7 +396,7 @@ const AboutEditor = forwardRef<AboutEditorRef>((props, ref) => {
           
           // Show warning if files failed to upload
           if (aboutImage1UploadFailed || aboutImage2UploadFailed) {
-            const failedImages = [];
+            const failedImages: string[] = [];
             if (aboutImage1UploadFailed) failedImages.push("About Image 1");
             if (aboutImage2UploadFailed) failedImages.push("About Image 2");
             setTimeout(() => {

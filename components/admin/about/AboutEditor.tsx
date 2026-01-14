@@ -237,7 +237,7 @@ const AboutEditor = forwardRef<AboutEditorRef>((props, ref) => {
     }
   };
 
-  const handleRemoveImage = (fieldName: string, urlFieldName: string, inputRef?: React.RefObject<HTMLInputElement>) => {
+  const handleRemoveImage = (fieldName: string, urlFieldName: string, inputRef?: React.RefObject<HTMLInputElement | null>) => {
     console.log(`=== REMOVING IMAGE ===`);
     console.log(`Field: ${fieldName}, URL Field: ${urlFieldName}`);
     console.log(`Current state BEFORE removal:`, {
