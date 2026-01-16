@@ -42,8 +42,8 @@ export default function AboutFounder() {
 
   if (loading) {
     return (
-      <section className="bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12">
-        <div className="max-w-7xl mx-auto">
+      <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
+        <div className="max-w-[95%] mx-auto">
           <div className="text-gray-600">Loading...</div>
         </div>
       </section>
@@ -56,12 +56,12 @@ export default function AboutFounder() {
   };
 
   return (
-    <section className="bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12">
-      <div className="max-w-7xl mx-auto">
+    <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
+      <div className="max-w-[95%] mx-auto">
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600 text-center mb-8 md:mb-12">
           {displayData.founder_title}
         </h2>
-        <div className="text-gray-700 text-sm sm:text-base md:text-xs leading-relaxed text-left max-w-7xl mx-auto">
+        <div className="text-gray-700 text-sm sm:text-base md:text-xs leading-relaxed text-left max-w-[95%] mx-auto">
           <p>{displayData.founder_description}</p>
         </div>
       </div>

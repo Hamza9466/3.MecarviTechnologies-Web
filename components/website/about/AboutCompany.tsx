@@ -52,7 +52,7 @@ export default function AboutCompany() {
 
   if (loading) {
     return (
-      <section className="bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-0">
+      <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
         <div className="text-gray-600 text-center">Loading...</div>
       </section>
     );
@@ -65,7 +65,7 @@ export default function AboutCompany() {
   };
 
   return (
-    <section className="bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-0">
+    <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="relative grid grid-cols-1 lg:grid-cols-[30%_1fr] gap-0 min-h-[500px] md:min-h-[600px] lg:min-h-[700px]">
         {/* Left Panel - Dark Blue Background with Logo on Mobile */}
         <div className="bg-blue-900 p-8 md:p-12 lg:p-16 relative min-h-[300px] lg:min-h-0 flex items-center justify-center lg:block">

@@ -34,7 +34,7 @@ export default function Header() {
       {/* Gradient background */}
       <div 
         className={`${isScrolled ? "bg-white shadow-md" : ""} py-3 px-1 md:px-2 lg:px-4 overflow-visible transition-all duration-1000`}
-        style={!isScrolled ? { background: "linear-gradient(to right, #00C6EC, #0040EA)" } : {}}
+        style={!isScrolled ? { background: "linear-gradient(to right, #7E03C3, #C503B4)" } : {}}
       >
         <div className="max-w-[95%] mx-auto flex items-center justify-between relative min-h-[63px]">
           {/* Logo on Left */}
@@ -49,11 +49,22 @@ export default function Header() {
           </Link>
 
           {/* Centered Navigation Panel - Hidden on mobile/tablet */}
-          <nav className={`hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/3 -translate-y-1/2 bg-white rounded-none rounded-bl-2xl rounded-br-2xl px-4 xl:px-8 py-6 xl:py-10 items-center gap-3 xl:gap-6 z-20 whitespace-nowrap transition-all duration-1000 ${isScrolled ? "shadow-none" : "shadow-lg"}`} style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+          <nav 
+            className={`hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/3 -translate-y-1/2 rounded-none rounded-bl-2xl rounded-br-2xl px-4 xl:px-8 py-6 xl:py-10 items-center gap-3 xl:gap-6 z-20 whitespace-nowrap transition-all duration-1000`} 
+            style={{ 
+              borderTopLeftRadius: 0, 
+              borderTopRightRadius: 0,
+              backgroundImage: 'url(/assets/images/Rectangle-28.png)',
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              width: '755px',              marginTop: '10px',
+            }}
+          >
             <Link 
               href="/" 
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap ${
-                pathname === "/" ? "text-orange-600 font-semibold" : "text-black hover:text-gray-700"
+              className={`text-xs lg:ps-3 xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${
+                pathname === "/" ? "font-semibold" : ""
               }`}
             >
               Home
@@ -61,8 +72,8 @@ export default function Header() {
 
             <Link 
               href="/website/pages/about" 
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap ${
-                pathname === "/website/pages/about" ? "text-orange-600 font-semibold" : "text-black hover:text-gray-700"
+              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${
+                pathname === "/website/pages/about" ? "font-semibold" : ""
               }`}
             >
               About us
@@ -70,8 +81,8 @@ export default function Header() {
 
             <Link 
               href="/website/pages/faq" 
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap ${
-                pathname === "/website/pages/faq" ? "text-orange-600 font-semibold" : "text-black hover:text-gray-700"
+              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${
+                pathname === "/website/pages/faq" ? "font-semibold" : ""
               }`}
             >
               FAQ
@@ -79,8 +90,8 @@ export default function Header() {
 
             <Link 
               href="/website/pages/quote" 
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap ${
-                pathname === "/website/pages/quote" ? "text-orange-600 font-semibold" : "text-black hover:text-gray-700"
+              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${
+                pathname === "/website/pages/quote" ? "font-semibold" : ""
               }`}
             >
               Quote
@@ -88,32 +99,32 @@ export default function Header() {
 
             <Link 
               href="/products" 
-              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap ${
-                pathname?.startsWith("/products") ? "text-orange-600 font-semibold" : "text-black hover:text-gray-700"
+              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${
+                pathname?.startsWith("/products") ? "font-semibold" : ""
               }`}
             >
               Products
-              <svg className={`w-3 h-3 xl:w-4 xl:h-4 ${pathname?.startsWith("/products") ? "text-orange-600" : "text-black"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 xl:w-4 xl:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </Link>
 
             <Link 
               href="/service" 
-              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap ${
-                pathname === "/service" ? "text-orange-600 font-semibold" : "text-black hover:text-gray-700"
+              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${
+                pathname === "/service" ? "font-semibold" : ""
               }`}
             >
               Service
-              <svg className={`w-3 h-3 xl:w-4 xl:h-4 ${pathname === "/service" ? "text-orange-600" : "text-black"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 xl:w-4 xl:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </Link>
           
             <Link 
               href="/technologies" 
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap ${
-                pathname === "/technologies" ? "text-orange-600 font-semibold" : "text-black hover:text-gray-700"
+              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${
+                pathname === "/technologies" ? "font-semibold" : ""
               }`}
             >
               Technologies
@@ -121,17 +132,17 @@ export default function Header() {
 
             <Link 
               href="/website/pages/career" 
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap ${
-                pathname === "/website/pages/career" ? "text-orange-600 font-semibold" : "text-black hover:text-gray-700"
+              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${
+                pathname === "/website/pages/career" ? "font-semibold" : ""
               }`}
             >
               Career
             </Link>
          
             <Link 
-              href="/contact" 
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap ${
-                pathname === "/contact" ? "text-orange-600 font-semibold" : "text-black hover:text-gray-700"
+              href="/website/pages/contact" 
+              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${
+                pathname === "/website/pages/contact" ? "font-semibold" : ""
               }`}
             >
               Contact
@@ -223,10 +234,10 @@ export default function Header() {
                   Career
                 </Link>
                 <Link 
-                  href="/contact" 
+                  href="/website/pages/contact" 
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                    pathname === "/contact" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
+                    pathname === "/website/pages/contact" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
                   }`}
                 >
                   Contact
@@ -238,7 +249,10 @@ export default function Header() {
           {/* Right Side - CTA Button and Menu Icon */}
           <div className="flex items-center gap-2 sm:gap-4 md:gap-6 z-10">
             {/* Try For Free Button - Hidden on mobile, visible on tablet+ */}
-            <button className="hidden sm:flex items-center gap-1.5 md:gap-2 bg-gradient-to-r from-orange-500 to-yellow-400 text-white px-3 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-full hover:opacity-90 transition-opacity text-xs sm:text-sm font-medium">
+            <button 
+              className="hidden sm:flex items-center gap-1.5 md:gap-2 text-white px-3 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-full hover:opacity-90 transition-opacity text-xs sm:text-sm font-medium"
+              style={{ background: 'linear-gradient(to right, #FD02A9, #7E03C3)' }}
+            >
               <span className="hidden md:inline">Try For Free</span>
               <span className="md:hidden">Try Free</span>
               <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-white/20 flex items-center justify-center">
@@ -251,7 +265,8 @@ export default function Header() {
             {/* Login Button */}
             <button 
               onClick={() => router.push("/login")}
-              className="px-5 sm:px-4 py-2.5 sm:py-2 rounded-full bg-orange-500 text-white text-xs sm:text-sm font-medium hover:bg-orange-600 transition-colors min-w-[70px] sm:min-w-auto"
+              className="px-5 sm:px-4 py-2.5 sm:py-2 rounded-full text-white text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity min-w-[70px] sm:min-w-auto"
+              style={{ background: 'linear-gradient(to right, #FD02A9, #7E03C3)' }}
             >
               <span className="hidden sm:inline">Login</span>
               <span className="sm:hidden">Log</span>

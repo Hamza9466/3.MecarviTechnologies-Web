@@ -46,14 +46,44 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
         },
       });
 
+      console.log("Hero Editor - Response status:", response.status);
+      
       if (!response.ok) {
-        throw new Error("Failed to fetch home page data");
+        if (response.status === 404) {
+          console.log("Hero Editor - No data found (404), using default values");
+          // Use same default values as website component
+          setFormData({
+            title: "A Complete\nSoftware Based\nWebsite",
+            buttonText: "Discover More",
+            buttonUrl: "/discover",
+            description: "Integrating and automating workflows simplifies operations, reduces manual effort, and boosts efficiency. Seamless integration connects various.",
+            backgroundImage: null,
+            secondaryImage: null,
+            backgroundImageUrl: null,
+            secondaryImageUrl: null,
+          });
+          setLoading(false);
+          return;
+        }
+        throw new Error(`Failed to fetch home page data: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log("Hero Editor - API Response:", data);
       
+      // Handle different response structures
+      let homePage = null;
       if (data.success && data.data?.home_page) {
-        const homePage = data.data.home_page;
+        homePage = data.data.home_page;
+      } else if (data.data && !data.data.home_page) {
+        // Try direct data structure
+        homePage = data.data;
+      } else if (data.home_page) {
+        homePage = data.home_page;
+      }
+      
+      if (homePage) {
+        console.log("Hero Editor - Home page data found:", homePage);
         setHomePageId(homePage.id);
         setFormData({
           title: homePage.title || "",
@@ -65,10 +95,23 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
           backgroundImageUrl: homePage.background_image || null,
           secondaryImageUrl: homePage.secondary_image || null,
         });
+      } else {
+        console.log("Hero Editor - No home page data in response, using default values");
+        // Use same default values as website component
+        setFormData({
+          title: "A Complete\nSoftware Based\nWebsite",
+          buttonText: "Discover More",
+          buttonUrl: "/discover",
+          description: "Integrating and automating workflows simplifies operations, reduces manual effort, and boosts efficiency. Seamless integration connects various.",
+          backgroundImage: null,
+          secondaryImage: null,
+          backgroundImageUrl: null,
+          secondaryImageUrl: null,
+        });
       }
     } catch (err: any) {
       console.error("Error fetching home page data:", err);
-      setError("Failed to load home page data");
+      setError(`Failed to load home page data: ${err.message}`);
     } finally {
       setLoading(false);
     }

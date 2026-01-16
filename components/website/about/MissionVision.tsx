@@ -46,8 +46,8 @@ export default function MissionVision() {
 
   if (loading) {
     return (
-      <section className="bg-white pb-16 sm:pb-20 md:pb-24 pt-0 px-4 sm:px-6 md:px-8 lg:px-12">
-        <div className="max-w-7xl mx-auto">
+      <section className="bg-white pb-16 sm:pb-20 md:pb-24 pt-0 px-1 sm:px-2 md:px-4 lg:px-6">
+        <div className="max-w-[95%] mx-auto">
           <div className="text-gray-600 text-center">Loading...</div>
         </div>
       </section>
@@ -62,8 +62,8 @@ export default function MissionVision() {
   };
 
   return (
-    <section className="bg-white pb-16 sm:pb-20 md:pb-24 pt-0 px-4 sm:px-6 md:px-8 lg:px-12">
-      <div className="max-w-7xl mx-auto">
+    <section className="bg-white pb-16 sm:pb-20 md:pb-24 pt-0 px-1 sm:px-2 md:px-4 lg:px-6">
+      <div className="max-w-[95%] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Mission Statement Card */}
           <div className="bg-teal-900 rounded-2xl p-8 md:p-10 lg:p-12">

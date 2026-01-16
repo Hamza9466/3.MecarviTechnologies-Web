@@ -74,8 +74,8 @@ export default function CoreValues() {
 
   if (loading) {
     return (
-      <section className="bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12">
-        <div className="max-w-7xl mx-auto">
+      <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
+        <div className="max-w-[95%] mx-auto">
           <div className="text-gray-600 text-center">Loading...</div>
         </div>
       </section>
@@ -87,8 +87,8 @@ export default function CoreValues() {
   }
 
   return (
-    <section className="bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12">
-      <div className="max-w-7xl mx-auto">
+    <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
+      <div className="max-w-[95%] mx-auto">
         {/* Title */}
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 text-center mb-6 md:mb-8">
           Core Values

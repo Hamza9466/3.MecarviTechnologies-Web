@@ -116,30 +116,22 @@ export default function Hero() {
 
   return (
     <section 
-      className="min-h-screen  flex items-center justify-center px-1 sm:px-2 md:px-4 lg:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16 relative overflow-visible"
+      className="min-h-[120vh] sm:min-h-[130vh] md:min-h-screen flex items-center justify-center px-1 sm:px-2 md:px-4 lg:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16 relative overflow-visible"
     >
       {/* Background Image or Gradient */}
       {displayData.background_image ? (
-        <>
-          {/* Background Image */}
-          <div 
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{
-              backgroundImage: `url(http://localhost:8000${displayData.background_image})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              zIndex: 0,
-              left: 0,
-              right: 0,
-            }}
-          />
-          {/* Overlay for better text readability */}
-          <div 
-            className="absolute inset-0 w-full h-full pointer-events-none bg-gradient-to-r from-blue-900/70 to-blue-800/70"
-            style={{ zIndex: 0, left: 0, right: 0 }}
-          />
-        </>
+        <div 
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          style={{
+            backgroundImage: `url(http://localhost:8000${displayData.background_image})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            zIndex: 0,
+            left: 0,
+            right: 0,
+          }}
+        />
       ) : (
         /* Default Gradient Background */
         <svg 
@@ -160,6 +152,50 @@ export default function Hero() {
           />
         </svg>
       )}
+
+      {/* Vector5 Image - Top Left */}
+      <div 
+        className="absolute top-0 left-0 pointer-events-none"
+        style={{ 
+          zIndex: 1,
+          width: '400px',
+          height: '400px',
+          maxWidth: '40%',
+          maxHeight: '50%',
+        }}
+      >
+        <img
+          src="/assets/images/Vector5.png"
+          alt="Vector decoration"
+          className="w-full h-full object-contain opacity-10"
+          style={{
+            filter: 'brightness(-10) invert(1)',
+            mixBlendMode: 'normal',
+          }}
+        />
+      </div>
+
+      {/* Vector6 Image - Top Right */}
+      <div 
+        className="absolute top-0 right-0 pointer-events-none"
+        style={{ 
+          zIndex: 1,
+          width: '400px',
+          height: '400px',
+          maxWidth: '40%',
+          maxHeight: '50%',
+        }}
+      >
+        <img
+          src="/assets/images/Vector6.png"
+          alt="Vector decoration"
+          className="w-full h-full object-contain opacity-80"
+          style={{
+            filter: 'brightness(-20) invert(1)',
+            mixBlendMode: 'normal',
+          }}
+        />
+      </div>
       
       <div className="max-w-[95%] mx-auto grid grid-cols-1 md:grid-cols-[50%_50%] gap-4 sm:gap-6 md:gap-8 lg:gap-10 items-center w-full relative z-10">
         {/* Left Content */}
@@ -246,19 +282,6 @@ export default function Hero() {
           </div>
         </div>
       </div>
-      
-      {/* Smooth Curved Bottom Edge */}
-      <svg 
-        className="absolute bottom-0 left-0 w-full pointer-events-none"
-        preserveAspectRatio="none"
-        viewBox="0 0 1440 100"
-        style={{ zIndex: 1 }}
-      >
-        <path 
-          d="M-20,100 C350,100 720,50 1080,50 C1260,55 1380,60 1440,75 L1440,100 L0,200 Z"
-          fill="white"
-        />
-      </svg>
     </section>
   );
 }

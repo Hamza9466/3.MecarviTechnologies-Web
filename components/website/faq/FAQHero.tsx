@@ -37,12 +37,12 @@ export default function FAQHero() {
         <svg viewBox="0 0 1440 800" className="w-full h-full" preserveAspectRatio="none" style={{ display: 'block' }}>
           <defs>
             <linearGradient id="curveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#9421F8" />
-              <stop offset="100%" stopColor="#DBCDFF" />
+              <stop offset="0%" stopColor="#7E03C3" />
+              <stop offset="100%" stopColor="#BF03B5" />
             </linearGradient>
           </defs>
           <path
-            d="M0,110 L1440,0 L1440,500 L0,800 Z"
+            d="M0,110 L1440,0 L1440,650 L0,800 Z"
             fill="url(#curveGradient)"
             stroke="none"
             vectorEffect="non-scaling-stroke"
@@ -53,7 +53,7 @@ export default function FAQHero() {
 
       <div className="max-w-7xl mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
         {/* Main Title */}
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 text-center w-full pt-16 sm:pt-12 md:pt-16">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center w-full pt-16 sm:pt-12 md:pt-16">
           {loading ? "Loading..." : heroTitle}
         </h1>
       </div>

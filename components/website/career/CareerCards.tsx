@@ -50,8 +50,8 @@ const careerCards = [
 
 export default function CareerCards() {
   return (
-    <section className="bg-white py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12">
-      <div className="max-w-7xl mx-auto">
+    <section className="bg-white pt-8 sm:pt-12 md:pt-16 pb-16 sm:pb-20 md:pb-24 px-1 sm:px-2 md:px-4 lg:px-6">
+      <div className="max-w-[95%] mx-auto">
         {/* Heading */}
         <h2 className="text-gray-800 text-center text-xl sm:text-2xl md:text-3xl font-bold mb-12 md:mb-16">
           Nusid quod maxime placeat facere possimus, nisi assumenda est, omnis dolor

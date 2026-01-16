@@ -83,7 +83,7 @@ export default function AboutHero() {
         backgroundRepeat: 'no-repeat'
       } : {}}
     >
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center w-full mt-8 sm:mt-10 md:mt-12 relative z-10">
+      <div className="max-w-[95%] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center w-full mt-8 sm:mt-10 md:mt-12 relative z-10">
         {/* Left Content */}
         <div className="space-y-6">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
@@ -111,14 +111,14 @@ export default function AboutHero() {
                 }}
               />
             ) : (
-              <Image
-                src="/assets/images/qioBaPBkCKqAHtwu1747656560.png"
-                alt="About Mecarvi Technologies"
-                width={800}
-                height={600}
-                className="w-full h-auto object-contain"
-                priority
-              />
+            <Image
+              src="/assets/images/qioBaPBkCKqAHtwu1747656560.png"
+              alt="About Mecarvi Technologies"
+              width={800}
+              height={600}
+              className="w-full h-auto object-contain"
+              priority
+            />
             )}
           </div>
         </div>

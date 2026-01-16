@@ -165,10 +165,32 @@ export default function WhyChooseUs() {
 
         {/* Main Content Container */}
         <div className="overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center rounded-lg p-6 md:p-8" style={{ backgroundColor: '#28190F' }}>
+          <div 
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center rounded-lg p-6 md:p-8 relative overflow-hidden" 
+          >
+            {/* Background Image Layer */}
+            <div
+              className="absolute inset-0 rounded-lg z-0"
+              style={{
+                backgroundImage: 'url(/assets/images/why-chose-us-bg.jpeg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
             {/* Left Area - Composite Image Layout */}
-            <div className="order-2 lg:order-1">
-              <div className="relative w-full aspect-[3/2] max-w-4xl mx-auto rounded-lg overflow-hidden" style={{ backgroundColor: '#28190F', minHeight: '500px' }}>
+            <div className="order-2 lg:order-1 relative z-10">
+              <div 
+                className="relative w-full aspect-[3/2] max-w-4xl mx-auto rounded-lg overflow-hidden" 
+                style={{ 
+                  backgroundImage: 'url(/assets/images/why-chose-us-bg-Copy.jpeg)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  minHeight: '500px',
+                  boxShadow: 'none',
+                }}
+              >
                 {/* Top-Left: Image 1 */}
                 {image1Url && (
                   <div className="absolute top-0 left-0 w-[65%] h-[60%] rounded-lg overflow-hidden">
@@ -236,7 +258,7 @@ export default function WhyChooseUs() {
             </div>
 
             {/* Right Area - Auto-scrolling Feature Cards with Red Borders */}
-            <div className="order-1 lg:order-2 relative h-[600px] overflow-hidden">
+            <div className="order-1 lg:order-2 relative z-10 h-[600px] overflow-hidden">
               {tabs.length > 0 ? (
                 <div
                   ref={scrollContainerRef}
