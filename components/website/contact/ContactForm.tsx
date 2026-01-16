@@ -171,7 +171,7 @@ Public Holidays: CLOSED </p>
             </div>
 
             {/* Right Column - Contact Form */}
-            <div className="bg-gray-50 rounded-lg p-2 md:p-3 lg:p-4" style={{height: '500px'}}>
+            <div className="bg-gray-50 rounded-lg p-2 md:p-3 lg:p-4 lg:mb-[60px]" style={{height: '440px'}}>
               <h2 className="text-gray-900 text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
                 Contact Form
               </h2>
@@ -258,10 +258,10 @@ Public Holidays: CLOSED </p>
                 </div>
 
                 {/* Submit Button */}
-                <div className="flex justify-start">
+                <div className="flex justify-start ">
                   <button
                     type="submit"
-                    className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 px-30 rounded-lg transition-all text-base md:text-lg"
+                    className="bg-gradient-to-r from-pink-500 to-purple-600  hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 px-30 rounded-lg transition-all text-base md:text-lg"
                   >
                     Submit
                   </button>
