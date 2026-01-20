@@ -776,7 +776,9 @@ const CareersEditor = forwardRef<CareersEditorRef, {}>((props, ref): ReactElemen
 
     try {
       await handleUpdateFAQSection(editingFaqId, {
-        ...editFaqFormData,
+        section_title: editFaqFormData.section_title,
+        question: editFaqFormData.question,
+        answer: editFaqFormData.answer,
         is_active: true,
         sort_order: 1,
       });
