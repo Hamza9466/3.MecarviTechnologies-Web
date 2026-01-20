@@ -125,6 +125,16 @@ export default function ContactForm() {
       <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 lg:mt-[-70px]">
         <div className="max-w-[95%] mx-auto">
           <div className="rounded-lg p-8 md:p-10 lg:p-12">
+            {/* Section Header */}
+            <div className="text-center mb-12">
+              <h2 className="text-gray-900 text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+                We are always here for you
+              </h2>
+              <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+                Feel free to reach out to us for any inquiries, collaborations, or support. We're here to help and will get back to you as soon as possible.
+              </p>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start">
               {/* Left Column - Contact Info with 6 Boxes */}
               <div className="space-y-0">
