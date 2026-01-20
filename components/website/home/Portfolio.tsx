@@ -40,6 +40,7 @@ export default function Portfolio() {
 
   const fetchSectionData = async () => {
     try {
+      console.log("Portfolio - Fetching section data...");
       // Try GET first (standard for fetching data)
       let response = await fetch("http://localhost:8000/api/v1/portfolio-section", {
         method: "GET",
@@ -48,8 +49,11 @@ export default function Portfolio() {
         },
       });
 
+      console.log("Portfolio - Section data response status:", response.status);
+
       // If GET doesn't work, try POST
       if (!response.ok && response.status === 405) {
+        console.log("Portfolio - GET not allowed, trying POST...");
         response = await fetch("http://localhost:8000/api/v1/portfolio-section", {
           method: "POST",
           headers: {
@@ -60,10 +64,12 @@ export default function Portfolio() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Portfolio - Section data response:", data);
         if (data.success && data.data?.portfolio_section) {
           setSectionData(data.data.portfolio_section);
         } else {
           // Set defaults
+          console.log("Portfolio - Using default section data");
           setSectionData({
             main_heading: "PORTFOLIO",
             description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse, deserunt sed eligendi velit laboriosam suscipit, quisquam eveniet illo soluta adipisci necessitatibus officia id blanditiis voluptates eos. Ab alias inventore molestiae.",
@@ -71,6 +77,7 @@ export default function Portfolio() {
           });
         }
       } else if (response.status === 404) {
+        console.log("Portfolio - Section data not found (404), using defaults");
         // Set defaults if endpoint returns 404
         setSectionData({
           main_heading: "PORTFOLIO",
@@ -79,7 +86,7 @@ export default function Portfolio() {
         });
       }
     } catch (err) {
-      console.error("Error fetching section data:", err);
+      console.error("Portfolio - Error fetching section data:", err);
       // Set defaults on error
       setSectionData({
         main_heading: "PORTFOLIO",
@@ -91,6 +98,7 @@ export default function Portfolio() {
 
   const fetchPortfolioItems = async () => {
     try {
+      console.log("Portfolio - Fetching portfolio items...");
       // Try GET first (standard for fetching data)
       let response = await fetch("http://localhost:8000/api/v1/portfolio-items", {
         method: "GET",
@@ -99,8 +107,11 @@ export default function Portfolio() {
         },
       });
 
+      console.log("Portfolio - Portfolio items response status:", response.status);
+
       // If GET doesn't work, try POST
       if (!response.ok && response.status === 405) {
+        console.log("Portfolio - GET not allowed for items, trying POST...");
         response = await fetch("http://localhost:8000/api/v1/portfolio-items", {
           method: "POST",
           headers: {
@@ -111,9 +122,16 @@ export default function Portfolio() {
 
       if (response.ok) {
         const data = await response.json();
-        
+        console.log("Portfolio - Portfolio items response:", data);
+
         // Handle different response formats
         let itemsData: any[] = [];
+        console.log("Portfolio - Raw data structure:", {
+          isArray: Array.isArray(data),
+          keys: Object.keys(data),
+          data: data
+        });
+
         if (Array.isArray(data)) {
           itemsData = data;
         } else if (data.success && data.data) {
@@ -124,12 +142,18 @@ export default function Portfolio() {
           } else if (data.data.portfolio_item) {
             // Single item response
             itemsData = [data.data.portfolio_item];
+          } else if (data.data.items && Array.isArray(data.data.items)) {
+            itemsData = data.data.items;
           }
         } else if (data.data && Array.isArray(data.data)) {
           itemsData = data.data;
         } else if (Array.isArray(data.portfolio_items)) {
           itemsData = data.portfolio_items;
+        } else if (data.items && Array.isArray(data.items)) {
+          itemsData = data.items;
         }
+
+        console.log("Portfolio - Parsed items data:", itemsData);
 
         const sortedItems = itemsData
           .map((item: any) => ({
@@ -141,13 +165,55 @@ export default function Portfolio() {
           }))
           .sort((a: PortfolioItem, b: PortfolioItem) => a.order - b.order);
 
+        console.log("Portfolio - Sorted items:", sortedItems);
         setPortfolioItems(sortedItems);
-      } else if (response.status === 404) {
-        setPortfolioItems([]);
+      } else {
+        console.log("Portfolio - Portfolio items not found (404), setting empty array");
+        // Temporarily enable sample data for testing
+        setPortfolioItems([
+          {
+            id: 1,
+            title: "Sample Project 1",
+            link: "#",
+            image: null,
+            order: 1
+          },
+          {
+            id: 2,
+            title: "Sample Project 2",
+            link: "#",
+            image: null,
+            order: 2
+          }
+        ]);
+
+        // Set empty array for production:
+        // setPortfolioItems([]);
       }
     } catch (err) {
-      console.error("Error fetching portfolio items:", err);
+      console.error("Portfolio - Error fetching portfolio items:", err);
+      console.log("Portfolio - Setting empty array due to error");
       setPortfolioItems([]);
+
+      // Uncomment to test with sample data when API fails:
+      /*
+      setPortfolioItems([
+        {
+          id: 1,
+          title: "Sample Project 1",
+          link: "#",
+          image: null,
+          order: 1
+        },
+        {
+          id: 2,
+          title: "Sample Project 2", 
+          link: "#",
+          image: null,
+          order: 2
+        }
+      ]);
+      */
     }
   };
 
@@ -166,7 +232,7 @@ export default function Portfolio() {
     const imageUrl = getImageUrl(item.image);
     return imageUrl !== null && imageUrl !== undefined;
   });
-  
+
   // Get portfolio images from items
   const portfolioImages = portfolioItemsWithImages
     .map((item) => getImageUrl(item.image)!)
@@ -187,7 +253,7 @@ export default function Portfolio() {
     // Start at 0 to show images immediately
     setCurrentIndex(0);
     setIsTransitioning(true);
-    
+
     // Move to middle set after images are visible for seamless infinite loop
     const initTimeout = setTimeout(() => {
       setCurrentIndex(portfolioImages.length);
@@ -272,14 +338,36 @@ export default function Portfolio() {
     );
   }
 
+  console.log("Portfolio Component Debug:", {
+    loading,
+    portfolioItemsLength: portfolioItems.length,
+    portfolioImagesLength: portfolioImages.length,
+    portfolioItems,
+    portfolioImages,
+  });
+
   // Don't render if no portfolio items at all
   if (portfolioItems.length === 0) {
-    return null;
+    return (
+      <section className="bg-white relative py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-center text-4xl font-bold text-gray-900 uppercase mb-4">PORTFOLIO</h2>
+          <p className="text-center text-gray-600 mb-8">No portfolio items available yet. Please add portfolio items through the admin panel.</p>
+        </div>
+      </section>
+    );
   }
 
-  // If no items have images, show a message (for debugging)
+  // If no items have images, show a message
   if (portfolioImages.length === 0 && portfolioItems.length > 0) {
-    return null;
+    return (
+      <section className="bg-white relative py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-center text-4xl font-bold text-gray-900 uppercase mb-4">PORTFOLIO</h2>
+          <p className="text-center text-gray-600 mb-8">Portfolio items exist but no images are available. Please add images to portfolio items through the admin panel.</p>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -288,11 +376,11 @@ export default function Portfolio() {
       style={
         backgroundImageUrl
           ? {
-              backgroundImage: `url(${backgroundImageUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }
+            backgroundImage: `url(${backgroundImageUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }
           : {}
       }
     >
@@ -378,7 +466,7 @@ export default function Portfolio() {
               <div
                 key={`img-${index}`}
                 className="relative overflow-hidden flex-shrink-0"
-                style={{ 
+                style={{
                   width: '350px',
                   minWidth: '350px',
                   maxWidth: '350px',
@@ -391,9 +479,9 @@ export default function Portfolio() {
                   src={imageUrl}
                   alt={item?.title || `Portfolio ${index + 1}`}
                   className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                  style={{ 
-                    display: 'block', 
-                    width: '100%', 
+                  style={{
+                    display: 'block',
+                    width: '100%',
                     height: '100%',
                     objectFit: 'cover',
                   }}

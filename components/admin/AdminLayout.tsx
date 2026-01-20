@@ -19,10 +19,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = async () => {
     setLogoutLoading(true);
-    
+
     try {
       const token = localStorage.getItem("token");
-      
+
       if (!token) {
         // If no token, just clear local storage and redirect
         clearAuthAndRedirect();
@@ -31,20 +31,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       // Call logout API - handle network errors gracefully
       try {
-      const response = await fetch("http://localhost:8000/api/v1/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-      });
+        const response = await fetch("http://localhost:8000/api/v1/logout", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
 
         // Only try to parse JSON if response is ok, otherwise just log
         if (response.ok) {
           try {
-      const data = await response.json();
-      console.log("Logout response:", data);
+            const data = await response.json();
+            console.log("Logout response:", data);
           } catch (parseError) {
             // Response might be empty or not JSON, that's okay
             console.log("Logout successful (no response body)");
@@ -75,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     localStorage.removeItem("userName");
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
-    
+
     // Redirect to login page
     setLogoutLoading(false);
     router.push("/login");
@@ -135,6 +135,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       ),
+      quote: (
+        <svg className={iconClass} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
     };
     return icons[iconName] || icons.dashboard;
   };
@@ -148,27 +153,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       subItems?: Array<{ name: string; href: string }> | null;
     }>;
   }> = [
-    {
-      category: "DASHBOARD",
-      items: [
-        { name: "Dashboard", href: "/admin/dashboard", iconName: "dashboard" },
-      ],
-    },
-    {
-      category: "PAGES",
-      items: [
-        { name: "Manage users", href: "/admin/users", iconName: "users" },
-        { name: "Home Page", href: "/admin/home", iconName: "home" },
-        { name: "About Us", href: "/admin/about", iconName: "about" },
-        { name: "Products", href: "/admin/products", iconName: "products" },
-        { name: "Services", href: "/admin/services", iconName: "services" },
-        { name: "FAQ", href: "/admin/faq", iconName: "faq" },
-        { name: "Contact us", href: "/admin/contact", iconName: "contact" },
-        { name: "Careers", href: "/admin/careers", iconName: "careers" },
-        { name: "Footer", href: "/admin/footer", iconName: "footer" },
-      ],
-    },
-  ];
+      {
+        category: "DASHBOARD",
+        items: [
+          { name: "Dashboard", href: "/admin/dashboard", iconName: "dashboard" },
+        ],
+      },
+      {
+        category: "PAGES",
+        items: [
+          { name: "Manage users", href: "/admin/users", iconName: "users" },
+          { name: "Home Page", href: "/admin/home", iconName: "home" },
+          { name: "About Us", href: "/admin/about", iconName: "about" },
+          { name: "Products", href: "/admin/products", iconName: "products" },
+          { name: "Services", href: "/admin/services", iconName: "services" },
+          { name: "FAQ", href: "/admin/faq", iconName: "faq" },
+          { name: "Contact us", href: "/admin/contact", iconName: "contact" },
+          { name: "Careers", href: "/admin/careers", iconName: "careers" },
+          { name: "Quote", href: "/admin/quote", iconName: "quote" },
+          { name: "Footer", href: "/admin/footer", iconName: "footer" },
+        ],
+      },
+    ];
 
   return (
     <div className="h-screen w-full bg-white flex flex-col overflow-hidden" style={{ width: '100vw', maxWidth: '100vw' }}>
@@ -193,7 +199,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Mecarvi Signs
           </Link>
         </div>
-        <button 
+        <button
           onClick={handleLogout}
           disabled={logoutLoading}
           className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -205,9 +211,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex flex-1 overflow-hidden" style={{ width: '100%' }}>
         {/* Sidebar */}
         <aside
-          className={`bg-gray-900 w-64 flex-shrink-0 transition-all duration-300 ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } fixed lg:fixed z-40 h-full flex flex-col`}
+          className={`bg-gray-900 w-64 flex-shrink-0 transition-all duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } fixed lg:fixed z-40 h-full flex flex-col`}
           style={{ height: 'calc(100vh - 64px)', top: '64px' }}
         >
           {/* Logo */}
@@ -240,11 +245,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     return (
                       <div key={item.name}>
                         <div
-                          className={`flex items-center justify-between px-4 py-2.5 rounded-lg transition-colors cursor-pointer ${
-                            isActive
-                              ? "bg-white text-gray-900"
-                              : "text-gray-300 hover:bg-gray-800"
-                          }`}
+                          className={`flex items-center justify-between px-4 py-2.5 rounded-lg transition-colors cursor-pointer ${isActive
+                            ? "bg-white text-gray-900"
+                            : "text-gray-300 hover:bg-gray-800"
+                            }`}
                         >
                           {hasSubItems ? (
                             <div
@@ -290,11 +294,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 <Link
                                   key={subItem.name}
                                   href={subItem.href}
-                                  className={`block px-4 py-2 rounded-lg text-sm transition-colors ${
-                                    isSubActive
-                                      ? "bg-gray-800 text-white"
-                                      : "text-gray-400 hover:bg-gray-800 hover:text-gray-300"
-                                  }`}
+                                  className={`block px-4 py-2 rounded-lg text-sm transition-colors ${isSubActive
+                                    ? "bg-gray-800 text-white"
+                                    : "text-gray-400 hover:bg-gray-800 hover:text-gray-300"
+                                    }`}
                                 >
                                   {subItem.name}
                                 </Link>
@@ -312,10 +315,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Main Content */}
-        <main 
-          className={`flex-1 overflow-y-auto h-full min-w-0 transition-all duration-300 ${
-            sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'
-          }`}
+        <main
+          className={`flex-1 overflow-y-auto h-full min-w-0 transition-all duration-300 ${sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'
+            }`}
           style={{ width: '100%', flex: '1 1 0%', backgroundColor: '#E6E8EC' }}
         >
           <div style={{ width: '100%' }}>{children}</div>
@@ -324,4 +326,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
-

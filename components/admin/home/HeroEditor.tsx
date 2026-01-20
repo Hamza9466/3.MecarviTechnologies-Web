@@ -47,7 +47,7 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
       });
 
       console.log("Hero Editor - Response status:", response.status);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
           console.log("Hero Editor - No data found (404), using default values");
@@ -70,7 +70,7 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
 
       const data = await response.json();
       console.log("Hero Editor - API Response:", data);
-      
+
       // Handle different response structures
       let homePage = null;
       if (data.success && data.data?.home_page) {
@@ -81,7 +81,7 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
       } else if (data.home_page) {
         homePage = data.home_page;
       }
-      
+
       if (homePage) {
         console.log("Hero Editor - Home page data found:", homePage);
         setHomePageId(homePage.id);
@@ -139,8 +139,31 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
         formDataToSend.append("secondary_image", formData.secondaryImage);
       }
 
-      const response = await fetch("http://localhost:8000/api/v1/home-page", {
-        method: "POST",
+      // Determine the correct method and URL based on whether we have a homePageId
+      const isUpdate = homePageId !== null;
+      const method = isUpdate ? "POST" : "POST"; // Laravel typically uses POST for both create and update with _method parameter
+      const url = isUpdate
+        ? `http://localhost:8000/api/v1/home-page/${homePageId}`
+        : "http://localhost:8000/api/v1/home-page";
+
+      // Add Laravel method spoofing for updates
+      if (isUpdate) {
+        formDataToSend.append("_method", "PUT");
+      }
+
+      console.log("Hero Editor - Saving data:", {
+        isUpdate,
+        homePageId,
+        url,
+        method,
+        hasBackgroundImage: !!formData.backgroundImage,
+        hasSecondaryImage: !!formData.secondaryImage,
+        hasBackgroundImageUrl: !!formData.backgroundImageUrl,
+        hasSecondaryImageUrl: !!formData.secondaryImageUrl,
+      });
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           "Accept": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
@@ -148,13 +171,19 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
         body: formDataToSend,
       });
 
+      console.log("Hero Editor - Response status:", response.status);
+
       let responseData;
       try {
         const text = await response.text();
+        console.log("Hero Editor - Raw response:", text);
         responseData = text ? JSON.parse(text) : {};
       } catch (parseError) {
+        console.error("Hero Editor - Parse error:", parseError);
         throw new Error("Invalid response from server");
       }
+
+      console.log("Hero Editor - Parsed response:", responseData);
 
       if (!response.ok) {
         let errorMessage = "Failed to save home page";
@@ -169,6 +198,13 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
 
       if (responseData.success && responseData.data?.home_page) {
         const homePage = responseData.data.home_page;
+        console.log("Hero Editor - Updated home page data:", homePage);
+
+        // Update homePageId if this was a new record
+        if (!isUpdate && homePage.id) {
+          setHomePageId(homePage.id);
+        }
+
         // Update form data with new URLs and clear file objects
         setFormData((prev) => ({
           ...prev,
@@ -179,6 +215,9 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
         }));
         setSuccess("Home page saved successfully!");
         setTimeout(() => setSuccess(""), 3000);
+      } else {
+        console.warn("Hero Editor - Unexpected response structure:", responseData);
+        throw new Error("Unexpected response format from server");
       }
     } catch (err: any) {
       console.error("Error saving home page:", err);
@@ -230,14 +269,25 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
       const formData = new FormData();
       formData.append("image_type", imageTypeParam);
 
+      // Add Laravel method spoofing for DELETE
+      formData.append("_method", "DELETE");
+
+      console.log("Hero Editor - Deleting image:", {
+        homePageId,
+        imageType,
+        imageTypeParam,
+      });
+
       const response = await fetch(`http://localhost:8000/api/v1/home-page/${homePageId}`, {
-        method: "DELETE",
+        method: "POST", // Use POST with _method parameter for Laravel
         headers: {
           "Accept": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: formData,
       });
+
+      console.log("Hero Editor - Delete response status:", response.status);
 
       let responseData;
       try {
@@ -403,10 +453,10 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
                 </span>
               </label>
               <span className="text-sm text-gray-600">
-                {formData.backgroundImage 
-                  ? formData.backgroundImage.name 
-                  : formData.backgroundImageUrl 
-                    ? "Existing image" 
+                {formData.backgroundImage
+                  ? formData.backgroundImage.name
+                  : formData.backgroundImageUrl
+                    ? "Existing image"
                     : "No file chosen"}
               </span>
             </div>
@@ -480,10 +530,10 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
               </span>
             </label>
             <span className="text-sm text-gray-600">
-              {formData.secondaryImage 
-                ? formData.secondaryImage.name 
-                : formData.secondaryImageUrl 
-                  ? "Existing image" 
+              {formData.secondaryImage
+                ? formData.secondaryImage.name
+                : formData.secondaryImageUrl
+                  ? "Existing image"
                   : "No file chosen"}
             </span>
           </div>

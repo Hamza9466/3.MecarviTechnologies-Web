@@ -1,36 +1,76 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function CareerContent() {
+  const [contentData, setContentData] = useState({
+    heading: null,
+    description: null,
+    image: null as string | null,
+  });
+
+  useEffect(() => {
+    fetchContentData();
+  }, []);
+
+  const fetchContentData = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/career-page-hero-section", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.career_page_hero_section) {
+          const content = data.data.career_page_hero_section;
+          setContentData({
+            heading: content.heading || null,
+            description: content.description || null,
+            image: content.image || null,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching content data:", err);
+    }
+  };
+
   return (
     <section className="bg-white pt-16 sm:pt-20 md:pt-24 pb-0 px-1 sm:px-2 md:px-4 lg:px-6">
-      <div className="max-w-[95%] mx-auto">
-        {/* Text Content */}
-        <div className="text-center mb-12 md:mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-            Start Your Career At Mecarvi Prints
-            <span className="block w-32 h-1 bg-pink-500 mx-auto mt-2"></span>
-          </h2>
-          
-          <div className="w-full text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed">
-            <p>
-              Strategies, products and systems are all very important, but success comes from bringing the right people together. At Mecarvi our culture of growth starts with our people. We look for employees who are smart, creative, empathetic, and fun. Once they're part of our team, we support them by giving them opportunities to grow. At Mecarvi, we recognize that employment is a two-way street and that jobs only work when they are mutually beneficial. Our core values articulate what we care about most. They guide how we work with each other, with our clients, and our partners. And most importantly, they help us become a better organization as a whole which serves its community. As an employer, Mecarvi understands its responsibility of treating its team with respect, empathy, care and consideration. We offer a wide range of benefits to our employees including market competitive salaries, health care, retirement funds, paid leaves, bonuses, employee discounts and much more. When we find the right people, we empower them to implement decisions on their own. If you want to work for a company that gives you the autonomy to explore and implement new ideas in a highly collaborative environment, you will succeed here. Join us!
-            </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col gap-8 items-center">
+          {/* Text Content */}
+          <div className="w-full space-y-6 text-center">
+            {contentData.heading && (
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
+                {contentData.heading}
+              </h2>
+            )}
+            {contentData.description && (
+              <p className="text-lg text-gray-600 leading-relaxed">
+                {contentData.description}
+              </p>
+            )}
           </div>
-        </div>
 
-        {/* Mask-group Image */}
-        <div className="relative w-full">
-          <Image
-            src="/assets/images/Mask-group.png"
-            alt="Career Content"
-            width={1200}
-            height={800}
-            className="w-full h-auto object-contain"
-            priority
-          />
+          {/* Image */}
+          {contentData.image && (
+            <div className="w-full max-w-3xl relative">
+              <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden">
+                <img
+                  src={contentData.image.startsWith('http') ? contentData.image : `http://localhost:8000${contentData.image}`}
+                  alt="Career content"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
   );
 }
-

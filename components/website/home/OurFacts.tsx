@@ -241,96 +241,96 @@ export default function OurFacts() {
       style={
         backgroundImageUrl
           ? {
-              backgroundImage: `url(${backgroundImageUrl})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }
+            backgroundImage: `url(${backgroundImageUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }
           : {}
       }
     >
       {/* Top Row - Full Width */}
-      <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 w-full max-w-full overflow-hidden">
         {/* Top Left - Pink Background with Years */}
         <div className="p-8 md:p-12 lg:p-16 flex items-center justify-center min-h-[300px] md:min-h-[400px]" style={{ backgroundColor: '#E60F77' }}>
           <div className="text-white text-center lg:text-left">
-            <div className="text-9xl sm:text-9xl md:text-[10rem] lg:text-[14rem] font-bold pl-12 md:pl-12 lg:pl-30 lg:pt-35">
+            <div className="text-7xl sm:text-8xl md:text-9xl lg:text-10xl xl:text-11xl font-bold pl-4 md:pl-8 lg:pl-12">
               {largeNumber}
             </div>
           </div>
         </div>
 
         {/* Top Right - Background with Circular Indicators */}
-        <div className="p-8 md:p-12 lg:p-16 min-h-[300px] md:min-h-[400px]" style={{ backgroundColor: '#F3F4F6' }}>
-          <div className="max-w-4xl mx-auto lg:mx-0">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-700 mb-8 md:mb-12">
+        <div className="p-8 md:p-12 lg:p-16 min-h-[300px] md:min-h-[400px] overflow-x-auto" style={{ backgroundColor: '#F3F4F6' }}>
+          <div className="w-full max-w-full">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-700 mb-6 md:mb-8">
               {sectionTitle}
             </h2>
-            <div className="flex flex-nowrap gap-4 md:gap-6 lg:gap-8 justify-center lg:justify-start">
+            <div className="flex flex-wrap gap-2 md:gap-4 lg:gap-6 justify-center lg:justify-start">
               {facts.length > 0 ? (
                 facts.map((fact) => {
-                // Parse percentage - handle both "99%" and "99" formats
-                const percentageValue = parseFloat(fact.percentage.replace(/[^0-9.]/g, '')) || 0;
-                const circumference = 2 * Math.PI * 54; // radius = 54
-                const offset = circumference - (percentageValue / 100) * circumference;
-                // Calculate dot position at the end of the progress arc
-                const angle = (percentageValue / 100) * 360 - 90; // -90 to start from top
-                const dotX = 60 + 54 * Math.cos((angle * Math.PI) / 180);
-                const dotY = 60 + 54 * Math.sin((angle * Math.PI) / 180);
-                
-                // Format percentage for display - ensure it has % sign
-                const displayPercentage = fact.percentage.includes('%') 
-                  ? fact.percentage 
-                  : `${fact.percentage}%`;
-                
-                return (
-                  <div key={fact.id} className="relative flex-shrink-0 flex flex-col items-center">
-                    <div className="w-36 h-36 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-56 xl:h-56 2xl:w-[28rem] 2xl:h-[28rem] relative">
-                      {/* Circle Background */}
-                      <svg
-                        className="w-full h-full transform -rotate-90"
-                        viewBox="0 0 120 120"
-                      >
-                        {/* Inner Circle - Light Gray */}
-                        <circle
-                          cx="60"
-                          cy="60"
-                          r="48"
-                          fill="#e5e7eb"
-                        />
-                        {/* Background Circle - Outer Ring */}
-                        <circle
-                          cx="60"
-                          cy="60"
-                          r="54"
-                          fill="none"
-                          stroke="#E2E8F2"
-                          strokeWidth="2"
-                        />
-                        {/* Blue Dot */}
-                        <circle
-                          cx={dotX}
-                          cy={dotY}
-                          r="5"
-                          fill="#2563EB"
-                        />
-                      </svg>
-                      {/* Percentage Text - Centered */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-3xl md:text-4xl lg:text-5xl xl:text-5xl 2xl:text-9xl font-bold text-black">
-                          {displayPercentage}
+                  // Parse percentage - handle both "99%" and "99" formats
+                  const percentageValue = parseFloat(fact.percentage.replace(/[^0-9.]/g, '')) || 0;
+                  const circumference = 2 * Math.PI * 54; // radius = 54
+                  const offset = circumference - (percentageValue / 100) * circumference;
+                  // Calculate dot position at end of progress arc
+                  const angle = (percentageValue / 100) * 360 - 90; // -90 to start from top
+                  const dotX = 60 + 54 * Math.cos((angle * Math.PI) / 180);
+                  const dotY = 60 + 54 * Math.sin((angle * Math.PI) / 180);
+
+                  // Format percentage for display - ensure it has % sign
+                  const displayPercentage = fact.percentage.includes('%')
+                    ? fact.percentage
+                    : `${fact.percentage}%`;
+
+                  return (
+                    <div key={fact.id} className="relative flex-shrink-0 flex flex-col items-center">
+                      <div className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-48 xl:h-48 relative">
+                        {/* Circle Background */}
+                        <svg
+                          className="w-full h-full transform -rotate-90"
+                          viewBox="0 0 120 120"
+                        >
+                          {/* Inner Circle - Light Gray */}
+                          <circle
+                            cx="60"
+                            cy="60"
+                            r="48"
+                            fill="#e5e7eb"
+                          />
+                          {/* Background Circle - Outer Ring */}
+                          <circle
+                            cx="60"
+                            cy="60"
+                            r="54"
+                            fill="none"
+                            stroke="#E2E8F2"
+                            strokeWidth="2"
+                          />
+                          {/* Blue Dot */}
+                          <circle
+                            cx={dotX}
+                            cy={dotY}
+                            r="5"
+                            fill="#2563EB"
+                          />
+                        </svg>
+                        {/* Percentage Text - Centered */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-black">
+                            {displayPercentage}
+                          </div>
                         </div>
                       </div>
+                      {/* Label - Below Circle */}
+                      <div className="text-center mt-2">
+                        <p className="text-sm sm:text-base md:text-lg text-gray-600 font-medium">
+                          {fact.label}
+                        </p>
+                      </div>
                     </div>
-                    {/* Label - Below Circle */}
-                    <div className="text-center mt-3">
-                      <p className="text-sm md:text-base lg:text-base xl:text-base 2xl:text-3xl text-gray-600 font-medium">
-                        {fact.label}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })
+                  );
+                })
               ) : (
                 <div className="text-gray-500 text-center w-full py-4">No facts available</div>
               )}
@@ -342,9 +342,9 @@ export default function OurFacts() {
       {/* Bottom Section - Background with Overlay Card */}
       <div className="relative w-full">
         {/* Full Width Background */}
-        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-0 min-h-[500px] sm:min-h-[450px] md:min-h-[500px] lg:min-h-[500px] w-full">
-        <div style={{ backgroundColor: '#E60F77' }}></div>
-        <div style={{ backgroundColor: '#F3F4F6' }}></div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[500px] sm:min-h-[450px] md:min-h-[500px] lg:min-h-[500px] w-full">
+          <div style={{ backgroundColor: '#E60F77' }}></div>
+          <div style={{ backgroundColor: '#F3F4F6' }}></div>
         </div>
 
         {/* Single White Card Overlay - Constrained */}
@@ -368,25 +368,25 @@ export default function OurFacts() {
                     <div className="flex flex-col gap-2 md:gap-3">
                       {processSteps.length > 0 ? (
                         processSteps.map((step, index) => (
-                        <div key={index} className="flex items-start gap-3 sm:gap-4 py-1 sm:py-2">
-                          {/* Light Pink Circular Number */}
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#FEE8F4' }}>
-                            <span className="font-bold text-base sm:text-lg md:text-xl" style={{ color: '#E60F77' }}>
-                              {step.number}
-                            </span>
-                          </div>
+                          <div key={index} className="flex items-start gap-3 sm:gap-4 py-1 sm:py-2">
+                            {/* Light Pink Circular Number */}
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#FEE8F4' }}>
+                              <span className="font-bold text-base sm:text-lg md:text-xl" style={{ color: '#E60F77' }}>
+                                {step.number}
+                              </span>
+                            </div>
 
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <h4 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
-                              {step.title}
-                            </h4>
-                            <p className="text-gray-700 text-xs sm:text-sm md:text-base leading-relaxed">
-                              {step.description}
-                            </p>
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm sm:text-base md:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
+                                {step.title}
+                              </h4>
+                              <p className="text-gray-700 text-xs sm:text-sm md:text-base leading-relaxed">
+                                {step.description}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        ))
                       ) : (
                         <div className="text-gray-500">No process steps available</div>
                       )}

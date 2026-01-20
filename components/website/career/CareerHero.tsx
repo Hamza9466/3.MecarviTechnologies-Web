@@ -1,6 +1,47 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 export default function CareerHero() {
+  const [heroData, setHeroData] = useState({
+    title: null,
+    subtitle: null,
+    heading: null,
+    description: null,
+    image: null as string | null,
+  });
+
+  useEffect(() => {
+    fetchHeroSection();
+  }, []);
+
+  const fetchHeroSection = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/career-page-hero-section", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.career_page_hero_section) {
+          const hero = data.data.career_page_hero_section;
+          setHeroData({
+            title: hero.title || null,
+            subtitle: hero.subtitle || null,
+            heading: hero.heading || null,
+            description: hero.description || null,
+            image: hero.image || null,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching hero section:", err);
+    }
+  };
+
   return (
     <section className="py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden min-h-[400px] sm:min-h-[500px] md:min-h-[400px] bg-white">
       {/* Background with curve */}
@@ -23,15 +64,18 @@ export default function CareerHero() {
       </div>
 
       <div className="max-w-[95%] mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
-        {/* Main Title */}
-        <h1 className="text-2xl sm:text-3xl lg:pt-[-15px] md:text-4xl lg:text-5xl font-bold text-white text-center w-full pt-16 sm:pt-12 md:pt-16 mb-6">
-          Career Opportunities
-        </h1>
-        <p className="text-white lg:pb-10 text-base sm:text-lg md:text-xl leading-relaxed text-center max-w-4xl">
-          Join our team and be part of an innovative company that values creativity, excellence, and growth.
-        </p>
+        {/* Title and Subtitle */}
+        {heroData.title && heroData.subtitle && (
+          <div className="text-center">
+            <h1 className="text-2xl sm:text-3xl lg:pt-[-15px] md:text-4xl lg:text-5xl font-bold text-white text-center w-full pt-16 sm:pt-12 md:pt-16 mb-6">
+              {heroData.title}
+            </h1>
+            <p className="text-white lg:pb-10 text-base sm:text-lg md:text-xl leading-relaxed text-center max-w-4xl">
+              {heroData.subtitle}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );
 }
-
