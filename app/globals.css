@@ -8,12 +8,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: 'Courier New', Courier, monospace;
-}
-
-:root {
-  --font-geist-mono: 'Courier New', Courier, monospace;
 }
 
 @media (prefers-color-scheme: dark) {

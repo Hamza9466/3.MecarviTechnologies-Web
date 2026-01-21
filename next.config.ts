@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Set workspace root to silence lockfile warning
+  turbopack: {
+    root: process.cwd(),
+  },
 };
 
 export default nextConfig;

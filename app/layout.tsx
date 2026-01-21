@@ -1,17 +1,12 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
-
-// Using a CSS variable fallback for mono font to avoid Turbopack build issues
-const geistMono = {
-  variable: "--font-geist-mono",
-};
 
 export const metadata: Metadata = {
   title: "Mecarvi Technologies - Welcome to Our Mecarvi Signs",
@@ -26,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased m-0 p-0 overflow-x-hidden`}
+        className={`${inter.variable} font-sans antialiased m-0 p-0 overflow-x-hidden`}
       >
         {children}
       </body>

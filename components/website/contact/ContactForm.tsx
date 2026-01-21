@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useState, useEffect } from "react";
 
 interface ContactFormData {
   first_name: string;
@@ -12,7 +11,39 @@ interface ContactFormData {
   message: string;
 }
 
+interface ContactHeroData {
+  heading: string;
+  subheading: string;
+  description: string;
+}
+
+interface ContactPageCard {
+  id: number;
+  card_type: 'call' | 'fax' | 'email' | 'visit' | 'store_hours' | 'online_hours';
+  badge_title: string | null;
+  secondary_badge: string | null;
+  label: string | null;
+  phone_number_1: string | null;
+  phone_number_2: string | null;
+  fax_number: string | null;
+  email_address: string | null;
+  street_address: string | null;
+  state_postal_code: string | null;
+  country: string | null;
+  monday_friday_hours: string | null;
+  saturday_hours: string | null;
+  sunday_hours: string | null;
+  icon: string | null;
+  is_active: boolean;
+  sort_order: number;
+}
+
 export default function ContactForm() {
+  const [heroData, setHeroData] = useState<ContactHeroData | null>(null);
+  const [heroLoading, setHeroLoading] = useState(true);
+  const [contactCards, setContactCards] = useState<ContactPageCard[]>([]);
+  const [cardsLoading, setCardsLoading] = useState(true);
+  
   const [formData, setFormData] = useState<ContactFormData>({
     first_name: "",
     last_name: "",
@@ -26,6 +57,301 @@ export default function ContactForm() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [showEmailPopup, setShowEmailPopup] = useState(false);
+
+  // Fetch contact cards function
+  const fetchContactCards = async () => {
+    try {
+      setCardsLoading(true);
+      console.log("ContactForm: Fetching contact cards from API...");
+      
+      const response = await fetch("http://localhost:8000/api/v1/contact-page-cards", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      console.log("ContactForm: Contact cards API response status:", response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("ContactForm: Contact cards API response data:", data);
+        
+        if (data.success && data.data?.contact_cards) {
+          // Filter only active cards
+          const activeCards = data.data.contact_cards.filter((card: ContactPageCard) => card.is_active);
+          
+          // Define the desired order for card types
+          const cardTypeOrder: { [key: string]: number } = {
+            'call': 1,
+            'fax': 2,
+            'email': 3,
+            'visit': 4,
+            'store_hours': 5,
+            'online_hours': 6,
+          };
+          
+          // Sort by card type order first, then by sort_order
+          const sortedCards = activeCards.sort((a: ContactPageCard, b: ContactPageCard) => {
+            const orderA = cardTypeOrder[a.card_type] || 999;
+            const orderB = cardTypeOrder[b.card_type] || 999;
+            if (orderA !== orderB) {
+              return orderA - orderB;
+            }
+            return a.sort_order - b.sort_order;
+          });
+          
+          console.log("ContactForm: Active cards found:", sortedCards.length, sortedCards);
+          setContactCards(sortedCards);
+        } else {
+          console.warn("ContactForm: No contact cards in response or invalid structure:", data);
+          setContactCards([]);
+        }
+      } else {
+        const errorText = await response.text().catch(() => "Unknown error");
+        console.error("ContactForm: Failed to fetch contact cards:", response.status, errorText);
+        setContactCards([]);
+      }
+    } catch (err) {
+      console.error("ContactForm: Error fetching contact cards:", err);
+      setContactCards([]);
+    } finally {
+      setCardsLoading(false);
+    }
+  };
+
+  // Fetch hero section data
+  useEffect(() => {
+    const fetchHeroSection = async () => {
+      try {
+        setHeroLoading(true);
+        console.log("ContactForm: Fetching hero section from API...");
+        
+        // Try with authentication token first
+        const token = localStorage.getItem("token");
+        const headers: HeadersInit = {
+          "Accept": "application/json",
+        };
+        
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const response = await fetch("http://localhost:8000/api/v1/contact-page-hero-sections", {
+          method: "GET",
+          headers,
+        });
+
+        console.log("ContactForm: Hero API response status:", response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("ContactForm: Hero API response data:", data);
+          console.log("ContactForm: Response structure:", {
+            success: data.success,
+            hasData: !!data.data,
+            hasHeroSections: !!data.data?.hero_sections,
+            heroSectionsLength: data.data?.hero_sections?.length || 0,
+            fullData: data
+          });
+          
+          if (data.success && data.data?.hero_sections?.length > 0) {
+            // Get the first active hero section or the first one
+            const activeSection = data.data.hero_sections.find(
+              (section: any) => section.is_active
+            ) || data.data.hero_sections[0];
+            console.log("ContactForm: Setting hero data:", activeSection);
+            setHeroData({
+              heading: activeSection.heading,
+              subheading: activeSection.subheading,
+              description: activeSection.description,
+            });
+          } else {
+            console.warn("ContactForm: No hero sections found. Response:", data);
+          }
+        } else if (response.status === 401) {
+          // API requires authentication - this is expected for public website views
+          // The endpoint should be made public on the backend, but for now we'll use default content
+          console.warn("ContactForm: Hero section API requires authentication. Using default content.");
+          // Don't set heroData, let it use the default text
+        } else {
+          const errorText = await response.text().catch(() => "Unknown error");
+          console.error("ContactForm: Failed to fetch hero section:", response.status, errorText);
+        }
+      } catch (err) {
+        console.error("ContactForm: Error fetching contact hero section:", err);
+      } finally {
+        setHeroLoading(false);
+      }
+    };
+
+    fetchHeroSection();
+    fetchContactCards();
+  }, []);
+
+  const getImageUrl = (iconPath: string | null | undefined): string | null => {
+    if (!iconPath) return null;
+    if (iconPath.startsWith('http://') || iconPath.startsWith('https://')) {
+      return iconPath;
+    }
+    // Remove leading '/storage/' or 'storage/' if present to avoid double paths
+    let cleanPath = iconPath;
+    if (cleanPath.startsWith('/storage/')) {
+      cleanPath = cleanPath.substring(9);
+    } else if (cleanPath.startsWith('storage/')) {
+      cleanPath = cleanPath.substring(8);
+    }
+    cleanPath = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
+    return `http://localhost:8000/storage/${cleanPath}`;
+  };
+
+  const renderContactCard = (card: ContactPageCard) => {
+    const iconUrl = getImageUrl(card.icon);
+    const badgeTitle = card.badge_title || card.card_type.charAt(0).toUpperCase() + card.card_type.slice(1).replace('_', ' ');
+    const label = card.label || '';
+    
+    // Determine card height based on type
+    const isHoursCard = card.card_type === 'store_hours' || card.card_type === 'online_hours';
+    const cardHeight = isHoursCard ? '180px' : '160px';
+
+    return (
+      <div 
+        key={card.id} 
+        className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow" 
+        style={{ width: '300px', height: cardHeight }}
+      >
+        <div className="relative">
+          <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full mb-3 hover:from-pink-600 hover:to-purple-700 transition-all">
+            {badgeTitle}
+          </button>
+          {card.secondary_badge && (
+            <div className="absolute top-0 right-0">
+              <button 
+                onClick={() => {
+                  if (card.card_type === 'email') {
+                    setShowEmailPopup(true);
+                  }
+                }}
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs px-3 py-1 rounded-full hover:from-pink-600 hover:to-purple-700 transition-all"
+              >
+                {card.secondary_badge}
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="w-full h-px bg-gray-200 mb-3"></div>
+
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 flex items-start justify-center flex-shrink-0 pt-1">
+            {iconUrl ? (
+              <img 
+                src={iconUrl} 
+                alt={badgeTitle} 
+                className="w-5 h-5 object-contain"
+                style={{ color: '#7E70E5' }}
+                onError={(e) => {
+                  console.error("Image failed to load:", iconUrl);
+                  // Hide the image and show SVG fallback
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <svg className="w-5 h-5" style={{ color: '#7E70E5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {getDefaultIcon(card.card_type)}
+              </svg>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            {label && (
+              <h4 className="text-gray-900 font-bold text-sm" style={{ fontFamily: 'Montserrat', fontWeight: 600 }}>
+                {label}
+              </h4>
+            )}
+            {renderCardContent(card)}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const getDefaultIcon = (cardType: string) => {
+    switch (cardType) {
+      case 'call':
+        return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />;
+      case 'fax':
+        return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />;
+      case 'email':
+        return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />;
+      case 'visit':
+        return (
+          <>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </>
+        );
+      case 'store_hours':
+      case 'online_hours':
+        return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />;
+      default:
+        return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />;
+    }
+  };
+
+  const renderCardContent = (card: ContactPageCard) => {
+    switch (card.card_type) {
+      case 'call':
+        return (
+          <>
+            {card.phone_number_1 && (
+              <p className="text-gray-600 text-xs mt-1 truncate">{card.phone_number_1}</p>
+            )}
+            {card.phone_number_2 && (
+              <p className="text-gray-600 text-xs truncate">{card.phone_number_2}</p>
+            )}
+          </>
+        );
+      case 'fax':
+        return card.fax_number ? (
+          <p className="text-gray-600 text-xs mt-1 truncate">{card.fax_number}</p>
+        ) : null;
+      case 'email':
+        return card.email_address ? (
+          <p className="text-gray-600 text-xs mt-1 truncate">{card.email_address}</p>
+        ) : null;
+      case 'visit':
+        return (
+          <>
+            {card.street_address && (
+              <p className="text-gray-600 text-xs mt-1 truncate">{card.street_address}</p>
+            )}
+            {(card.state_postal_code || card.country) && (
+              <p className="text-gray-600 text-xs truncate">
+                {[card.state_postal_code, card.country].filter(Boolean).join(', ')}
+              </p>
+            )}
+          </>
+        );
+      case 'store_hours':
+      case 'online_hours':
+        return (
+          <>
+            {card.monday_friday_hours && (
+              <p className="text-gray-600 text-xs mt-1">Monday-Friday: {card.monday_friday_hours}</p>
+            )}
+            {card.saturday_hours && (
+              <p className="text-gray-600 text-xs">Saturday: {card.saturday_hours}</p>
+            )}
+            {card.sunday_hours && (
+              <p className="text-gray-600 text-xs">Sunday: {card.sunday_hours}</p>
+            )}
+          </>
+        );
+      default:
+        return null;
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -127,12 +453,28 @@ export default function ContactForm() {
           <div className="rounded-lg p-8 md:p-10 lg:p-12">
             {/* Section Header */}
             <div className="text-center mb-12">
-              <h2 className="text-gray-900 text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-                We are always here for you
-              </h2>
-              <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
-                Feel free to reach out to us for any inquiries, collaborations, or support. We're here to help and will get back to you as soon as possible.
-              </p>
+              {heroLoading ? (
+                <div className="py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+                </div>
+              ) : (
+                <>
+                  {heroData?.subheading && (
+                    <h3 className="text-gray-700 text-xl sm:text-2xl md:text-3xl font-semibold mb-3">
+                      {heroData.subheading}
+                    </h3>
+                  )}
+                  {heroData?.description ? (
+                    <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+                      {heroData.description}
+                    </p>
+                  ) : (
+                    <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+                      Feel free to reach out to us for any inquiries, collaborations, or support. We're here to help and will get back to you as soon as possible.
+                    </p>
+                  )}
+                </>
+              )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start">
@@ -144,175 +486,38 @@ export default function ContactForm() {
 
                 </div>
 
-                {/* 6 Boxes in Left Column */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Box 1 - Call Us */}
-                    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow" style={{ width: '300px', height: '160px' }}>
-                      {/* Call Button */}
-                      <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full mb-3 hover:from-pink-600 hover:to-purple-700 transition-all">
-                        Call
-                      </button>
-
-                      {/* Line Separator */}
-                      <div className="w-full h-px bg-gray-200 mb-3"></div>
-
-                      {/* Icon and Content */}
-                      <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 flex items-start justify-center flex-shrink-0 pt-1">
-                          <svg className="w-5 h-5" style={{ color: '#7E70E5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-gray-900 font-bold text-sm" style={{ fontFamily: 'Montserrat', fontWeight: 600 }}>Call Us</h4>
-                          <p className="text-gray-600 text-xs mt-1 truncate">+1 234 567 890</p>
-                          <p className="text-gray-600 text-xs truncate">+1 987 654 321</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Box 2 - Fax */}
-                    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow" style={{ width: '300px', height: '160px' }}>
-                      {/* Call Button */}
-                      <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full mb-3 hover:from-pink-600 hover:to-purple-700 transition-all">
-                        Fax
-                      </button>
-
-                      {/* Line Separator */}
-                      <div className="w-full h-px bg-gray-200 mb-3"></div>
-
-                      {/* Icon and Content */}
-                      <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 flex items-start justify-center flex-shrink-0 pt-1">
-                          <svg className="w-5 h-5" style={{ color: '#7E70E5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-gray-900 font-bold text-sm" style={{ fontFamily: 'Montserrat', fontWeight: 600 }}>Fax</h4>
-                          <p className="text-gray-600 text-xs mt-1 truncate">1-770-347-7149</p>
-                        </div>
-                      </div>
-                    </div>
+                {/* Dynamic Contact Cards */}
+                {cardsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+                    <p className="ml-4 text-gray-600">Loading contact cards...</p>
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Box 3 - Email */}
-                    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow" style={{ width: '300px', height: '160px' }}>
-                      <div className="relative">
-                        {/* Call Button */}
-                        <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full mb-3 hover:from-pink-600 hover:to-purple-700 transition-all">
-                          Email
-                        </button>
-                        <div className="absolute top-0 right-0">
-                          <button
-                            onClick={() => setShowEmailPopup(true)}
-                            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs px-3 py-1 rounded-full hover:from-pink-600 hover:to-purple-700 transition-all"
-                          >
-                            Team
-                          </button>
-                        </div>
+                ) : contactCards.length > 0 ? (
+                  <div className="space-y-4">
+                    {/* Row 1: First 2 cards */}
+                    {contactCards.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {contactCards.slice(0, 2).map((card) => renderContactCard(card))}
                       </div>
-                      {/* Line Separator */}
-                      <div className="w-full h-px bg-gray-200 mb-3"></div>
-
-                      {/* Icon and Content */}
-                      <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 flex items-start justify-center flex-shrink-0 pt-1">
-                          <svg className="w-5 h-5" style={{ color: '#7E70E5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-gray-900 font-bold text-sm" style={{ fontFamily: 'Montserrat', fontWeight: 600 }}>Email Us</h4>
-                          <p className="text-gray-600 text-xs mt-1 truncate">contact@mecarvi.com</p>
-
-                        </div>
+                    )}
+                    {/* Row 2: Next 2 cards */}
+                    {contactCards.length > 2 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {contactCards.slice(2, 4).map((card) => renderContactCard(card))}
                       </div>
-                    </div>
-
-                    {/* Box 4 - Address */}
-                    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow" style={{ width: '300px', height: '160px' }}>
-                      {/* Call Button */}
-                      <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full mb-3 hover:from-pink-600 hover:to-purple-700 transition-all">
-                        Visit
-                      </button>
-
-                      {/* Line Separator */}
-                      <div className="w-full h-px bg-gray-200 mb-3"></div>
-
-                      {/* Icon and Content */}
-                      <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 flex items-start justify-center flex-shrink-0 pt-1">
-                          <svg className="w-5 h-5" style={{ color: '#7E70E5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-gray-900 font-bold text-sm" style={{ fontFamily: 'Montserrat', fontWeight: 600 }}>Address</h4>
-                          <p className="text-gray-600 text-xs mt-1 truncate">123 Main St, City</p>
-                          <p className="text-gray-600 text-xs truncate">State 12345, Country</p>
-                        </div>
+                    )}
+                    {/* Row 3: Last 2 cards */}
+                    {contactCards.length > 4 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {contactCards.slice(4, 6).map((card) => renderContactCard(card))}
                       </div>
-                    </div>
+                    )}
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Box 5 - Store Hours */}
-                    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow" style={{ width: '300px', height: '180px' }}>
-                      {/* Call Button */}
-                      <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full mb-3 hover:from-pink-600 hover:to-purple-700 transition-all">
-                        Store Hours
-                      </button>
-
-                      {/* Line Separator */}
-                      <div className="w-full h-px bg-gray-200 mb-3"></div>
-
-                      {/* Icon and Content */}
-                      <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 flex items-start justify-center flex-shrink-0 pt-1">
-                          <svg className="w-5 h-5" style={{ color: '#7E70E5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-gray-900 font-bold text-sm" style={{ fontFamily: 'Montserrat', fontWeight: 600 }}>Store Hours</h4>
-                          <p className="text-gray-600 text-xs mt-1">Monday-Friday: 9am - 5pm</p>
-                          <p className="text-gray-600 text-xs">Saturday: CLOSED</p>
-                          <p className="text-gray-600 text-xs">Sunday: CLOSED</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Box 6 - Online Hours */}
-                    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow" style={{ width: '300px', height: '180px' }}>
-                      {/* Call Button */}
-                      <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full mb-3 hover:from-pink-600 hover:to-purple-700 transition-all">
-                        Online Hours
-                      </button>
-
-                      {/* Line Separator */}
-                      <div className="w-full h-px bg-gray-200 mb-3"></div>
-
-                      {/* Icon and Content */}
-                      <div className="flex items-start space-x-3">
-                        <div className="w-10 h-10 flex items-start justify-center flex-shrink-0 pt-1">
-                          <svg className="w-5 h-5" style={{ color: '#7E70E5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-gray-900 font-bold text-sm" style={{ fontFamily: 'Montserrat', fontWeight: 600 }}>Online Hours</h4>
-                          <p className="text-gray-600 text-xs mt-1">Monday-Friday: 8am - 8pm</p>
-                          <p className="text-gray-600 text-xs">Saturday: 11am-5pm</p>
-                          <p className="text-gray-600 text-xs">Sunday: CLOSED</p>
-                        </div>
-                      </div>
-                    </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No contact cards available.</p>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Right Column - Contact Form */}

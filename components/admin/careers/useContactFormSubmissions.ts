@@ -2,15 +2,14 @@ import { useState, useEffect } from "react";
 
 interface ContactFormSubmission {
     id: number;
-    first_name: string;
-    last_name: string;
-    full_name: string;
+    name: string;
     email: string;
     phone: string | null;
-    company: string | null;
+    job_location: string | null;
+    preferred_contact_method: string | null;
+    best_time_to_contact: string | null;
     message: string;
     is_read: boolean;
-    submitted_at: string;
     created_at: string;
     updated_at: string;
 }
@@ -77,7 +76,14 @@ export const useContactFormSubmissions = () => {
                 per_page: "15",
             });
 
-            if (status) params.append("status", status);
+            if (status) {
+                // Convert status to is_read boolean
+                if (status === "read") {
+                    params.append("is_read", "true");
+                } else if (status === "unread") {
+                    params.append("is_read", "false");
+                }
+            }
             if (search) params.append("search", search);
 
             const response = await fetch(`http://localhost:8000/api/v1/contact-form-submissions?${params}`, {
@@ -90,14 +96,46 @@ export const useContactFormSubmissions = () => {
 
             if (response.ok) {
                 const data: ContactFormResponse = await response.json();
-                if (data.success) {
-                    setContactSubmissions(data.data.contact_form_submissions);
-                    setPagination(data.data.pagination);
+                console.log("Contact submissions API response:", data);
+                if (data.success && data.data) {
+                    const submissions = data.data.contact_form_submissions || [];
+                    const paginationData = data.data.pagination || {
+                        current_page: 1,
+                        last_page: 1,
+                        per_page: 15,
+                        total: 0,
+                        from: 0,
+                        to: 0,
+                    };
+                    console.log("Contact submissions found:", submissions.length);
+                    setContactSubmissions(submissions);
+                    setPagination(paginationData);
                 } else {
-                    throw new Error("Failed to fetch contact submissions");
+                    console.error("API returned success=false or missing data:", data);
+                    // Set empty state instead of throwing error
+                    setContactSubmissions([]);
+                    setPagination({
+                        current_page: 1,
+                        last_page: 1,
+                        per_page: 15,
+                        total: 0,
+                        from: 0,
+                        to: 0,
+                    });
                 }
             } else {
-                throw new Error("Failed to fetch contact submissions");
+                const errorText = await response.text().catch(() => "Unknown error");
+                console.error("Contact submissions API error:", response.status, errorText);
+                // Set empty state instead of throwing error
+                setContactSubmissions([]);
+                setPagination({
+                    current_page: 1,
+                    last_page: 1,
+                    per_page: 15,
+                    total: 0,
+                    from: 0,
+                    to: 0,
+                });
             }
         } catch (err) {
             console.error("Error fetching contact submissions:", err);

@@ -57,24 +57,37 @@ export const useSupportSections = () => {
 
             if (response.ok) {
                 const data: SupportResponse = await response.json();
-                console.log("API Response data:", data);
+                console.log("=== API Response ===");
+                console.log("Full response:", JSON.stringify(data, null, 2));
+                console.log("data.success:", data.success);
+                console.log("data.data:", data.data);
+                console.log("data.data?.support_sections:", data.data?.support_sections);
 
                 if (data.success && data.data?.support_sections) {
                     console.log("Found support sections:", data.data.support_sections);
+                    console.log("Number of sections:", data.data.support_sections.length);
                     setSupportSections(data.data.support_sections);
                     // Set current support section to the first one
                     if (data.data.support_sections.length > 0) {
-                        console.log("Setting current support section to:", data.data.support_sections[0]);
-                        setCurrentSupportSection(data.data.support_sections[0]);
+                        const firstSection = data.data.support_sections[0];
+                        console.log("Setting current support section to:", firstSection);
+                        console.log("First section ID:", firstSection.id);
+                        console.log("First section title:", firstSection.title);
+                        console.log("First section section_title:", firstSection.section_title);
+                        setCurrentSupportSection(firstSection);
                     } else {
                         // No data found - set to null
-                        console.log("No support sections found");
+                        console.log("No support sections found in array");
                         setCurrentSupportSection(null);
                     }
                 } else {
-                    console.log("API response structure unexpected:", data);
+                    console.error("API response structure unexpected:");
+                    console.error("- data.success:", data.success);
+                    console.error("- data.data:", data.data);
+                    console.error("- data.data?.support_sections:", data.data?.support_sections);
+                    console.error("Full response:", JSON.stringify(data, null, 2));
                     // API request failed - set to null
-                    console.warn("API request failed");
+                    console.warn("API request failed - unexpected response structure");
                     setCurrentSupportSection(null);
                 }
             } else {

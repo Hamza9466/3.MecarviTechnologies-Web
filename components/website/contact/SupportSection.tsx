@@ -48,7 +48,24 @@ export default function SupportSection() {
                             (section: SupportSection) => section.is_active
                         ) || data.data.support_sections[0];
 
-                        setSupportData(activeSection);
+                        // Helper to get image URL
+                        const getImageUrl = (imagePath: string | null | undefined): string | null => {
+                            if (!imagePath) return null;
+                            if (imagePath.startsWith("http")) return imagePath;
+                            if (imagePath.startsWith("/storage") || imagePath.startsWith("/")) {
+                                return `http://localhost:8000${imagePath}`;
+                            }
+                            return `http://localhost:8000/storage/${imagePath}`;
+                        };
+
+                        // Update image URLs
+                        const sectionWithImages = {
+                            ...activeSection,
+                            call_icon: getImageUrl(activeSection.call_icon),
+                            email_icon: getImageUrl(activeSection.email_icon),
+                        };
+
+                        setSupportData(sectionWithImages);
                     } else {
                         setError("No support section data available");
                     }
@@ -133,7 +150,7 @@ export default function SupportSection() {
                         <div className="mb-6">
                             {supportData.call_icon ? (
                                 <img
-                                    src={`http://localhost:8000/storage/${supportData.call_icon}`}
+                                    src={supportData.call_icon.startsWith('http') ? supportData.call_icon : `http://localhost:8000/storage/${supportData.call_icon}`}
                                     alt="Call Us"
                                     className="w-20 h-20 mx-auto object-contain"
                                 />
@@ -164,7 +181,7 @@ export default function SupportSection() {
                         <div className="mb-6">
                             {supportData.email_icon ? (
                                 <img
-                                    src={`http://localhost:8000/storage/${supportData.email_icon}`}
+                                    src={supportData.email_icon.startsWith('http') ? supportData.email_icon : `http://localhost:8000/storage/${supportData.email_icon}`}
                                     alt="Email Us"
                                     className="w-20 h-20 mx-auto object-contain"
                                 />
