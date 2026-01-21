@@ -2531,7 +2531,7 @@ const CareersEditor = forwardRef<CareersEditorRef, {}>((props, ref): ReactElemen
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
-                                                    <div className="font-medium">{submission.name}</div>
+                                                    <div className="font-medium">{submission.full_name}</div>
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
                                                     <a href={`mailto:${submission.email}`} className="text-blue-600 hover:text-blue-800 hover:underline">

@@ -40,54 +40,109 @@ export default function CareerSupport() {
     const fetchSupportSection = async () => {
       try {
         setLoadingSupport(true);
-        const response = await fetch("http://localhost:8000/api/v1/support-sections", {
+        console.log("Fetching support sections from API...");
+        
+        // Try with authentication token if available (for logged-in users)
+        const token = localStorage.getItem("token");
+        const headers: HeadersInit = {
+          "Accept": "application/json",
+        };
+        
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
+        let response = await fetch("http://localhost:8000/api/v1/support-sections", {
           method: "GET",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
+          headers,
         });
+
+        console.log("API Response status:", response.status, response.ok);
+
+        // If 401 and we didn't use a token, try with token if available
+        if (response.status === 401 && !token) {
+          const storedToken = localStorage.getItem("token");
+          if (storedToken) {
+            console.log("Retrying with authentication token...");
+            response = await fetch("http://localhost:8000/api/v1/support-sections", {
+              method: "GET",
+              headers: {
+                "Accept": "application/json",
+                "Authorization": `Bearer ${storedToken}`,
+              },
+            });
+          }
+        }
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Support section API response:", data);
-          if (data.success && data.data?.support_sections?.length > 0) {
-            // Get the first active support section
-            const activeSection = data.data.support_sections.find(
-              (section: SupportSection) => section.is_active
-            ) || data.data.support_sections[0];
+          console.log("Support section API response:", JSON.stringify(data, null, 2));
+          
+          // Check different possible response structures
+          let sections: SupportSection[] = [];
+          
+          if (data.success) {
+            if (data.data?.support_sections && Array.isArray(data.data.support_sections)) {
+              sections = data.data.support_sections;
+            } else if (data.data?.support_section) {
+              // Single section response
+              sections = [data.data.support_section];
+            } else if (Array.isArray(data.data)) {
+              sections = data.data;
+            }
+          }
+          
+          console.log("Extracted sections:", sections);
+          console.log("Number of sections:", sections.length);
 
-            // Helper to get image URL
-            const getImageUrl = (imagePath: string | null | undefined): string | null => {
-              if (!imagePath) return null;
-              if (imagePath.startsWith("http")) return imagePath;
-              if (imagePath.startsWith("/storage") || imagePath.startsWith("/")) {
-                return `http://localhost:8000${imagePath}`;
-              }
-              return `http://localhost:8000/storage/${imagePath}`;
-            };
+          if (sections.length > 0) {
+            // Get the first active support section, or the first one if none are active
+            const activeSection = sections.find(
+              (section: SupportSection) => section.is_active === true
+            ) || sections[0];
 
-            // Update image URLs
-            const sectionWithImages = {
-              ...activeSection,
-              call_icon: getImageUrl(activeSection.call_icon),
-              email_icon: getImageUrl(activeSection.email_icon),
-            };
+            console.log("Selected support section:", activeSection);
+            console.log("Section data:", {
+              id: activeSection.id,
+              section_title: activeSection.section_title,
+              title: activeSection.title,
+              description: activeSection.description,
+              call_title: activeSection.call_title,
+              call_description: activeSection.call_description,
+              call_phone: activeSection.call_phone,
+              email_title: activeSection.email_title,
+              email_description: activeSection.email_description,
+              email_address: activeSection.email_address,
+              is_active: activeSection.is_active,
+            });
 
-            setSupportData(sectionWithImages);
+            setSupportData(activeSection);
           } else {
-            console.warn("No support sections found in API response:", data);
-            // Set fallback data if API returns no sections
+            console.warn("No support sections found in API response. Full response:", data);
             setSupportData(null);
           }
         } else {
-          // For any error status, try to still show the section if we have any data
-          // or log the error but don't block the UI
-          console.warn("Support section API error:", response.status);
-          // Don't set to null - let it try to show with whatever data we might have
+          const errorText = await response.text().catch(() => "");
+          console.error("Support section API error:", response.status, errorText);
+          try {
+            const errorData = JSON.parse(errorText);
+            console.error("Error details:", errorData);
+            
+            // If it's an authentication error, show a helpful message
+            if (response.status === 401) {
+              console.warn("API requires authentication. The support-sections endpoint may need to be made public on the backend.");
+            }
+          } catch (e) {
+            console.error("Error response is not JSON:", errorText);
+          }
+          setSupportData(null);
         }
       } catch (err) {
         console.error("Error fetching support section:", err);
+        if (err instanceof Error) {
+          console.error("Error message:", err.message);
+          console.error("Error stack:", err.stack);
+        }
         setSupportData(null);
       } finally {
         setLoadingSupport(false);
@@ -141,9 +196,9 @@ export default function CareerSupport() {
         return;
       }
 
-      // Build submission data, only including fields that have values
+      // Build submission data for career support form
       const submissionData: Record<string, string> = {
-        name: formData.name.trim(),
+        full_name: formData.name.trim(),
         email: formData.email.trim(),
         message: formData.message.trim(),
       };
@@ -162,11 +217,11 @@ export default function CareerSupport() {
         submissionData.best_time_to_contact = formData.bestTime;
       }
 
-      console.log("Submitting contact form:", submissionData);
+      console.log("Submitting career support form:", submissionData);
 
       let response: Response;
       try {
-        response = await fetch("http://localhost:8000/api/v1/contact-form", {
+        response = await fetch("http://localhost:8000/api/v1/career-support-form", {
           method: "POST",
           headers: {
             "Accept": "application/json",
@@ -317,6 +372,28 @@ export default function CareerSupport() {
     }
   };
 
+  // Helper to get image URL
+  const getImageUrl = (imagePath: string | null | undefined): string | null => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      // Fix localhost URLs that might be missing port
+      if (imagePath.startsWith("http://localhost/storage/") || imagePath.startsWith("http://localhost/")) {
+        return imagePath.replace("http://localhost/", "http://localhost:8000/");
+      }
+      return imagePath;
+    }
+    // Remove leading /storage/ or storage/ if present to avoid double paths
+    let cleanPath = imagePath;
+    if (cleanPath.startsWith("/storage/")) {
+      cleanPath = cleanPath.substring(9); // Remove '/storage/'
+    } else if (cleanPath.startsWith("storage/")) {
+      cleanPath = cleanPath.substring(8); // Remove 'storage/'
+    }
+    // Remove leading slash if present
+    cleanPath = cleanPath.startsWith("/") ? cleanPath.substring(1) : cleanPath;
+    return `http://localhost:8000/storage/${cleanPath}`;
+  };
+
   return (
     <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="max-w-[95%] mx-auto">
@@ -328,15 +405,15 @@ export default function CareerSupport() {
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
                 <p className="mt-4 text-gray-600">Loading support information...</p>
               </div>
-            ) : (
+            ) : supportData ? (
               <>
                 <h3 className="text-blue-600 text-lg md:text-xl font-semibold mb-4">
                   Quick Support
                 </h3>
                 <h2 className="text-gray-900 text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
-                  {supportData?.section_title || supportData?.title || "Get in Touch"}
+                  {supportData.section_title || supportData.title || "Get in Touch"}
                 </h2>
-                {(supportData?.description) && (
+                {supportData.description && (
                   <p className="text-gray-700 text-sm md:text-base leading-relaxed mb-8">
                     {supportData.description}
                   </p>
@@ -347,11 +424,16 @@ export default function CareerSupport() {
                   {/* Call Us */}
                   <div>
                     <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
-                      {supportData?.call_icon ? (
+                      {supportData.call_icon ? (
                         <img
-                          src={supportData.call_icon}
+                          src={getImageUrl(supportData.call_icon) || ''}
                           alt="Call Us"
                           className="w-8 h-8 object-contain"
+                          onError={(e) => {
+                            // Hide image on error and show fallback
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
                         />
                       ) : (
                         <svg
@@ -370,18 +452,14 @@ export default function CareerSupport() {
                       )}
                     </div>
                     <h4 className="text-gray-900 font-bold text-lg mb-2">
-                      {supportData?.call_title || "Call Us"}
+                      {supportData.call_title?.trim() || "Call Us"}
                     </h4>
-                    {supportData?.call_description ? (
+                    {supportData.call_description?.trim() ? (
                       <p className="text-gray-700 text-sm mb-2">
                         {supportData.call_description}
                       </p>
-                    ) : (
-                      <p className="text-gray-700 text-sm mb-2">
-                        Questions about our product or pricing? Call for support
-                      </p>
-                    )}
-                    {supportData?.call_phone ? (
+                    ) : null}
+                    {supportData.call_phone?.trim() ? (
                       <a
                         href={`tel:${supportData.call_phone}`}
                         className="text-gray-900 font-semibold hover:text-blue-600 transition-colors"
@@ -396,11 +474,16 @@ export default function CareerSupport() {
                   {/* Email Us */}
                   <div>
                     <div className="w-12 h-12 bg-pink-500 rounded-lg flex items-center justify-center mb-4">
-                      {supportData?.email_icon ? (
+                      {supportData.email_icon ? (
                         <img
-                          src={supportData.email_icon}
+                          src={getImageUrl(supportData.email_icon) || ''}
                           alt="Email Us"
                           className="w-8 h-8 object-contain"
+                          onError={(e) => {
+                            // Hide image on error and show fallback
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
                         />
                       ) : (
                         <svg
@@ -419,18 +502,14 @@ export default function CareerSupport() {
                       )}
                     </div>
                     <h4 className="text-gray-900 font-bold text-lg mb-2">
-                      {supportData?.email_title || "Email Us"}
+                      {supportData.email_title?.trim() || "Email Us"}
                     </h4>
-                    {supportData?.email_description ? (
+                    {supportData.email_description?.trim() ? (
                       <p className="text-gray-700 text-sm mb-2">
                         {supportData.email_description}
                       </p>
-                    ) : (
-                      <p className="text-gray-700 text-sm mb-2">
-                        Our support will help you from 9am to 5pm
-                      </p>
-                    )}
-                    {supportData?.email_address ? (
+                    ) : null}
+                    {supportData.email_address?.trim() ? (
                       <a
                         href={`mailto:${supportData.email_address}`}
                         className="text-gray-900 font-semibold hover:text-pink-600 transition-colors"
@@ -443,6 +522,10 @@ export default function CareerSupport() {
                   </div>
                 </div>
               </>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <p>No support information available.</p>
+              </div>
             )}
           </div>
 

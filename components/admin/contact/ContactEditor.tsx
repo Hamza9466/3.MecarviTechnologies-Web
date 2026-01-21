@@ -55,6 +55,70 @@ export default function ContactEditor() {
         deleteLink: deleteSocialLink,
     } = useSocialMedia();
 
+    // Contact Form Submissions
+    interface ContactFormSubmission {
+        id: number;
+        first_name: string;
+        last_name: string;
+        email: string;
+        phone: string | null;
+        company: string | null;
+        message: string;
+        is_read: boolean;
+        created_at: string;
+        updated_at: string;
+    }
+
+    const [formSubmissions, setFormSubmissions] = useState<ContactFormSubmission[]>([]);
+    const [submissionsLoading, setSubmissionsLoading] = useState(false);
+    const [submissionsError, setSubmissionsError] = useState("");
+    const [submissionsPage, setSubmissionsPage] = useState(1);
+    const [submissionsPagination, setSubmissionsPagination] = useState({
+        current_page: 1,
+        last_page: 1,
+        per_page: 15,
+        total: 0,
+        from: 0,
+        to: 0,
+    });
+    const [submissionActions, setSubmissionActions] = useState<{ [key: number]: boolean }>({});
+
+    // Team Management
+    interface TeamMember {
+        id: number;
+        first_name: string;
+        last_name: string;
+        role: string;
+        email: string;
+        picture: string | null;
+        order: number;
+        created_at: string;
+        updated_at: string;
+    }
+
+    const [showTeamModal, setShowTeamModal] = useState(false);
+    const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+    const [teamMembersLoading, setTeamMembersLoading] = useState(false);
+    const [teamMembersError, setTeamMembersError] = useState("");
+    const [currentTeamMember, setCurrentTeamMember] = useState<{
+        first_name: string;
+        last_name: string;
+        role: string;
+        email: string;
+        picture: File | null;
+        order?: number;
+    }>({
+        first_name: '',
+        last_name: '',
+        role: '',
+        email: '',
+        picture: null,
+    });
+    const [editingTeamMemberId, setEditingTeamMemberId] = useState<number | null>(null);
+    const [teamMemberSaving, setTeamMemberSaving] = useState(false);
+    const [teamMemberSuccess, setTeamMemberSuccess] = useState("");
+    const [teamMemberError, setTeamMemberError] = useState("");
+
     const [cardSaving, setCardSaving] = useState<{ [key: number | string]: boolean }>({});
     const [cardSuccess, setCardSuccess] = useState<{ [key: number | string]: string }>({});
     const [cardErrors, setCardErrors] = useState<{ [key: number | string]: string }>({});
@@ -423,7 +487,7 @@ export default function ContactEditor() {
             
             if (!data) {
                 setCardErrors((prev) => ({
-                    ...prev,
+            ...prev,
                     [cardType]: 'Card data not found',
                 }));
                 return;
@@ -823,7 +887,7 @@ export default function ContactEditor() {
     // Social Links state
     const [socialLinkData, setSocialLinkData] = useState<{ [key: number]: Partial<SocialLink & { iconFile: File | null }> }>({});
     const [newSocialLinkData, setNewSocialLinkData] = useState<Partial<SocialLink & { iconFile: File | null }>>({
-        platform_name: "",
+                    platform_name: "",
         platform_url: "",
         iconFile: null,
         is_active: true,
@@ -903,7 +967,7 @@ export default function ContactEditor() {
     const handleSocialLinkFileChange = (linkId: number | 'new', file: File | null) => {
         if (linkId === 'new') {
             setNewSocialLinkData((prev) => ({
-                ...prev,
+            ...prev,
                 iconFile: file,
             }));
         } else {
@@ -1000,6 +1064,517 @@ export default function ContactEditor() {
         }
     };
 
+    // Contact Form Submissions Functions
+    const fetchFormSubmissions = async (page: number = 1) => {
+        try {
+            setSubmissionsLoading(true);
+            setSubmissionsError("");
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setSubmissionsError("Authentication required. Please log in.");
+                return;
+            }
+
+            const response = await fetch(
+                `http://localhost:8000/api/v1/contact-form-submissions?page=${page}&per_page=15`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data) {
+                    setFormSubmissions(data.data.data || []);
+                    setSubmissionsPagination({
+                        current_page: data.data.current_page || 1,
+                        last_page: data.data.last_page || 1,
+                        per_page: data.data.per_page || 15,
+                        total: data.data.total || 0,
+                        from: data.data.from || 0,
+                        to: data.data.to || 0,
+                    });
+                }
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                setSubmissionsError(errorData.message || `Failed to fetch submissions (${response.status})`);
+            }
+        } catch (err) {
+            console.error("Error fetching form submissions:", err);
+            setSubmissionsError("Error loading form submissions. Please check your connection.");
+        } finally {
+            setSubmissionsLoading(false);
+        }
+    };
+
+    const handleMarkAsRead = async (id: number) => {
+        try {
+            setSubmissionActions((prev) => ({ ...prev, [id]: true }));
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setSubmissionsError("Authentication required. Please log in.");
+                return;
+            }
+
+            const response = await fetch(
+                `http://localhost:8000/api/v1/contact-form-submissions/${id}/mark-read`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.ok) {
+                await fetchFormSubmissions(submissionsPage);
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                setSubmissionsError(errorData.message || "Failed to mark as read");
+            }
+        } catch (err) {
+            console.error("Error marking submission as read:", err);
+            setSubmissionsError("Error marking submission as read. Please try again.");
+        } finally {
+            setSubmissionActions((prev) => ({ ...prev, [id]: false }));
+        }
+    };
+
+    const handleMarkAsUnread = async (id: number) => {
+        try {
+            setSubmissionActions((prev) => ({ ...prev, [id]: true }));
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setSubmissionsError("Authentication required. Please log in.");
+                return;
+            }
+
+            const response = await fetch(
+                `http://localhost:8000/api/v1/contact-form-submissions/${id}/mark-unread`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.ok) {
+                await fetchFormSubmissions(submissionsPage);
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                setSubmissionsError(errorData.message || "Failed to mark as unread");
+            }
+        } catch (err) {
+            console.error("Error marking submission as unread:", err);
+            setSubmissionsError("Error marking submission as unread. Please try again.");
+        } finally {
+            setSubmissionActions((prev) => ({ ...prev, [id]: false }));
+        }
+    };
+
+    const handleDeleteSubmission = async (id: number) => {
+        try {
+            const submission = formSubmissions.find((s) => s.id === id);
+            if (!submission) return;
+
+            if (!confirm(`Are you sure you want to delete the submission from ${submission.first_name} ${submission.last_name}?`)) {
+                return;
+            }
+
+            setSubmissionActions((prev) => ({ ...prev, [id]: true }));
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+                setSubmissionsError("Authentication required. Please log in.");
+                return;
+            }
+
+            const response = await fetch(
+                `http://localhost:8000/api/v1/contact-form-submissions/${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Accept": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.ok) {
+                await fetchFormSubmissions(submissionsPage);
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                setSubmissionsError(errorData.message || "Failed to delete submission");
+            }
+        } catch (err) {
+            console.error("Error deleting submission:", err);
+            setSubmissionsError("Error deleting submission. Please try again.");
+        } finally {
+            setSubmissionActions((prev) => ({ ...prev, [id]: false }));
+        }
+    };
+
+    // Fetch form submissions on component mount
+    useEffect(() => {
+        fetchFormSubmissions(1);
+    }, []);
+
+    // Team Management API Functions
+    const fetchTeamMembers = async () => {
+        try {
+            setTeamMembersLoading(true);
+            setTeamMembersError("");
+
+            const response = await fetch("http://localhost:8000/api/v1/team-members", {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json",
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.data?.team_members) {
+                    setTeamMembers(data.data.team_members);
+                }
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                setTeamMembersError(errorData.message || `Failed to fetch team members (${response.status})`);
+            }
+        } catch (err) {
+            console.error("Error fetching team members:", err);
+            setTeamMembersError("Error loading team members. Please check your connection.");
+        } finally {
+            setTeamMembersLoading(false);
+        }
+    };
+
+    const createTeamMember = async (memberData: {
+        first_name: string;
+        last_name: string;
+        role: string;
+        email: string;
+        picture?: File | null;
+        order?: number;
+    }) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("Authentication required. Please log in.");
+            }
+
+            const formData = new FormData();
+            formData.append("first_name", memberData.first_name.trim());
+            formData.append("last_name", memberData.last_name.trim());
+            formData.append("role", memberData.role.trim());
+            formData.append("email", memberData.email.trim());
+            if (memberData.picture) {
+                formData.append("picture", memberData.picture);
+            }
+            if (memberData.order !== undefined) {
+                formData.append("order", memberData.order.toString());
+            }
+
+            const response = await fetch("http://localhost:8000/api/v1/team-members", {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    await fetchTeamMembers();
+                    return data.data.team_member;
+                } else {
+                    throw new Error(data.message || "Failed to create team member");
+                }
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.message || `Failed to create team member (${response.status})`;
+                if (errorData.errors) {
+                    const validationErrors = Object.entries(errorData.errors)
+                        .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
+                        .join("\n");
+                    throw new Error(`${errorMessage}\n${validationErrors}`);
+                }
+                throw new Error(errorMessage);
+            }
+        } catch (err: any) {
+            console.error("Error creating team member:", err);
+            throw err;
+        }
+    };
+
+    const updateTeamMember = async (id: number, memberData: {
+        first_name?: string;
+        last_name?: string;
+        role?: string;
+        email?: string;
+        picture?: File | null;
+        order?: number;
+    }) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("Authentication required. Please log in.");
+            }
+
+            const formData = new FormData();
+            if (memberData.first_name !== undefined) {
+                formData.append("first_name", memberData.first_name.trim());
+            }
+            if (memberData.last_name !== undefined) {
+                formData.append("last_name", memberData.last_name.trim());
+            }
+            if (memberData.role !== undefined) {
+                formData.append("role", memberData.role.trim());
+            }
+            if (memberData.email !== undefined) {
+                formData.append("email", memberData.email.trim());
+            }
+            if (memberData.picture) {
+                formData.append("picture", memberData.picture);
+            }
+            if (memberData.order !== undefined) {
+                formData.append("order", memberData.order.toString());
+            }
+
+            const response = await fetch(`http://localhost:8000/api/v1/team-members/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    await fetchTeamMembers();
+                    return data.data.team_member;
+                } else {
+                    throw new Error(data.message || "Failed to update team member");
+                }
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                const errorMessage = errorData.message || `Failed to update team member (${response.status})`;
+                if (errorData.errors) {
+                    const validationErrors = Object.entries(errorData.errors)
+                        .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(", ") : messages}`)
+                        .join("\n");
+                    throw new Error(`${errorMessage}\n${validationErrors}`);
+                }
+                throw new Error(errorMessage);
+            }
+        } catch (err: any) {
+            console.error("Error updating team member:", err);
+            throw err;
+        }
+    };
+
+    const deleteTeamMember = async (id: number) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                throw new Error("Authentication required. Please log in.");
+            }
+
+            const response = await fetch(`http://localhost:8000/api/v1/team-members/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Accept": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    await fetchTeamMembers();
+                } else {
+                    throw new Error(data.message || "Failed to delete team member");
+                }
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to delete team member (${response.status})`);
+            }
+        } catch (err: any) {
+            console.error("Error deleting team member:", err);
+            throw err;
+        }
+    };
+
+    // Team Management Handlers
+    const handleAddTeamMember = () => {
+        setCurrentTeamMember({
+            first_name: '',
+            last_name: '',
+            role: '',
+            email: '',
+            picture: null,
+        });
+        setEditingTeamMemberId(null);
+        setTeamMemberError("");
+        setTeamMemberSuccess("");
+    };
+
+    const handleEditTeamMember = (member: TeamMember) => {
+        setCurrentTeamMember({
+            first_name: member.first_name,
+            last_name: member.last_name,
+            role: member.role,
+            email: member.email,
+            picture: null, // Don't set picture file, it's already on server
+            order: member.order,
+        });
+        setEditingTeamMemberId(member.id);
+        setTeamMemberError("");
+        setTeamMemberSuccess("");
+    };
+
+    const handleSaveTeamMember = async () => {
+        if (!currentTeamMember.first_name.trim() || !currentTeamMember.last_name.trim() || 
+            !currentTeamMember.role.trim() || !currentTeamMember.email.trim()) {
+            setTeamMemberError("Please fill in all required fields");
+            return;
+        }
+
+        try {
+            setTeamMemberSaving(true);
+            setTeamMemberError("");
+            setTeamMemberSuccess("");
+
+            if (editingTeamMemberId !== null) {
+                // Update existing member
+                await updateTeamMember(editingTeamMemberId, {
+                    first_name: currentTeamMember.first_name,
+                    last_name: currentTeamMember.last_name,
+                    role: currentTeamMember.role,
+                    email: currentTeamMember.email,
+                    picture: currentTeamMember.picture,
+                    order: currentTeamMember.order,
+                });
+                setTeamMemberSuccess("Team member updated successfully!");
+            } else {
+                // Create new member
+                await createTeamMember({
+                    first_name: currentTeamMember.first_name,
+                    last_name: currentTeamMember.last_name,
+                    role: currentTeamMember.role,
+                    email: currentTeamMember.email,
+                    picture: currentTeamMember.picture,
+                    order: currentTeamMember.order,
+                });
+                setTeamMemberSuccess("Team member created successfully!");
+            }
+
+            // Reset form
+            setCurrentTeamMember({
+                first_name: '',
+                last_name: '',
+                role: '',
+                email: '',
+                picture: null,
+            });
+            setEditingTeamMemberId(null);
+
+            setTimeout(() => setTeamMemberSuccess(""), 3000);
+        } catch (err: any) {
+            console.error("Error saving team member:", err);
+            setTeamMemberError(err.message || "Failed to save team member");
+        } finally {
+            setTeamMemberSaving(false);
+        }
+    };
+
+    const handleTeamPictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setCurrentTeamMember(prev => ({ ...prev, picture: file }));
+    };
+
+    const getTeamMemberImageUrl = (picture: string | File | null | undefined): string | null => {
+        if (!picture) return null;
+        if (picture instanceof File) {
+            return URL.createObjectURL(picture);
+        }
+        if (typeof picture === 'string') {
+            // If it's already a full URL, return as is
+            if (picture.startsWith('http://') || picture.startsWith('https://')) {
+                // Fix localhost URLs that might be missing port
+                if (picture.startsWith('http://localhost/storage/') || picture.startsWith('http://localhost/')) {
+                    return picture.replace('http://localhost/', 'http://localhost:8000/');
+                }
+                return picture;
+            }
+            // Remove leading /storage/ or storage/ if present
+            let cleanPath = picture;
+            if (cleanPath.startsWith('/storage/')) {
+                cleanPath = cleanPath.substring(9); // Remove '/storage/'
+            } else if (cleanPath.startsWith('storage/')) {
+                cleanPath = cleanPath.substring(8); // Remove 'storage/'
+            }
+            // Remove leading slash if present
+            cleanPath = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
+            return `http://localhost:8000/storage/${cleanPath}`;
+        }
+        return null;
+    };
+
+    const handleDeleteTeamMember = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this team member?')) {
+            return;
+        }
+
+        try {
+            await deleteTeamMember(id);
+            setTeamMemberSuccess("Team member deleted successfully!");
+            setTimeout(() => setTeamMemberSuccess(""), 3000);
+        } catch (err: any) {
+            console.error("Error deleting team member:", err);
+            setTeamMemberError(err.message || "Failed to delete team member");
+        }
+    };
+
+    const getInitials = (firstName: string, lastName: string): string => {
+        return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    };
+
+    const handleCloseTeamModal = () => {
+        setShowTeamModal(false);
+        setCurrentTeamMember({
+            first_name: '',
+            last_name: '',
+            role: '',
+            email: '',
+            picture: null,
+        });
+        setEditingTeamMemberId(null);
+        setTeamMemberError("");
+        setTeamMemberSuccess("");
+    };
+
+    // Fetch team members when modal opens
+    useEffect(() => {
+        if (showTeamModal) {
+            fetchTeamMembers();
+        }
+    }, [showTeamModal]);
+
     return (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="space-y-8">
@@ -1028,41 +1603,41 @@ export default function ContactEditor() {
                             <p className="mt-4 text-gray-600">Loading hero section data...</p>
                         </div>
                     ) : (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Heading</label>
-                                    <input
-                                        type="text"
-                                        name="heading"
-                                        value={formData.heading}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Subheading</label>
-                                    <input
-                                        type="text"
-                                        name="subheading"
-                                        value={formData.subheading}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
-                                    />
-                                </div>
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Heading</label>
+                                <input
+                                    type="text"
+                                    name="heading"
+                                    value={formData.heading}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
+                                />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                <textarea
-                                    name="description"
-                                    value={formData.description}
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Subheading</label>
+                                <input
+                                    type="text"
+                                    name="subheading"
+                                    value={formData.subheading}
                                     onChange={handleInputChange}
-                                    rows={5}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none text-gray-900 bg-white"
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
                                 />
                             </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea
+                                name="description"
+                                value={formData.description}
+                                onChange={handleInputChange}
+                                rows={5}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none text-gray-900 bg-white"
+                            />
+                        </div>
 
                             {/* Save Button */}
                             <div className="flex justify-end">
@@ -1073,7 +1648,7 @@ export default function ContactEditor() {
                                 >
                                     {heroSaving ? "Saving..." : "Save Hero Section"}
                                 </button>
-                            </div>
+                    </div>
                         </div>
                     )}
                 </div>
@@ -1106,27 +1681,27 @@ export default function ContactEditor() {
                                 >
                                     Retry
                                 </button>
-                            </div>
-                        </div>
+                                </div>
+                                </div>
                     )}
 
                     {cardSuccess._all && (
                         <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
                             {cardSuccess._all}
-                        </div>
+                                </div>
                     )}
 
                     {cardErrors._all && (
                         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                             {cardErrors._all}
-                        </div>
+                                </div>
                     )}
 
                     {cardsLoading ? (
                         <div className="text-center py-8">
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
                             <p className="mt-4 text-gray-600">Loading contact cards...</p>
-                        </div>
+                            </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {(['call', 'fax', 'email', 'visit', 'store_hours', 'online_hours'] as ContactPageCard['card_type'][]).map((cardType) => {
@@ -1147,6 +1722,7 @@ export default function ContactEditor() {
                                         onFileChange={handleCardFileChange}
                                         onSave={handleSaveCard}
                                         onDelete={handleDeleteCard}
+                                        onOpenTeam={cardType === 'email' ? () => setShowTeamModal(true) : undefined}
                                         saving={cardSaving[cardType] || false}
                                         success={cardSuccess[cardType] || ''}
                                         error={cardErrors[cardType] || ''}
@@ -1154,12 +1730,12 @@ export default function ContactEditor() {
                                     />
                                 );
                             })}
-                        </div>
+                                </div>
                     )}
-                </div>
+                                </div>
 
                 {/* Hours of Operation Section */}
-                <div>
+                                <div>
                     <div className="flex flex-col items-start mb-6">
                         <div className="flex justify-between items-center w-full mb-2">
                             <h3 className="text-lg font-bold text-pink-600">Hours of Operation</h3>
@@ -1170,9 +1746,9 @@ export default function ContactEditor() {
                             >
                                 {Object.values(hoursSaving).some(saving => saving) ? 'Saving...' : 'Save All Hours'}
                             </button>
-                        </div>
+                                </div>
                         <div className="h-0.5 bg-pink-600 w-full"></div>
-                    </div>
+                        </div>
 
                     {hoursError && (
                         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
@@ -1186,27 +1762,27 @@ export default function ContactEditor() {
                                 >
                                     Retry
                                 </button>
-                            </div>
-                        </div>
+                                </div>
+                                </div>
                     )}
 
                     {hoursSuccess._all && (
                         <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
                             {hoursSuccess._all}
-                        </div>
+                                </div>
                     )}
 
                     {hoursErrors._all && (
                         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                             {hoursErrors._all}
-                        </div>
+                                </div>
                     )}
 
                     {hoursLoading ? (
                         <div className="text-center py-8">
                             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
                             <p className="mt-4 text-gray-600">Loading hours of operation...</p>
-                        </div>
+                            </div>
                     ) : (
                         <div className="space-y-6">
                             {/* Section Title - Editable */}
@@ -1216,13 +1792,13 @@ export default function ContactEditor() {
                                 {sectionTitleSuccess && (
                                     <div className="mb-3 p-2 bg-green-100 border border-green-400 text-green-700 rounded text-xs">
                                         {sectionTitleSuccess}
-                                    </div>
+                        </div>
                                 )}
 
                                 {sectionTitleError && (
                                     <div className="mb-3 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-xs">
                                         {sectionTitleError}
-                                    </div>
+                                </div>
                                 )}
 
                                 <div className="flex gap-2">
@@ -1242,7 +1818,7 @@ export default function ContactEditor() {
                                     </button>
                                 </div>
                                 <p className="text-xs text-gray-500 mt-2">This title will be applied to all hours entries</p>
-                            </div>
+                                </div>
 
                             {/* Existing Hours of Operation */}
                             {hoursOfOperation.map((hour, index) => {
@@ -1259,99 +1835,99 @@ export default function ContactEditor() {
                                             >
                                                 Delete
                                             </button>
-                                        </div>
+                                </div>
 
                                         {hoursSuccess[hour.id] && (
                                             <div className="mb-3 p-2 bg-green-100 border border-green-400 text-green-700 rounded text-xs">
                                                 {hoursSuccess[hour.id]}
-                                            </div>
+                                </div>
                                         )}
 
                                         {hoursErrors[hour.id] && (
                                             <div className="mb-3 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-xs">
                                                 <div className="font-semibold mb-1">Error:</div>
                                                 <div className="whitespace-pre-wrap break-words">{hoursErrors[hour.id]}</div>
-                                            </div>
+                                </div>
                                         )}
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
+                                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Category Title *</label>
-                                                <input
-                                                    type="text"
+                                    <input
+                                        type="text"
                                                     value={data.category_title || ''}
                                                     onChange={(e) => handleHoursInputChange(hour.id, 'category_title', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                                     required
-                                                />
-                                            </div>
-                                            <div>
+                                    />
+                                </div>
+                                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Monday – Friday Hours</label>
-                                                <input
-                                                    type="text"
+                                    <input
+                                        type="text"
                                                     value={data.monday_friday_hours || ''}
                                                     onChange={(e) => handleHoursInputChange(hour.id, 'monday_friday_hours', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                                />
-                                            </div>
-                                            <div>
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
+                                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Saturday Hours</label>
-                                                <input
-                                                    type="text"
+                                    <input
+                                        type="text"
                                                     value={data.saturday_hours || ''}
                                                     onChange={(e) => handleHoursInputChange(hour.id, 'saturday_hours', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                                />
-                                            </div>
-                                            <div>
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
+                                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Sunday Hours</label>
-                                                <input
-                                                    type="text"
+                                    <input
+                                        type="text"
                                                     value={data.sunday_hours || ''}
                                                     onChange={(e) => handleHoursInputChange(hour.id, 'sunday_hours', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Sunday Status</label>
-                                                <input
-                                                    type="text"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Sunday Status</label>
+                                    <input
+                                        type="text"
                                                     value={data.sunday_status || ''}
                                                     onChange={(e) => handleHoursInputChange(hour.id, 'sunday_status', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                                     placeholder="e.g., Closed"
-                                                />
-                                            </div>
-                                            <div>
+                                    />
+                                </div>
+                                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Public Holidays Hours</label>
-                                                <input
-                                                    type="text"
+                                    <input
+                                        type="text"
                                                     value={data.public_holidays_hours || ''}
                                                     onChange={(e) => handleHoursInputChange(hour.id, 'public_holidays_hours', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                                />
-                                            </div>
-                                            <div>
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
+                                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Public Holidays Status</label>
-                                                <input
-                                                    type="text"
+                                    <input
+                                        type="text"
                                                     value={data.public_holidays_status || ''}
                                                     onChange={(e) => handleHoursInputChange(hour.id, 'public_holidays_status', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                                     placeholder="e.g., Closed"
-                                                />
-                                            </div>
-                                            <div>
+                                    />
+                                </div>
+                                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
-                                                <input
+                                    <input
                                                     type="number"
                                                     min="0"
                                                     value={data.sort_order ?? hour.sort_order}
                                                     onChange={(e) => handleHoursInputChange(hour.id, 'sort_order', parseInt(e.target.value) || 0)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                                />
-                                            </div>
-                                        </div>
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
+                                </div>
 
                                         <div className="mt-4 flex justify-end">
                                             <button
@@ -1361,8 +1937,8 @@ export default function ContactEditor() {
                                             >
                                                 {hoursSaving[hour.id] ? 'Saving...' : 'Save'}
                                             </button>
-                                        </div>
-                                    </div>
+                                </div>
+                                </div>
                                 );
                             })}
 
@@ -1373,93 +1949,93 @@ export default function ContactEditor() {
                                 {hoursSuccess['new'] && (
                                     <div className="mb-3 p-2 bg-green-100 border border-green-400 text-green-700 rounded text-xs">
                                         {hoursSuccess['new']}
-                                    </div>
+                    </div>
                                 )}
 
                                 {hoursErrors['new'] && (
                                     <div className="mb-3 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-xs">
                                         <div className="font-semibold mb-1">Error:</div>
                                         <div className="whitespace-pre-wrap break-words">{hoursErrors['new']}</div>
-                                    </div>
+                        </div>
                                 )}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Category Title *</label>
-                                        <input
-                                            type="text"
+                                    <input
+                                        type="text"
                                             value={newHoursData.category_title || ''}
                                             onChange={(e) => handleHoursInputChange('new', 'category_title', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                             required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Monday – Friday Hours</label>
-                                        <input
-                                            type="text"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Monday – Friday Hours</label>
+                                    <input
+                                        type="text"
                                             value={newHoursData.monday_friday_hours || ''}
                                             onChange={(e) => handleHoursInputChange('new', 'monday_friday_hours', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Saturday Hours</label>
-                                        <input
-                                            type="text"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Saturday Hours</label>
+                                    <input
+                                        type="text"
                                             value={newHoursData.saturday_hours || ''}
                                             onChange={(e) => handleHoursInputChange('new', 'saturday_hours', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                        />
-                                    </div>
-                                    <div>
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
+                                <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Sunday Hours</label>
-                                        <input
-                                            type="text"
+                                    <input
+                                        type="text"
                                             value={newHoursData.sunday_hours || ''}
                                             onChange={(e) => handleHoursInputChange('new', 'sunday_hours', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                        />
-                                    </div>
-                                    <div>
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
+                                <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Sunday Status</label>
-                                        <input
-                                            type="text"
+                                    <input
+                                        type="text"
                                             value={newHoursData.sunday_status || ''}
                                             onChange={(e) => handleHoursInputChange('new', 'sunday_status', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                             placeholder="e.g., Closed"
-                                        />
-                                    </div>
-                                    <div>
+                                    />
+                                </div>
+                                <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Public Holidays Hours</label>
-                                        <input
-                                            type="text"
+                                    <input
+                                        type="text"
                                             value={newHoursData.public_holidays_hours || ''}
                                             onChange={(e) => handleHoursInputChange('new', 'public_holidays_hours', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                        />
-                                    </div>
-                                    <div>
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
+                                <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Public Holidays Status</label>
-                                        <input
-                                            type="text"
+                                    <input
+                                        type="text"
                                             value={newHoursData.public_holidays_status || ''}
                                             onChange={(e) => handleHoursInputChange('new', 'public_holidays_status', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                             placeholder="e.g., Closed"
-                                        />
-                                    </div>
-                                    <div>
+                                    />
+                                </div>
+                                <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
-                                        <input
+                                    <input
                                             type="number"
                                             min="0"
                                             value={newHoursData.sort_order ?? hoursOfOperation.length}
                                             onChange={(e) => handleHoursInputChange('new', 'sort_order', parseInt(e.target.value) || 0)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                        />
-                                    </div>
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                    />
+                                </div>
                                 </div>
 
                                 <div className="mt-4 flex justify-end">
@@ -1477,25 +2053,25 @@ export default function ContactEditor() {
                 </div>
 
                 {/* Social Media Section */}
-                <div>
+                                <div>
                     <div className="flex flex-col items-start mb-6">
                         <h3 className="text-lg font-bold text-pink-600 mb-2">Social Media</h3>
                         <div className="h-0.5 bg-pink-600 w-full"></div>
-                    </div>
+                                </div>
 
                     {socialMediaError && (
                         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
                             <div className="flex justify-between items-start">
                                 <div className="flex-1">
                                     <strong>Error:</strong> {socialMediaError}
-                                </div>
+                            </div>
                                 <button
                                     onClick={fetchSocialMedia}
                                     className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm whitespace-nowrap"
                                 >
                                     Retry
                                 </button>
-                            </div>
+                        </div>
                         </div>
                     )}
 
@@ -1507,34 +2083,34 @@ export default function ContactEditor() {
                     ) : (
                         <div className="space-y-6">
                             {/* Section Heading and Description */}
-                            <div className="border border-gray-200 rounded-lg p-4">
+                        <div className="border border-gray-200 rounded-lg p-4">
                                 <h4 className="font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-300">Section Information</h4>
 
                                 {socialSectionSuccess && (
                                     <div className="mb-3 p-2 bg-green-100 border border-green-400 text-green-700 rounded text-xs">
                                         {socialSectionSuccess}
-                                    </div>
+                                </div>
                                 )}
 
                                 {socialSectionError && (
                                     <div className="mb-3 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-xs">
                                         {socialSectionError}
-                                    </div>
+                                </div>
                                 )}
 
                                 <div className="space-y-4">
-                                    <div>
+                                <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Heading</label>
-                                        <input
-                                            type="text"
+                                    <input
+                                        type="text"
                                             value={socialSectionData.heading}
                                             onChange={(e) => setSocialSectionData((prev) => ({ ...prev, heading: e.target.value }))}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white"
                                             placeholder="e.g., Follow Us"
-                                        />
-                                    </div>
+                                    />
+                                </div>
 
-                                    <div>
+                                <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                                         <textarea
                                             value={socialSectionData.description}
@@ -1542,8 +2118,8 @@ export default function ContactEditor() {
                                             rows={3}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 resize-none text-gray-900 bg-white"
                                             placeholder="Stay connected with us on social media..."
-                                        />
-                                    </div>
+                                    />
+                                </div>
 
                                     <div className="flex justify-end">
                                         <button
@@ -1553,9 +2129,9 @@ export default function ContactEditor() {
                                         >
                                             {socialSectionSaving ? 'Saving...' : 'Save Section'}
                                         </button>
-                                    </div>
                                 </div>
                             </div>
+                        </div>
 
                             {/* Existing Social Links */}
                             {socialLinks.map((link) => {
@@ -1572,46 +2148,46 @@ export default function ContactEditor() {
                                             >
                                                 Delete
                                             </button>
-                                        </div>
+                                </div>
 
                                         {socialLinkSuccess[link.id] && (
                                             <div className="mb-3 p-2 bg-green-100 border border-green-400 text-green-700 rounded text-xs">
                                                 {socialLinkSuccess[link.id]}
-                                            </div>
+                                </div>
                                         )}
 
                                         {socialLinkErrors[link.id] && (
                                             <div className="mb-3 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-xs">
                                                 {socialLinkErrors[link.id]}
-                                            </div>
+                                </div>
                                         )}
 
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <div>
+                                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Platform Name *</label>
-                                                <input
-                                                    type="text"
+                                    <input
+                                        type="text"
                                                     value={data.platform_name || ''}
                                                     onChange={(e) => handleSocialLinkInputChange(link.id, 'platform_name', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                                     placeholder="e.g., Facebook, Instagram"
                                                     required
-                                                />
-                                            </div>
+                                    />
+                                </div>
 
-                                            <div>
+                                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Platform URL *</label>
-                                                <input
+                                    <input
                                                     type="url"
                                                     value={data.platform_url || ''}
                                                     onChange={(e) => handleSocialLinkInputChange(link.id, 'platform_url', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                                     placeholder="https://example.com/platform"
                                                     required
-                                                />
-                                            </div>
+                                    />
+                </div>
 
-                                            <div>
+                <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Platform Icon</label>
                                                 {link.icon && (
                                                     <div className="mb-2">
@@ -1620,9 +2196,9 @@ export default function ContactEditor() {
                                                             alt={link.platform_name}
                                                             className="h-8 w-8 object-contain"
                                                         />
-                                                    </div>
+                    </div>
                                                 )}
-                                                <input
+                            <input
                                                     type="file"
                                                     accept="image/*"
                                                     onChange={(e) => handleSocialLinkFileChange(link.id, e.target.files?.[0] || null)}
@@ -1633,9 +2209,9 @@ export default function ContactEditor() {
                                                         Selected: {data.iconFile.name}
                                                     </p>
                                                 )}
-                                            </div>
+                        </div>
 
-                                            <div>
+                        <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
                                                 <input
                                                     type="number"
@@ -1645,17 +2221,17 @@ export default function ContactEditor() {
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                                 />
                                             </div>
-                                        </div>
+                        </div>
 
                                         <div className="mt-4 flex justify-end">
-                                            <button
+                                <button
                                                 onClick={() => handleSaveSocialLink(link.id)}
                                                 disabled={socialLinkSaving[link.id]}
                                                 className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 {socialLinkSaving[link.id] ? 'Saving...' : 'Save'}
-                                            </button>
-                                        </div>
+                                </button>
+                            </div>
                                     </div>
                                 );
                             })}
@@ -1674,47 +2250,47 @@ export default function ContactEditor() {
                                     <div className="mb-3 p-2 bg-red-100 border border-red-400 text-red-700 rounded text-xs">
                                         {socialLinkErrors['new']}
                                     </div>
-                                )}
+                                        )}
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Platform Name *</label>
-                                        <input
-                                            type="text"
+                                                <input
+                                                    type="text"
                                             value={newSocialLinkData.platform_name || ''}
                                             onChange={(e) => handleSocialLinkInputChange('new', 'platform_name', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                             placeholder="e.g., Facebook, Instagram"
                                             required
-                                        />
-                                    </div>
+                                                />
+                                            </div>
 
-                                    <div>
+                                            <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Platform URL *</label>
-                                        <input
-                                            type="url"
+                                                <input
+                                                    type="url"
                                             value={newSocialLinkData.platform_url || ''}
                                             onChange={(e) => handleSocialLinkInputChange('new', 'platform_url', e.target.value)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                                            placeholder="https://example.com/platform"
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                                                    placeholder="https://example.com/platform"
                                             required
-                                        />
-                                    </div>
+                                                />
+                                            </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Platform Icon</label>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Platform Icon</label>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
                                             onChange={(e) => handleSocialLinkFileChange('new', e.target.files?.[0] || null)}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
-                                        />
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+                                                />
                                         {newSocialLinkData.iconFile && (
-                                            <p className="text-xs text-gray-600 mt-1">
+                                                    <p className="text-xs text-gray-600 mt-1">
                                                 Selected: {newSocialLinkData.iconFile.name}
-                                            </p>
-                                        )}
-                                    </div>
+                                                    </p>
+                                                )}
+                                            </div>
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
@@ -1725,8 +2301,8 @@ export default function ContactEditor() {
                                             onChange={(e) => handleSocialLinkInputChange('new', 'sort_order', parseInt(e.target.value) || 0)}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                                         />
+                                        </div>
                                     </div>
-                                </div>
 
                                 <div className="mt-4 flex justify-end">
                                     <button
@@ -1736,8 +2312,198 @@ export default function ContactEditor() {
                                     >
                                         {socialLinkSaving['new'] ? 'Creating...' : 'Create New Link'}
                                     </button>
-                                </div>
                             </div>
+                        </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Contact Form Submissions Table */}
+                <div>
+                    <div className="flex flex-col items-start mb-6">
+                        <div className="flex justify-between items-center w-full mb-2">
+                            <h3 className="text-lg font-bold text-pink-600">Contact Form Submissions</h3>
+                            <button
+                                onClick={() => fetchFormSubmissions(submissionsPage)}
+                                disabled={submissionsLoading}
+                                className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {submissionsLoading ? "Refreshing..." : "Refresh"}
+                            </button>
+                        </div>
+                        <div className="h-0.5 bg-pink-600 w-full"></div>
+                    </div>
+
+                    {submissionsError && (
+                        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                            <div className="flex justify-between items-start">
+                                <div className="flex-1">
+                                    <strong>Error:</strong> {submissionsError}
+                                </div>
+                                <button
+                                    onClick={() => fetchFormSubmissions(submissionsPage)}
+                                    className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm whitespace-nowrap"
+                                >
+                                    Retry
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {submissionsLoading ? (
+                        <div className="text-center py-8">
+                            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+                            <p className="mt-4 text-gray-600">Loading submissions...</p>
+                        </div>
+                    ) : formSubmissions.length > 0 ? (
+                        <>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300">
+                                                Status
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300">
+                                                First Name
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300">
+                                                Last Name
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300">
+                                                Email
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300">
+                                                Phone
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300">
+                                                Company
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300">
+                                                Message
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300">
+                                                Date
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-300">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {formSubmissions.map((submission) => (
+                                            <tr 
+                                                key={submission.id} 
+                                                className={`hover:bg-gray-50 ${submission.is_read ? "bg-gray-50" : "bg-white"}`}
+                                            >
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                                        submission.is_read 
+                                                            ? "bg-green-100 text-green-800" 
+                                                            : "bg-yellow-100 text-yellow-800"
+                                                    }`}>
+                                                        {submission.is_read ? "Read" : "Unread"}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {submission.first_name}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {submission.last_name}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    <a 
+                                                        href={`mailto:${submission.email}`}
+                                                        className="text-pink-600 hover:text-pink-900"
+                                                    >
+                                                        {submission.email}
+                                                    </a>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {submission.phone || '-'}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {submission.company || '-'}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title={submission.message}>
+                                                    {submission.message || '-'}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    {new Date(submission.created_at).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <div className="flex gap-2">
+                                                        {submission.is_read ? (
+                                                            <button
+                                                                onClick={() => handleMarkAsUnread(submission.id)}
+                                                                disabled={submissionActions[submission.id]}
+                                                                className="text-yellow-600 hover:text-yellow-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                title="Mark as unread"
+                                                            >
+                                                                {submissionActions[submission.id] ? "..." : "Mark Unread"}
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleMarkAsRead(submission.id)}
+                                                                disabled={submissionActions[submission.id]}
+                                                                className="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                title="Mark as read"
+                                                            >
+                                                                {submissionActions[submission.id] ? "..." : "Mark Read"}
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleDeleteSubmission(submission.id)}
+                                                            disabled={submissionActions[submission.id]}
+                                                            className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            title="Delete submission"
+                                                        >
+                                                            {submissionActions[submission.id] ? "..." : "Delete"}
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {/* Pagination */}
+                            {submissionsPagination.last_page > 1 && (
+                                <div className="mt-4 flex items-center justify-between">
+                                    <div className="text-sm text-gray-700">
+                                        Showing {submissionsPagination.from} to {submissionsPagination.to} of {submissionsPagination.total} results
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                const newPage = submissionsPage - 1;
+                                                setSubmissionsPage(newPage);
+                                                fetchFormSubmissions(newPage);
+                                            }}
+                                            disabled={submissionsPage === 1 || submissionsLoading}
+                                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Previous
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const newPage = submissionsPage + 1;
+                                                setSubmissionsPage(newPage);
+                                                fetchFormSubmissions(newPage);
+                                            }}
+                                            disabled={submissionsPage >= submissionsPagination.last_page || submissionsLoading}
+                                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <div className="text-center py-8 text-gray-500">
+                            <p>No contact form submissions found.</p>
                         </div>
                     )}
                 </div>
@@ -1749,6 +2515,216 @@ export default function ContactEditor() {
                     </button>
                 </div>
             </div>
+
+            {/* Team Management Modal */}
+            {showTeamModal && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+                            <h2 className="text-xl font-bold text-gray-900">Contact Our Team</h2>
+                            <button
+                                onClick={handleCloseTeamModal}
+                                className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {/* Success/Error Messages */}
+                            {teamMemberSuccess && (
+                                <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                                    {teamMemberSuccess}
+                                </div>
+                            )}
+                            {teamMemberError && (
+                                <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                    <div className="font-semibold mb-1">Error:</div>
+                                    <div className="whitespace-pre-wrap break-words">{teamMemberError}</div>
+                                </div>
+                            )}
+                            {teamMembersError && (
+                                <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex-1">
+                                            <strong>Error:</strong> {teamMembersError}
+                                        </div>
+                                        <button
+                                            onClick={fetchTeamMembers}
+                                            className="ml-4 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm whitespace-nowrap"
+                                        >
+                                            Retry
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Team Members List */}
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">Team Members</h3>
+                                {teamMembersLoading ? (
+                                    <div className="text-center py-8">
+                                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+                                        <p className="mt-4 text-gray-600">Loading team members...</p>
+                                    </div>
+                                ) : teamMembers.length === 0 ? (
+                                    <p className="text-gray-500 text-sm">No team members added yet.</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {teamMembers.map((member) => {
+                                            const imageUrl = getTeamMemberImageUrl(member.picture);
+                                            return (
+                                                <div
+                                                    key={member.id}
+                                                    className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
+                                                >
+                                                    <div className="flex-shrink-0">
+                                                        {imageUrl ? (
+                                                            <img
+                                                                src={imageUrl}
+                                                                alt={`${member.first_name} ${member.last_name}`}
+                                                                className="w-12 h-12 rounded-full object-cover shadow-md"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-700 font-semibold text-lg shadow-md">
+                                                                {getInitials(member.first_name, member.last_name)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-semibold text-gray-900">{member.first_name} {member.last_name}</h4>
+                                                    <p className="text-sm text-gray-600">{member.role}</p>
+                                                    <a
+                                                        href={`mailto:${member.email}`}
+                                                        className="text-sm text-blue-600 hover:text-blue-800"
+                                                    >
+                                                        {member.email}
+                                                    </a>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleEditTeamMember(member)}
+                                                        className="px-3 py-1 text-sm text-pink-600 hover:text-pink-800 font-medium"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => member.id && handleDeleteTeamMember(member.id)}
+                                                        className="px-3 py-1 text-sm text-red-600 hover:text-red-800 font-medium"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Add/Edit Team Member Form */}
+                            <div className="border-t border-gray-200 pt-6">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                    {editingTeamMemberId !== null ? 'Edit Team Member' : 'Add New Team Member'}
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                        <input
+                                            type="text"
+                                            value={currentTeamMember.first_name}
+                                            onChange={(e) => setCurrentTeamMember(prev => ({ ...prev, first_name: e.target.value }))}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white"
+                                            placeholder="John"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                        <input
+                                            type="text"
+                                            value={currentTeamMember.last_name}
+                                            onChange={(e) => setCurrentTeamMember(prev => ({ ...prev, last_name: e.target.value }))}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white"
+                                            placeholder="Doe"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
+                                        <input
+                                            type="text"
+                                            value={currentTeamMember.role}
+                                            onChange={(e) => setCurrentTeamMember(prev => ({ ...prev, role: e.target.value }))}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white"
+                                            placeholder="CEO & Founder"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                                        <input
+                                            type="email"
+                                            value={currentTeamMember.email}
+                                            onChange={(e) => setCurrentTeamMember(prev => ({ ...prev, email: e.target.value }))}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white"
+                                            placeholder="john@mecarvi.com"
+                                        />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Picture</label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleTeamPictureChange}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+                                        />
+                                        {(currentTeamMember.picture || (editingTeamMemberId !== null && teamMembers.find(m => m.id === editingTeamMemberId)?.picture)) && (
+                                            <div className="mt-3">
+                                                {currentTeamMember.picture instanceof File ? (
+                                                    <>
+                                                        <img
+                                                            src={URL.createObjectURL(currentTeamMember.picture)}
+                                                            alt="Preview"
+                                                            className="w-20 h-20 rounded-full object-cover shadow-md"
+                                                        />
+                                                        <p className="text-xs text-gray-600 mt-1">
+                                                            Selected: {currentTeamMember.picture.name}
+                                                        </p>
+                                                    </>
+                                                ) : editingTeamMemberId !== null ? (
+                                                    <>
+                                                        <img
+                                                            src={getTeamMemberImageUrl(teamMembers.find(m => m.id === editingTeamMemberId)?.picture || null) || ''}
+                                                            alt="Current picture"
+                                                            className="w-20 h-20 rounded-full object-cover shadow-md"
+                                                        />
+                                                        <p className="text-xs text-gray-600 mt-1">Current picture</p>
+                                                    </>
+                                                ) : null}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 mt-6">
+                                    <button
+                                        onClick={handleSaveTeamMember}
+                                        disabled={teamMemberSaving}
+                                        className="px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:bg-pink-300 disabled:cursor-not-allowed transition-colors font-medium"
+                                    >
+                                        {teamMemberSaving ? 'Saving...' : editingTeamMemberId !== null ? 'Update Member' : 'Add Member'}
+                                    </button>
+                                    {editingTeamMemberId !== null && (
+                                        <button
+                                            onClick={handleAddTeamMember}
+                                            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium"
+                                        >
+                                            Cancel Edit
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

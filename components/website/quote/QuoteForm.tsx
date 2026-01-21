@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function QuoteForm() {
   const [activeTab, setActiveTab] = useState(1);
@@ -64,14 +64,68 @@ export default function QuoteForm() {
     // Section 11: Additional Information
     hearAboutUs: "",
     additionalNotes: "",
+    uploadedFiles: [] as File[],
     
     // Section 12: Confirmation
     confirmation: false,
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      setFormData((prev) => ({
+        ...prev,
+        uploadedFiles: [...prev.uploadedFiles, ...newFiles],
+      }));
+    }
+  };
+
+  // Handle drag and drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files);
+      setFormData((prev) => ({
+        ...prev,
+        uploadedFiles: [...prev.uploadedFiles, ...newFiles],
+      }));
+    }
+  };
+
+  // Remove file
+  const handleRemoveFile = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      uploadedFiles: prev.uploadedFiles.filter((_, i) => i !== index),
+    }));
+  };
+
+  // Trigger file input click
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleCheckboxChange = (name: string, value: string) => {
@@ -104,10 +158,256 @@ export default function QuoteForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState("");
+  const [submitError, setSubmitError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    alert("Quote request submitted successfully!");
+    
+    // Validate required fields
+    if (!formData.fullName.trim()) {
+      setSubmitError("Full name is required");
+      return;
+    }
+    if (!formData.email.trim()) {
+      setSubmitError("Email is required");
+      return;
+    }
+    if (!formData.confirmation) {
+      setSubmitError("Please confirm authorization");
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      setSubmitError("Please enter a valid email address");
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError("");
+    setSubmitSuccess("");
+
+    try {
+      // Build submission data
+      const submissionData: Record<string, any> = {
+        full_name: formData.fullName.trim(),
+        email: formData.email.trim(),
+        authorization_confirmation: true,
+      };
+
+      // Add optional fields only if they have values
+      if (formData.jobTitle.trim()) submissionData.job_title = formData.jobTitle.trim();
+      if (formData.companyName.trim()) submissionData.company_name = formData.companyName.trim();
+      if (formData.phone.trim()) submissionData.phone = formData.phone.trim();
+      if (formData.preferredContact) submissionData.preferred_contact_method = formData.preferredContact;
+      if (formData.industry.trim()) submissionData.industry_sector = formData.industry.trim();
+      if (formData.companySize) submissionData.company_size = formData.companySize;
+      if (formData.streetAddress.trim()) submissionData.street_address = formData.streetAddress.trim();
+      if (formData.city.trim()) submissionData.city = formData.city.trim();
+      if (formData.state.trim()) submissionData.state_province = formData.state.trim();
+      if (formData.postalCode.trim()) submissionData.postal_code = formData.postalCode.trim();
+      if (formData.country.trim()) submissionData.country = formData.country.trim();
+      if (formData.businessWebsite.trim()) submissionData.business_website = formData.businessWebsite.trim();
+      if (formData.services.length > 0) submissionData.services_required = formData.services;
+      if (formData.frontEndTech.length > 0) submissionData.frontend_technologies = formData.frontEndTech;
+      if (formData.backEndTech.length > 0) submissionData.backend_technologies = formData.backEndTech;
+      if (formData.databasePreference) submissionData.database_preference = formData.databasePreference;
+      // Map domain_name_ownership: "yes"/"no" -> "Yes"/"No"
+      if (formData.ownDomain) {
+        submissionData.domain_name_ownership = formData.ownDomain === "yes" ? "Yes" : "No";
+      }
+      // Map hosting_services_availability: "yes"/"no" -> "Yes"/"No"
+      if (formData.hasHosting) {
+        submissionData.hosting_services_availability = formData.hasHosting === "yes" ? "Yes" : "No";
+      }
+      // Map ready_made_product_interest: "not-sure" -> "Not sure", "yes"/"no" -> "Yes"/"No"
+      if (formData.interestedInProducts) {
+        if (formData.interestedInProducts === "not-sure") {
+          submissionData.ready_made_product_interest = "Not sure";
+        } else if (formData.interestedInProducts === "yes") {
+          submissionData.ready_made_product_interest = "Yes";
+        } else if (formData.interestedInProducts === "no") {
+          submissionData.ready_made_product_interest = "No";
+        }
+      }
+      // Map custom_development_requirement: "unsure" -> "Unsure", "yes"/"no" -> "Yes"/"No"
+      if (formData.requireCustomDev) {
+        if (formData.requireCustomDev === "unsure") {
+          submissionData.custom_development_requirement = "Unsure";
+        } else if (formData.requireCustomDev === "yes") {
+          submissionData.custom_development_requirement = "Yes";
+        } else if (formData.requireCustomDev === "no") {
+          submissionData.custom_development_requirement = "No";
+        }
+      }
+      if (formData.projectType.trim()) submissionData.project_type = formData.projectType.trim();
+      if (formData.projectDescription.trim()) submissionData.brief_project_description = formData.projectDescription.trim();
+      if (formData.primaryObjective.trim()) submissionData.primary_objective = formData.primaryObjective.trim();
+      if (formData.estimatedTimeline.trim()) submissionData.estimated_timeline = formData.estimatedTimeline.trim();
+      if (formData.budgetRange.trim()) submissionData.estimated_budget_range = formData.budgetRange.trim();
+      if (formData.requiredIntegrations.trim()) submissionData.required_integrations = formData.requiredIntegrations.trim();
+      if (formData.securityCompliance.length > 0) submissionData.security_compliance_requirements = formData.securityCompliance;
+      // Map ongoing_maintenance_support: "open-to-discussion" -> "Open to discussion", others capitalize
+      if (formData.requireMaintenance) {
+        if (formData.requireMaintenance === "open-to-discussion") {
+          submissionData.ongoing_maintenance_support = "Open to discussion";
+        } else {
+          submissionData.ongoing_maintenance_support = formData.requireMaintenance.charAt(0).toUpperCase() + formData.requireMaintenance.slice(1);
+        }
+      }
+      // Map long_term_partnership: capitalize first letter
+      if (formData.interestedInPartnership) {
+        submissionData.long_term_partnership = formData.interestedInPartnership.charAt(0).toUpperCase() + formData.interestedInPartnership.slice(1);
+      }
+      if (formData.hearAboutUs.trim()) submissionData.how_did_you_hear = formData.hearAboutUs.trim();
+      if (formData.additionalNotes.trim()) submissionData.message = formData.additionalNotes.trim();
+
+      console.log("Submitting quote form:", submissionData);
+      console.log("Uploaded files:", formData.uploadedFiles);
+
+      // Use FormData if files are uploaded, otherwise use JSON
+      let body: FormData | string;
+      let headers: HeadersInit;
+
+      if (formData.uploadedFiles.length > 0) {
+        // Use FormData for file uploads
+        const formDataToSend = new FormData();
+        
+        // Add all text fields
+        Object.entries(submissionData).forEach(([key, value]) => {
+          if (value !== null && value !== undefined) {
+            if (Array.isArray(value)) {
+              // For arrays, append each item separately
+              value.forEach((item) => {
+                formDataToSend.append(`${key}[]`, item);
+              });
+            } else if (typeof value === 'boolean') {
+              formDataToSend.append(key, value ? '1' : '0');
+            } else {
+              formDataToSend.append(key, String(value));
+            }
+          }
+        });
+
+        // Add files
+        formData.uploadedFiles.forEach((file) => {
+          formDataToSend.append('uploaded_files[]', file);
+        });
+
+        body = formDataToSend;
+        headers = {
+          "Accept": "application/json",
+          // Don't set Content-Type for FormData, browser will set it with boundary
+        };
+      } else {
+        // Use JSON if no files
+        body = JSON.stringify(submissionData);
+        headers = {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        };
+      }
+
+      const response = await fetch("http://localhost:8000/api/v1/quote-form", {
+        method: "POST",
+        headers,
+        body,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setSubmitSuccess("Thank you! Your quote request has been submitted successfully. We'll get back to you soon.");
+          // Reset form
+          setFormData({
+            fullName: "",
+            jobTitle: "",
+            companyName: "",
+            email: "",
+            phone: "",
+            preferredContact: "",
+            industry: "",
+            companySize: "",
+            streetAddress: "",
+            city: "",
+            state: "",
+            postalCode: "",
+            country: "",
+            businessWebsite: "",
+            services: [],
+            frontEndTech: [],
+            backEndTech: [],
+            databasePreference: "",
+            ownDomain: "",
+            domainName: "",
+            hasHosting: "",
+            hostingProvider: [],
+            hostingRequirements: [],
+            preferredCloud: "",
+            interestedInProducts: "",
+            productSolutions: [],
+            requireCustomDev: "",
+            projectType: "",
+            projectDescription: "",
+            primaryObjective: "",
+            estimatedTimeline: "",
+            budgetRange: "",
+            requiredIntegrations: "",
+            securityCompliance: [],
+            requireMaintenance: "",
+            interestedInPartnership: "",
+            hearAboutUs: "",
+            additionalNotes: "",
+            uploadedFiles: [],
+            confirmation: false,
+          });
+          // Reset file input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+          setActiveTab(1);
+          setTimeout(() => setSubmitSuccess(""), 10000);
+        } else {
+          const errorMsg = data.message || data.error || "Failed to submit form";
+          throw new Error(errorMsg);
+        }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("API Error Response:", errorData);
+        
+        // Build detailed error message from validation errors
+        let errorMsg = errorData.message || errorData.error || `Failed to submit form (${response.status})`;
+        
+        if (errorData.errors && typeof errorData.errors === 'object') {
+          const validationErrors: string[] = [];
+          Object.entries(errorData.errors).forEach(([field, messages]) => {
+            if (Array.isArray(messages)) {
+              validationErrors.push(`${field}: ${messages.join(', ')}`);
+            } else if (typeof messages === 'string') {
+              validationErrors.push(`${field}: ${messages}`);
+            }
+          });
+          
+          if (validationErrors.length > 0) {
+            errorMsg = `Validation failed:\n${validationErrors.join('\n')}`;
+          }
+        }
+        
+        throw new Error(errorMsg);
+      }
+    } catch (err) {
+      console.error("Error submitting quote form:", err);
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : "Failed to submit form. Please try again.";
+      setSubmitError(errorMessage);
+      setTimeout(() => setSubmitError(""), 8000);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const tabs = [
@@ -147,6 +447,17 @@ export default function QuoteForm() {
 
         {/* Form Container with Shadow */}
         <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 md:p-8 lg:p-10 shadow-2xl" style={{ boxShadow: '0 0 30px rgba(0, 0, 0, 0.15), 0 -10px 25px rgba(0, 0, 0, 0.1)' }}>
+          {/* Success/Error Messages */}
+          {submitSuccess && (
+            <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+              {submitSuccess}
+            </div>
+          )}
+          {submitError && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg whitespace-pre-line">
+              {submitError}
+            </div>
+          )}
           
           {/* Tab 1: Primary Contact Information */}
           {activeTab === 1 && (
@@ -161,7 +472,7 @@ export default function QuoteForm() {
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   />
                 </div>
@@ -172,7 +483,7 @@ export default function QuoteForm() {
                     name="jobTitle"
                     value={formData.jobTitle}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   />
                 </div>
@@ -183,7 +494,7 @@ export default function QuoteForm() {
                     name="companyName"
                     value={formData.companyName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   />
                 </div>
@@ -194,7 +505,7 @@ export default function QuoteForm() {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   />
                 </div>
@@ -205,7 +516,7 @@ export default function QuoteForm() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   />
                 </div>
@@ -215,13 +526,15 @@ export default function QuoteForm() {
                     name="preferredContact"
                     value={formData.preferredContact}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   >
                     <option value="">Select...</option>
                     <option value="email">Email</option>
                     <option value="phone">Phone</option>
-                    <option value="either">Either</option>
+                    <option value="sms">SMS</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="any">Any</option>
                   </select>
                 </div>
               </div>
@@ -240,7 +553,7 @@ export default function QuoteForm() {
                     name="industry"
                     value={formData.industry}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   />
                 </div>
@@ -250,7 +563,7 @@ export default function QuoteForm() {
                     name="companySize"
                     value={formData.companySize}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     required
                   >
                     <option value="">Select...</option>
@@ -269,7 +582,7 @@ export default function QuoteForm() {
                       name="streetAddress"
                       value={formData.streetAddress}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     />
                   </div>
                   <div>
@@ -279,7 +592,7 @@ export default function QuoteForm() {
                       name="city"
                       value={formData.city}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     />
                   </div>
                   <div>
@@ -289,7 +602,7 @@ export default function QuoteForm() {
                       name="state"
                       value={formData.state}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     />
                   </div>
                   <div>
@@ -299,7 +612,7 @@ export default function QuoteForm() {
                       name="postalCode"
                       value={formData.postalCode}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     />
                   </div>
                   <div>
@@ -309,7 +622,7 @@ export default function QuoteForm() {
                       name="country"
                       value={formData.country}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     />
                   </div>
                   <div>
@@ -319,7 +632,7 @@ export default function QuoteForm() {
                       name="businessWebsite"
                       value={formData.businessWebsite}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                     />
                   </div>
                 </div>
@@ -624,7 +937,7 @@ export default function QuoteForm() {
                     name="projectType"
                     value={formData.projectType}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                   >
                     <option value="">Select...</option>
                     <option value="new-build">New build</option>
@@ -641,7 +954,7 @@ export default function QuoteForm() {
                     onChange={handleInputChange}
                     rows={5}
                     placeholder="What are you building or improving?"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-gray-900"
                   />
                 </div>
               </div>
@@ -659,7 +972,7 @@ export default function QuoteForm() {
                     name="primaryObjective"
                     value={formData.primaryObjective}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                   >
                     <option value="">Select...</option>
                     <option value="launch-new">Launch new product</option>
@@ -675,7 +988,7 @@ export default function QuoteForm() {
                     name="estimatedTimeline"
                     value={formData.estimatedTimeline}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                   >
                     <option value="">Select...</option>
                     <option value="asap">ASAP</option>
@@ -690,7 +1003,7 @@ export default function QuoteForm() {
                     name="budgetRange"
                     value={formData.budgetRange}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                   >
                     <option value="">Select...</option>
                     <option value="under-5k">Under $5,000</option>
@@ -716,7 +1029,7 @@ export default function QuoteForm() {
                     onChange={handleInputChange}
                     rows={4}
                     placeholder="APIs, payment gateways, CRM, ERP, third-party platforms"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-gray-900"
                   />
                 </div>
                 <div>
@@ -794,22 +1107,96 @@ export default function QuoteForm() {
                     name="hearAboutUs"
                     value={formData.hearAboutUs}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                   />
                 </div>
                 
                 {/* File Upload Section */}
                 <div>
-                  <label className="block text-gray-900 mb-3 font-medium">Upload Files</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
-                    <p className="text-gray-600 mb-4">Drag file here or click the button below</p>
+                  <label className="block text-gray-900 mb-3 font-medium">Upload Files (Optional)</label>
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                      isDragging
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-300 bg-gray-50"
+                    }`}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    <p className="text-gray-600 mb-4">Drag files here or click the button below</p>
                     <button
                       type="button"
+                      onClick={handleUploadClick}
                       className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
                     >
-                      Upload file
+                      Select Files
                     </button>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Max 10MB per file. Allowed: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT, JPG, JPEG, PNG, GIF, ZIP, RAR
+                    </p>
                   </div>
+                  
+                  {/* Display selected files */}
+                  {formData.uploadedFiles.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <p className="text-sm font-medium text-gray-700">Selected Files:</p>
+                      {formData.uploadedFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-white border border-gray-300 rounded-lg p-3"
+                        >
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <svg
+                              className="w-5 h-5 text-gray-400 flex-shrink-0"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
+                            <span className="text-sm text-gray-900 truncate">{file.name}</span>
+                            <span className="text-xs text-gray-500 flex-shrink-0">
+                              ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(index)}
+                            className="ml-2 text-red-600 hover:text-red-800 flex-shrink-0"
+                            title="Remove file"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -820,7 +1207,7 @@ export default function QuoteForm() {
                     onChange={handleInputChange}
                     rows={6}
                     placeholder="Additional Notes or Special Requirements"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-gray-900"
                   />
                 </div>
               </div>
@@ -875,9 +1262,14 @@ export default function QuoteForm() {
             ) : (
               <button
                 type="submit"
-                className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
+                disabled={submitting}
+                className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                  submitting
+                    ? "bg-gray-400 text-white cursor-not-allowed"
+                    : "bg-green-600 text-white hover:bg-green-700"
+                }`}
               >
-                Submit Request
+                {submitting ? "Submitting..." : "Submit Request"}
               </button>
             )}
           </div>

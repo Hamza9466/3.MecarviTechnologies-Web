@@ -38,11 +38,25 @@ interface ContactPageCard {
   sort_order: number;
 }
 
+interface TeamMember {
+  id: number;
+  first_name: string;
+  last_name: string;
+  role: string;
+  email: string;
+  picture: string | null;
+  order: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export default function ContactForm() {
   const [heroData, setHeroData] = useState<ContactHeroData | null>(null);
   const [heroLoading, setHeroLoading] = useState(true);
   const [contactCards, setContactCards] = useState<ContactPageCard[]>([]);
   const [cardsLoading, setCardsLoading] = useState(true);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamMembersLoading, setTeamMembersLoading] = useState(false);
   
   const [formData, setFormData] = useState<ContactFormData>({
     first_name: "",
@@ -57,6 +71,32 @@ export default function ContactForm() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [showEmailPopup, setShowEmailPopup] = useState(false);
+
+  // Fetch team members function
+  const fetchTeamMembers = async () => {
+    try {
+      setTeamMembersLoading(true);
+      const response = await fetch("http://localhost:8000/api/v1/team-members", {
+        method: "GET",
+        headers: {
+          "Accept": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.team_members) {
+          // Sort by order field
+          const sortedMembers = [...data.data.team_members].sort((a: TeamMember, b: TeamMember) => a.order - b.order);
+          setTeamMembers(sortedMembers);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching team members:", err);
+    } finally {
+      setTeamMembersLoading(false);
+    }
+  };
 
   // Fetch contact cards function
   const fetchContactCards = async () => {
@@ -187,11 +227,16 @@ export default function ContactForm() {
 
     fetchHeroSection();
     fetchContactCards();
+    fetchTeamMembers();
   }, []);
 
   const getImageUrl = (iconPath: string | null | undefined): string | null => {
     if (!iconPath) return null;
     if (iconPath.startsWith('http://') || iconPath.startsWith('https://')) {
+      // Fix localhost URLs that might be missing port
+      if (iconPath.startsWith('http://localhost/storage/') || iconPath.startsWith('http://localhost/')) {
+        return iconPath.replace('http://localhost/', 'http://localhost:8000/');
+      }
       return iconPath;
     }
     // Remove leading '/storage/' or 'storage/' if present to avoid double paths
@@ -203,6 +248,35 @@ export default function ContactForm() {
     }
     cleanPath = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
     return `http://localhost:8000/storage/${cleanPath}`;
+  };
+
+  const getTeamMemberImageUrl = (picture: string | null | undefined): string | null => {
+    if (!picture) return null;
+    if (typeof picture === 'string') {
+      // If it's already a full URL, return as is
+      if (picture.startsWith('http://') || picture.startsWith('https://')) {
+        // Fix localhost URLs that might be missing port
+        if (picture.startsWith('http://localhost/storage/') || picture.startsWith('http://localhost/')) {
+          return picture.replace('http://localhost/', 'http://localhost:8000/');
+        }
+        return picture;
+      }
+      // Remove leading /storage/ or storage/ if present
+      let cleanPath = picture;
+      if (cleanPath.startsWith('/storage/')) {
+        cleanPath = cleanPath.substring(9); // Remove '/storage/'
+      } else if (cleanPath.startsWith('storage/')) {
+        cleanPath = cleanPath.substring(8); // Remove 'storage/'
+      }
+      // Remove leading slash if present
+      cleanPath = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
+      return `http://localhost:8000/storage/${cleanPath}`;
+    }
+    return null;
+  };
+
+  const getInitials = (firstName: string, lastName: string): string => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
   const renderContactCard = (card: ContactPageCard) => {
@@ -684,77 +758,49 @@ export default function ContactForm() {
               </button>
             </div>
 
-            <div className="space-y-4">
-              {/* Team Member 1 */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    JD
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">John Doe</h4>
-                    <p className="text-sm text-gray-600">CEO & Founder</p>
-                    <p className="text-sm text-blue-600 hover:underline cursor-pointer">john@mecarvi.com</p>
-                  </div>
-                </div>
+            {teamMembersLoading ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+                <p className="mt-4 text-gray-600">Loading team members...</p>
               </div>
-
-              {/* Team Member 2 */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    SM
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">Sarah Miller</h4>
-                    <p className="text-sm text-gray-600">Sales Manager</p>
-                    <p className="text-sm text-blue-600 hover:underline cursor-pointer">sarah@mecarvi.com</p>
-                  </div>
-                </div>
+            ) : teamMembers.length > 0 ? (
+              <div className="space-y-4">
+                {teamMembers.map((member) => {
+                  const imageUrl = getTeamMemberImageUrl(member.picture);
+                  return (
+                    <div key={member.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-center space-x-3">
+                        {imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={`${member.first_name} ${member.last_name}`}
+                            className="w-12 h-12 rounded-full object-cover shadow-md"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-700 font-bold shadow-md">
+                            {getInitials(member.first_name, member.last_name)}
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900">{member.first_name} {member.last_name}</h4>
+                          <p className="text-sm text-gray-600">{member.role}</p>
+                          <a
+                            href={`mailto:${member.email}`}
+                            className="text-sm text-blue-600 hover:underline cursor-pointer"
+                          >
+                            {member.email}
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-
-              {/* Team Member 3 */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    TC
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">Tom Chen</h4>
-                    <p className="text-sm text-gray-600">Technical Lead</p>
-                    <p className="text-sm text-blue-600 hover:underline cursor-pointer">tom@mecarvi.com</p>
-                  </div>
-                </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No team members available.</p>
               </div>
-
-              {/* Team Member 4 */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    EJ
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">Emma Johnson</h4>
-                    <p className="text-sm text-gray-600">Customer Support</p>
-                    <p className="text-sm text-blue-600 hover:underline cursor-pointer">emma@mecarvi.com</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Team Member 5 */}
-              <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    MR
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900">Mike Roberts</h4>
-                    <p className="text-sm text-gray-600">Project Manager</p>
-                    <p className="text-sm text-blue-600 hover:underline cursor-pointer">mike@mecarvi.com</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       )}

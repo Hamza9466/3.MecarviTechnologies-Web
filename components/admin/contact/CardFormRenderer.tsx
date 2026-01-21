@@ -24,6 +24,7 @@ interface CardFormRendererProps {
     onFileChange: (cardType: string, file: File | null) => void;
     onSave: (cardType: ContactPageCard['card_type']) => void;
     onDelete: (cardType: ContactPageCard['card_type']) => void;
+    onOpenTeam?: () => void;
     saving: boolean;
     success: string;
     error: string;
@@ -47,6 +48,7 @@ export default function CardFormRenderer({
     onFileChange,
     onSave,
     onDelete,
+    onOpenTeam,
     saving,
     success,
     error,
@@ -157,15 +159,26 @@ export default function CardFormRenderer({
 
                 {/* Email Card Fields */}
                 {cardType === 'email' && (
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                        <input
-                            type="email"
-                            value={data.email_address || ''}
-                            onChange={(e) => onInputChange(cardType, 'email_address', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                        />
-                    </div>
+                    <>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                            <input
+                                type="email"
+                                value={data.email_address || ''}
+                                onChange={(e) => onInputChange(cardType, 'email_address', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
+                            />
+                        </div>
+                        <div>
+                            <button
+                                type="button"
+                                onClick={onOpenTeam}
+                                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                            >
+                                Manage Team
+                            </button>
+                        </div>
+                    </>
                 )}
 
                 {/* Visit Card Fields */}

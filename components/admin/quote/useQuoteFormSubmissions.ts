@@ -1,23 +1,51 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-interface CareerSupportFormSubmission {
+interface QuoteFormSubmission {
     id: number;
     full_name: string;
+    job_title: string | null;
+    company_name: string | null;
     email: string;
     phone: string | null;
-    job_location: string | null;
     preferred_contact_method: string | null;
-    best_time_to_contact: string | null;
-    message: string;
+    industry_sector: string | null;
+    company_size: string | null;
+    street_address: string | null;
+    city: string | null;
+    state_province: string | null;
+    postal_code: string | null;
+    country: string | null;
+    business_website: string | null;
+    services_required: string | null; // JSON string array
+    frontend_technologies: string | null; // JSON string array
+    backend_technologies: string | null; // JSON string array
+    database_preference: string | null;
+    domain_name_ownership: string | null;
+    hosting_services_availability: string | null;
+    ready_made_product_interest: string | null;
+    custom_development_requirement: string | null;
+    project_type: string | null;
+    brief_project_description: string | null;
+    primary_objective: string | null;
+    estimated_timeline: string | null;
+    estimated_budget_range: string | null;
+    required_integrations: string | null;
+    security_compliance_requirements: string | null; // JSON string array
+    ongoing_maintenance_support: string | null;
+    long_term_partnership: string | null;
+    how_did_you_hear: string | null;
+    uploaded_files: string | null; // JSON string array
+    message: string | null;
+    authorization_confirmation: boolean;
     is_read: boolean;
     created_at: string;
     updated_at: string;
 }
 
-interface CareerSupportFormResponse {
+interface QuoteFormResponse {
     success: boolean;
     data: {
-        data: CareerSupportFormSubmission[];
+        data: QuoteFormSubmission[];
         current_page: number;
         last_page: number;
         per_page: number;
@@ -29,7 +57,7 @@ interface CareerSupportFormResponse {
     errors?: Record<string, string[]>;
 }
 
-interface CareerSupportFormStatsResponse {
+interface QuoteFormStatsResponse {
     success: boolean;
     data: {
         total_submissions: number;
@@ -39,8 +67,8 @@ interface CareerSupportFormStatsResponse {
     };
 }
 
-export const useContactFormSubmissions = () => {
-    const [contactSubmissions, setContactSubmissions] = useState<CareerSupportFormSubmission[]>([]);
+export const useQuoteFormSubmissions = () => {
+    const [quoteSubmissions, setQuoteSubmissions] = useState<QuoteFormSubmission[]>([]);
     const [statistics, setStatistics] = useState({
         total_submissions: 0,
         unread_submissions: 0,
@@ -59,8 +87,8 @@ export const useContactFormSubmissions = () => {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
-    // Fetch all contact form submissions
-    const fetchContactSubmissions = async (page = 1, status?: string, search?: string) => {
+    // Fetch all quote form submissions
+    const fetchQuoteSubmissions = async (page = 1, status?: string, search?: string) => {
         try {
             setLoading(true);
             setError("");
@@ -72,7 +100,6 @@ export const useContactFormSubmissions = () => {
             });
 
             if (status) {
-                // Convert status to is_read boolean
                 if (status === "read") {
                     params.append("is_read", "true");
                 } else if (status === "unread") {
@@ -81,7 +108,7 @@ export const useContactFormSubmissions = () => {
             }
             if (search) params.append("search", search);
 
-            const response = await fetch(`http://localhost:8000/api/v1/career-support-form-submissions?${params}`, {
+            const response = await fetch(`http://localhost:8000/api/v1/quote-form-submissions?${params}`, {
                 method: "GET",
                 headers: {
                     "Accept": "application/json",
@@ -90,8 +117,8 @@ export const useContactFormSubmissions = () => {
             });
 
             if (response.ok) {
-                const data: CareerSupportFormResponse = await response.json();
-                console.log("Career support form submissions API response:", data);
+                const data: QuoteFormResponse = await response.json();
+                console.log("Quote form submissions API response:", data);
                 if (data.success && data.data) {
                     const submissions = data.data.data || [];
                     const paginationData = {
@@ -102,12 +129,12 @@ export const useContactFormSubmissions = () => {
                         from: data.data.from || 0,
                         to: data.data.to || 0,
                     };
-                    console.log("Career support form submissions found:", submissions.length);
-                    setContactSubmissions(submissions);
+                    console.log("Quote form submissions found:", submissions.length);
+                    setQuoteSubmissions(submissions);
                     setPagination(paginationData);
                 } else {
                     console.error("API returned success=false or missing data:", data);
-                    setContactSubmissions([]);
+                    setQuoteSubmissions([]);
                     setPagination({
                         current_page: 1,
                         last_page: 1,
@@ -119,8 +146,8 @@ export const useContactFormSubmissions = () => {
                 }
             } else {
                 const errorText = await response.text().catch(() => "Unknown error");
-                console.error("Career support form submissions API error:", response.status, errorText);
-                setContactSubmissions([]);
+                console.error("Quote form submissions API error:", response.status, errorText);
+                setQuoteSubmissions([]);
                 setPagination({
                     current_page: 1,
                     last_page: 1,
@@ -131,18 +158,18 @@ export const useContactFormSubmissions = () => {
                 });
             }
         } catch (err) {
-            console.error("Error fetching contact submissions:", err);
-            setError(err instanceof Error ? err.message : "Failed to fetch contact submissions");
+            console.error("Error fetching quote form submissions:", err);
+            setError(err instanceof Error ? err.message : "Failed to fetch quote form submissions");
         } finally {
             setLoading(false);
         }
     };
 
-    // Fetch career support form statistics
+    // Fetch quote form statistics
     const fetchStatistics = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://localhost:8000/api/v1/career-support-form-submissions/stats", {
+            const response = await fetch("http://localhost:8000/api/v1/quote-form-submissions/stats", {
                 method: "GET",
                 headers: {
                     "Accept": "application/json",
@@ -151,7 +178,7 @@ export const useContactFormSubmissions = () => {
             });
 
             if (response.ok) {
-                const data: CareerSupportFormStatsResponse = await response.json();
+                const data: QuoteFormStatsResponse = await response.json();
                 if (data.success && data.data) {
                     setStatistics({
                         total_submissions: data.data.total_submissions || 0,
@@ -174,7 +201,7 @@ export const useContactFormSubmissions = () => {
             setSuccess("");
 
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8000/api/v1/career-support-form-submissions/${id}/mark-read`, {
+            const response = await fetch(`http://localhost:8000/api/v1/quote-form-submissions/${id}/mark-read`, {
                 method: "POST",
                 headers: {
                     "Accept": "application/json",
@@ -186,13 +213,11 @@ export const useContactFormSubmissions = () => {
                 const data = await response.json();
                 if (data.success) {
                     setSuccess("Submission marked as read");
-                    // Update local state
-                    setContactSubmissions(prev =>
+                    setQuoteSubmissions(prev =>
                         prev.map(submission =>
                             submission.id === id ? { ...submission, is_read: true } : submission
                         )
                     );
-                    // Update statistics
                     fetchStatistics();
                     setTimeout(() => setSuccess(""), 3000);
                     return data;
@@ -219,7 +244,7 @@ export const useContactFormSubmissions = () => {
             setSuccess("");
 
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8000/api/v1/career-support-form-submissions/${id}/mark-unread`, {
+            const response = await fetch(`http://localhost:8000/api/v1/quote-form-submissions/${id}/mark-unread`, {
                 method: "POST",
                 headers: {
                     "Accept": "application/json",
@@ -231,13 +256,11 @@ export const useContactFormSubmissions = () => {
                 const data = await response.json();
                 if (data.success) {
                     setSuccess("Submission marked as unread");
-                    // Update local state
-                    setContactSubmissions(prev =>
+                    setQuoteSubmissions(prev =>
                         prev.map(submission =>
                             submission.id === id ? { ...submission, is_read: false } : submission
                         )
                     );
-                    // Update statistics
                     fetchStatistics();
                     setTimeout(() => setSuccess(""), 3000);
                     return data;
@@ -264,7 +287,7 @@ export const useContactFormSubmissions = () => {
             setSuccess("");
 
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8000/api/v1/career-support-form-submissions/${id}`, {
+            const response = await fetch(`http://localhost:8000/api/v1/quote-form-submissions/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Accept": "application/json",
@@ -276,9 +299,7 @@ export const useContactFormSubmissions = () => {
                 const data = await response.json();
                 if (data.success) {
                     setSuccess("Submission deleted successfully");
-                    // Remove from local state
-                    setContactSubmissions(prev => prev.filter(submission => submission.id !== id));
-                    // Update statistics
+                    setQuoteSubmissions(prev => prev.filter(submission => submission.id !== id));
                     fetchStatistics();
                     setTimeout(() => setSuccess(""), 3000);
                     return data;
@@ -297,6 +318,45 @@ export const useContactFormSubmissions = () => {
         }
     };
 
+    // Get specific submission
+    const getSubmission = async (id: number) => {
+        try {
+            setLoading(true);
+            setError("");
+
+            const token = localStorage.getItem("token");
+            const response = await fetch(`http://localhost:8000/api/v1/quote-form-submissions/${id}`, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Get submission API response:", data);
+                if (data.success && data.data) {
+                    console.log("Submission data:", data.data);
+                    return data.data;
+                } else {
+                    console.error("API returned success=false or missing data:", data);
+                    throw new Error("Failed to fetch submission");
+                }
+            } else {
+                const errorText = await response.text().catch(() => "");
+                console.error("Get submission API error:", response.status, errorText);
+                throw new Error("Failed to fetch submission");
+            }
+        } catch (err) {
+            console.error("Error fetching submission:", err);
+            setError(err instanceof Error ? err.message : "Failed to fetch submission");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Clear messages
     const clearMessages = () => {
         setError("");
@@ -304,17 +364,19 @@ export const useContactFormSubmissions = () => {
     };
 
     return {
-        contactSubmissions,
+        quoteSubmissions,
         statistics,
         pagination,
         loading,
         error,
         success,
-        fetchContactSubmissions,
+        fetchQuoteSubmissions,
         fetchStatistics,
         markAsRead,
         markAsUnread,
         deleteSubmission,
+        getSubmission,
         clearMessages,
     };
 };
+
