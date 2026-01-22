@@ -2,41 +2,18 @@ import { useState } from "react";
 
 interface QuoteFormSubmission {
     id: number;
-    full_name: string;
-    job_title: string | null;
-    company_name: string | null;
-    email: string;
+    first_name: string;
+    last_name: string;
     phone: string | null;
-    preferred_contact_method: string | null;
-    industry_sector: string | null;
-    company_size: string | null;
-    street_address: string | null;
-    city: string | null;
-    state_province: string | null;
-    postal_code: string | null;
+    email: string;
+    company_name: string | null;
     country: string | null;
-    business_website: string | null;
-    services_required: string | null; // JSON string array
-    frontend_technologies: string | null; // JSON string array
-    backend_technologies: string | null; // JSON string array
-    database_preference: string | null;
-    domain_name_ownership: string | null;
-    hosting_services_availability: string | null;
-    ready_made_product_interest: string | null;
-    custom_development_requirement: string | null;
     project_type: string | null;
-    brief_project_description: string | null;
-    primary_objective: string | null;
-    estimated_timeline: string | null;
-    estimated_budget_range: string | null;
-    required_integrations: string | null;
-    security_compliance_requirements: string | null; // JSON string array
-    ongoing_maintenance_support: string | null;
-    long_term_partnership: string | null;
-    how_did_you_hear: string | null;
-    uploaded_files: string | null; // JSON string array
+    estimate_budget: string | null;
+    maximum_time_for_project: string | null;
+    required_skills: string | null;
+    uploaded_files: string | null; // JSON string array or null
     message: string | null;
-    authorization_confirmation: boolean;
     is_read: boolean;
     created_at: string;
     updated_at: string;

@@ -752,20 +752,6 @@ export default function FAQEditor() {
         </div>
       )}
 
-      {/* API Endpoint Status Indicator */}
-      {!loading && (!endpointStatus.hero || !endpointStatus.intro || !endpointStatus.categories || !endpointStatus.items || !endpointStatus.questions) && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
-          <p className="font-semibold mb-2">⚠️ Some GET endpoints are not configured:</p>
-          <ul className="text-sm space-y-1 ml-4 list-disc">
-            {!endpointStatus.hero && <li>Hero Section (GET) - Data will not load until backend route is configured</li>}
-            {!endpointStatus.intro && <li>Intro Paragraph (GET) - Data will not load until backend route is configured</li>}
-            {!endpointStatus.categories && <li>Categories (GET) - Data will not load until backend route is configured</li>}
-            {!endpointStatus.items && <li>FAQ Items (GET) - Data will not load until backend route is configured</li>}
-            {!endpointStatus.questions && <li>User Questions (GET) - Data will not load until backend route is configured</li>}
-          </ul>
-          <p className="text-sm mt-2">💡 You can still create/update data using the Save buttons (POST/PUT endpoints work).</p>
-        </div>
-      )}
 
       {/* HERO SECTION */}
       <div>

@@ -893,9 +893,9 @@ export default function ContactEditor() {
         is_active: true,
         sort_order: 0,
     });
-    const [socialLinkSaving, setSocialLinkSaving] = useState<{ [key: number | 'new']: boolean }>({});
-    const [socialLinkSuccess, setSocialLinkSuccess] = useState<{ [key: number | 'new']: string }>({});
-    const [socialLinkErrors, setSocialLinkErrors] = useState<{ [key: number | 'new']: string }>({});
+    const [socialLinkSaving, setSocialLinkSaving] = useState<Record<string | number, boolean>>({});
+    const [socialLinkSuccess, setSocialLinkSuccess] = useState<Record<string | number, string>>({});
+    const [socialLinkErrors, setSocialLinkErrors] = useState<Record<string | number, string>>({});
 
     // Initialize social media section data when loaded
     useEffect(() => {
@@ -2192,11 +2192,15 @@ export default function ContactEditor() {
                                                 {link.icon && (
                                                     <div className="mb-2">
                                                         <img
-                                                            src={getImageUrl(link.icon)}
+                                                            src={getImageUrl(link.icon) || ''}
                                                             alt={link.platform_name}
                                                             className="h-8 w-8 object-contain"
+                                                            onError={(e) => {
+                                                                const target = e.target as HTMLImageElement;
+                                                                target.style.display = 'none';
+                                                            }}
                                                         />
-                    </div>
+                                                    </div>
                                                 )}
                             <input
                                                     type="file"

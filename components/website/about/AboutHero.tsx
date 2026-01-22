@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 
 interface HeroSectionData {
   title_part_1: string;
@@ -74,54 +73,31 @@ export default function AboutHero() {
   };
 
   return (
-    <section 
-      className="bg-white min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8 pt-24 pb-16 relative"
-      style={displayData.hero_background_image ? {
-        backgroundImage: `url(${displayData.hero_background_image})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      } : {}}
-    >
-      <div className="max-w-[95%] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center w-full mt-8 sm:mt-10 md:mt-12 relative z-10">
-        {/* Left Content */}
-        <div className="space-y-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
-            {displayData.title_part_1} <span className="text-pink-500">{displayData.title_part_2}</span>
-          </h1>
-          <p className="text-gray-700 text-lg sm:text-xl md:text-2xl leading-relaxed">
-            {displayData.description_1}
-          </p>
-          <p className="text-gray-600 text-base sm:text-lg md:text-xl leading-relaxed">
-            {displayData.description_2}
-          </p>
-        </div>
+    <section className="py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden min-h-[400px] sm:min-h-[500px] md:min-h-[400px] bg-white">
+      {/* Background with curve */}
+      <div className="absolute top-0 right-0 w-full h-full overflow-hidden">
+        <svg viewBox="0 0 1440 800" className="w-full h-full" preserveAspectRatio="none" style={{ display: 'block' }}>
+          <defs>
+            <linearGradient id="aboutCurveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#7E03C3" />
+              <stop offset="100%" stopColor="#BF03B5" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,110 L1440,0 L1440,650 L0,800 Z"
+            fill="url(#aboutCurveGradient)"
+            stroke="none"
+            vectorEffect="non-scaling-stroke"
+            className="w-full h-full"
+          />
+        </svg>
+      </div>
 
-        {/* Right Content - Image */}
-        <div className="relative flex items-center justify-center">
-          <div className="relative w-full max-w-xl">
-            {displayData.hero_image ? (
-              <img
-                src={displayData.hero_image}
-                alt="About Mecarvi Technologies"
-                className="w-full h-auto object-contain"
-                style={{ maxHeight: '600px' }}
-                onError={(e) => {
-                  e.currentTarget.src = "/assets/images/qioBaPBkCKqAHtwu1747656560.png";
-                }}
-              />
-            ) : (
-            <Image
-              src="/assets/images/qioBaPBkCKqAHtwu1747656560.png"
-              alt="About Mecarvi Technologies"
-              width={800}
-              height={600}
-              className="w-full h-auto object-contain"
-              priority
-            />
-            )}
-          </div>
-        </div>
+      <div className="max-w-[95%] mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
+        {/* Content */}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center leading-tight pt-16 sm:pt-12 md:pt-16">
+          {displayData.title_part_1} <span className="text-white">{displayData.title_part_2}</span>
+        </h1>
       </div>
     </section>
   );

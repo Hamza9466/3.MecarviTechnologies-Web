@@ -5,41 +5,18 @@ import { useQuoteFormSubmissions } from "./useQuoteFormSubmissions";
 
 interface QuoteFormSubmissionDetail {
     id: number;
-    full_name: string;
-    job_title: string | null;
-    company_name: string | null;
-    email: string;
+    first_name: string;
+    last_name: string;
     phone: string | null;
-    preferred_contact_method: string | null;
-    industry_sector: string | null;
-    company_size: string | null;
-    street_address: string | null;
-    city: string | null;
-    state_province: string | null;
-    postal_code: string | null;
+    email: string;
+    company_name: string | null;
     country: string | null;
-    business_website: string | null;
-    services_required: string | null;
-    frontend_technologies: string | null;
-    backend_technologies: string | null;
-    database_preference: string | null;
-    domain_name_ownership: string | null;
-    hosting_services_availability: string | null;
-    ready_made_product_interest: string | null;
-    custom_development_requirement: string | null;
     project_type: string | null;
-    brief_project_description: string | null;
-    primary_objective: string | null;
-    estimated_timeline: string | null;
-    estimated_budget_range: string | null;
-    required_integrations: string | null;
-    security_compliance_requirements: string | null;
-    ongoing_maintenance_support: string | null;
-    long_term_partnership: string | null;
-    how_did_you_hear: string | null;
+    estimate_budget: string | null;
+    maximum_time_for_project: string | null;
+    required_skills: string | null;
     uploaded_files: string | null;
     message: string | null;
-    authorization_confirmation: boolean;
     is_read: boolean;
     created_at: string;
     updated_at: string;
@@ -75,14 +52,15 @@ export default function QuoteEditor() {
         fetchStatistics();
     }, []);
 
-    // Helper function to parse JSON strings
+    // Helper function to parse JSON strings or file paths
     const parseJsonField = (field: string | null): string[] => {
         if (!field) return [];
         try {
             const parsed = JSON.parse(field);
             return Array.isArray(parsed) ? parsed : [];
         } catch {
-            return [];
+            // If not JSON, treat as single string
+            return field ? [field] : [];
         }
     };
 
@@ -206,7 +184,6 @@ export default function QuoteEditor() {
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EMAIL</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PHONE</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">COMPANY</th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">JOB TITLE</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SERVICES</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">BUDGET</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TIMELINE</th>
@@ -217,13 +194,13 @@ export default function QuoteEditor() {
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={11} className="px-6 py-8 text-center text-sm text-gray-500">
+                                        <td colSpan={10} className="px-6 py-8 text-center text-sm text-gray-500">
                                             Loading quote submissions...
                                         </td>
                                     </tr>
                                 ) : quoteSubmissions && quoteSubmissions.length > 0 ? (
                                     quoteSubmissions.map((submission) => {
-                                        const services = parseJsonField(submission.services_required);
+                                        const fullName = `${submission.first_name} ${submission.last_name}`.trim();
                                         return (
                                             <tr key={submission.id} className={`hover:bg-gray-50 transition-colors ${!submission.is_read ? 'bg-blue-50' : 'bg-white'}`}>
                                                 <td className="px-4 py-4 whitespace-nowrap border-b border-gray-200">
@@ -235,7 +212,7 @@ export default function QuoteEditor() {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
-                                                    <div className="font-medium">{submission.full_name}</div>
+                                                    <div className="font-medium">{fullName || <span className="text-gray-400">-</span>}</div>
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
                                                     <a href={`mailto:${submission.email}`} className="text-blue-600 hover:text-blue-800 hover:underline">
@@ -254,23 +231,14 @@ export default function QuoteEditor() {
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
                                                     {submission.company_name || <span className="text-gray-400">-</span>}
                                                 </td>
-                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
-                                                    {submission.job_title || <span className="text-gray-400">-</span>}
-                                                </td>
                                                 <td className="px-4 py-4 text-sm text-gray-900 max-w-xs border-b border-gray-200">
-                                                    {services.length > 0 ? (
-                                                        <div className="truncate" title={services.join(", ")}>
-                                                            {services.slice(0, 2).join(", ")}{services.length > 2 ? "..." : ""}
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-gray-400">-</span>
-                                                    )}
+                                                    {submission.project_type || <span className="text-gray-400">-</span>}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
-                                                    {submission.estimated_budget_range || <span className="text-gray-400">-</span>}
+                                                    {submission.estimate_budget || <span className="text-gray-400">-</span>}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
-                                                    {submission.estimated_timeline || <span className="text-gray-400">-</span>}
+                                                    {submission.maximum_time_for_project || <span className="text-gray-400">-</span>}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 border-b border-gray-200">
                                                     {submission.created_at ? (
@@ -284,7 +252,7 @@ export default function QuoteEditor() {
                                                     )}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium border-b border-gray-200">
-                                                    <div className="flex gap-2 flex-wrap">
+                                                    <div className="flex flex-col gap-1">
                                                         <button
                                                             onClick={() => handleViewDetails(submission.id)}
                                                             className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded hover:bg-blue-200 transition-colors"
@@ -327,7 +295,7 @@ export default function QuoteEditor() {
                                     })
                                 ) : (
                                     <tr>
-                                        <td colSpan={11} className="px-6 py-8 text-center text-sm text-gray-500">
+                                        <td colSpan={10} className="px-6 py-8 text-center text-sm text-gray-500">
                                             No quote form submissions found
                                         </td>
                                     </tr>
@@ -390,278 +358,103 @@ export default function QuoteEditor() {
                                 </div>
                             ) : (
                                 <>
-                                    {/* Primary Contact Information */}
+                                    {/* Contact Information */}
                                     <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">1. Primary Contact Information</h3>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="text-sm font-medium text-gray-500">Full Name</label>
-                                                <p className="text-gray-900">{selectedSubmission.full_name}</p>
+                                                <label className="text-sm font-medium text-gray-500">First Name</label>
+                                                <p className="text-gray-900">{selectedSubmission.first_name || "-"}</p>
                                             </div>
                                             <div>
-                                                <label className="text-sm font-medium text-gray-500">Job Title</label>
-                                                <p className="text-gray-900">{selectedSubmission.job_title || "-"}</p>
+                                                <label className="text-sm font-medium text-gray-500">Last Name</label>
+                                                <p className="text-gray-900">{selectedSubmission.last_name || "-"}</p>
+                                            </div>
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-500">Email</label>
+                                                <p className="text-gray-900">
+                                                    <a href={`mailto:${selectedSubmission.email}`} className="text-blue-600 hover:underline">
+                                                        {selectedSubmission.email}
+                                                    </a>
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-500">Phone</label>
+                                                <p className="text-gray-900">
+                                                    {selectedSubmission.phone ? (
+                                                        <a href={`tel:${selectedSubmission.phone}`} className="text-blue-600 hover:underline">
+                                                            {selectedSubmission.phone}
+                                                        </a>
+                                                    ) : "-"}
+                                                </p>
                                             </div>
                                             <div>
                                                 <label className="text-sm font-medium text-gray-500">Company Name</label>
                                                 <p className="text-gray-900">{selectedSubmission.company_name || "-"}</p>
                                             </div>
                                             <div>
-                                                <label className="text-sm font-medium text-gray-500">Email</label>
-                                                <p className="text-gray-900">{selectedSubmission.email}</p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Phone</label>
-                                                <p className="text-gray-900">{selectedSubmission.phone || "-"}</p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Preferred Contact Method</label>
-                                                <p className="text-gray-900">{selectedSubmission.preferred_contact_method || "-"}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Business Information */}
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">2. Business Information</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Industry Sector</label>
-                                                <p className="text-gray-900">
-                                                    {selectedSubmission.industry_sector && selectedSubmission.industry_sector.trim() 
-                                                        ? selectedSubmission.industry_sector 
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Company Size</label>
-                                                <p className="text-gray-900">
-                                                    {selectedSubmission.company_size && selectedSubmission.company_size.trim() 
-                                                        ? selectedSubmission.company_size 
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <label className="text-sm font-medium text-gray-500">Street Address</label>
-                                                <p className="text-gray-900">
-                                                    {selectedSubmission.street_address && selectedSubmission.street_address.trim() 
-                                                        ? selectedSubmission.street_address 
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">City</label>
-                                                <p className="text-gray-900">
-                                                    {selectedSubmission.city && selectedSubmission.city.trim() 
-                                                        ? selectedSubmission.city 
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">State/Province</label>
-                                                <p className="text-gray-900">
-                                                    {selectedSubmission.state_province && selectedSubmission.state_province.trim() 
-                                                        ? selectedSubmission.state_province 
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Postal Code</label>
-                                                <p className="text-gray-900">
-                                                    {selectedSubmission.postal_code && selectedSubmission.postal_code.trim() 
-                                                        ? selectedSubmission.postal_code 
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                            <div>
                                                 <label className="text-sm font-medium text-gray-500">Country</label>
-                                                <p className="text-gray-900">
-                                                    {selectedSubmission.country && selectedSubmission.country.trim() 
-                                                        ? selectedSubmission.country 
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Business Website</label>
-                                                <p className="text-gray-900">
-                                                    {selectedSubmission.business_website && selectedSubmission.business_website.trim() ? (
-                                                        <a href={selectedSubmission.business_website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                                            {selectedSubmission.business_website}
-                                                        </a>
-                                                    ) : "-"}
-                                                </p>
+                                                <p className="text-gray-900">{selectedSubmission.country || "-"}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Services Required */}
+                                    {/* Project Information */}
                                     <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">3. Services Required</h3>
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-500">Services</label>
-                                            <p className="text-gray-900">
-                                                {parseJsonField(selectedSubmission.services_required).length > 0
-                                                    ? parseJsonField(selectedSubmission.services_required).join(", ")
-                                                    : "-"}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Technology Stack */}
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">4. Technology Stack</h3>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Information</h3>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Frontend Technologies</label>
-                                                <p className="text-gray-900">
-                                                    {parseJsonField(selectedSubmission.frontend_technologies).length > 0
-                                                        ? parseJsonField(selectedSubmission.frontend_technologies).join(", ")
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Backend Technologies</label>
-                                                <p className="text-gray-900">
-                                                    {parseJsonField(selectedSubmission.backend_technologies).length > 0
-                                                        ? parseJsonField(selectedSubmission.backend_technologies).join(", ")
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Database Preference</label>
-                                                <p className="text-gray-900">{selectedSubmission.database_preference || "-"}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Domain & Hosting */}
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">5. Domain & Hosting</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Domain Name Ownership</label>
-                                                <p className="text-gray-900">{selectedSubmission.domain_name_ownership || "-"}</p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Hosting Services Availability</label>
-                                                <p className="text-gray-900">{selectedSubmission.hosting_services_availability || "-"}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Product Interest */}
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">6. Product Interest</h3>
-                                        <div>
-                                            <label className="text-sm font-medium text-gray-500">Ready-Made Product Interest</label>
-                                            <p className="text-gray-900">{selectedSubmission.ready_made_product_interest || "-"}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Custom Development */}
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">7. Custom Development</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Custom Development Requirement</label>
-                                                <p className="text-gray-900">{selectedSubmission.custom_development_requirement || "-"}</p>
-                                            </div>
                                             <div>
                                                 <label className="text-sm font-medium text-gray-500">Project Type</label>
                                                 <p className="text-gray-900">{selectedSubmission.project_type || "-"}</p>
                                             </div>
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-500">Estimate Budget</label>
+                                                <p className="text-gray-900">{selectedSubmission.estimate_budget || "-"}</p>
+                                            </div>
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-500">Maximum Time for Project</label>
+                                                <p className="text-gray-900">{selectedSubmission.maximum_time_for_project || "-"}</p>
+                                            </div>
                                             <div className="md:col-span-2">
-                                                <label className="text-sm font-medium text-gray-500">Brief Project Description</label>
-                                                <p className="text-gray-900 whitespace-pre-wrap">{selectedSubmission.brief_project_description || "-"}</p>
+                                                <label className="text-sm font-medium text-gray-500">Required Skills</label>
+                                                <p className="text-gray-900 whitespace-pre-wrap">{selectedSubmission.required_skills || "-"}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Project Scope */}
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">8. Project Scope</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Message */}
+                                    {selectedSubmission.message && (
+                                        <div className="border-b border-gray-200 pb-4">
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Message</h3>
                                             <div>
-                                                <label className="text-sm font-medium text-gray-500">Primary Objective</label>
-                                                <p className="text-gray-900">{selectedSubmission.primary_objective || "-"}</p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Estimated Timeline</label>
-                                                <p className="text-gray-900">{selectedSubmission.estimated_timeline || "-"}</p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Estimated Budget Range</label>
-                                                <p className="text-gray-900">{selectedSubmission.estimated_budget_range || "-"}</p>
+                                                <p className="text-gray-900 whitespace-pre-wrap">{selectedSubmission.message}</p>
                                             </div>
                                         </div>
-                                    </div>
+                                    )}
 
-                                    {/* Technical Requirements */}
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">9. Technical Requirements</h3>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Required Integrations</label>
-                                                <p className="text-gray-900 whitespace-pre-wrap">{selectedSubmission.required_integrations || "-"}</p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Security/Compliance Requirements</label>
-                                                <p className="text-gray-900">
-                                                    {parseJsonField(selectedSubmission.security_compliance_requirements).length > 0
-                                                        ? parseJsonField(selectedSubmission.security_compliance_requirements).join(", ")
-                                                        : "-"}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Post-Launch */}
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">10. Post-Launch & Partnership</h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Ongoing Maintenance Support</label>
-                                                <p className="text-gray-900">{selectedSubmission.ongoing_maintenance_support || "-"}</p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Long-Term Partnership</label>
-                                                <p className="text-gray-900">{selectedSubmission.long_term_partnership || "-"}</p>
+                                    {/* Uploaded Files */}
+                                    {selectedSubmission.uploaded_files && parseJsonField(selectedSubmission.uploaded_files).length > 0 && (
+                                        <div className="border-b border-gray-200 pb-4">
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Uploaded Files</h3>
+                                            <div className="space-y-2">
+                                                {parseJsonField(selectedSubmission.uploaded_files).map((file, index) => {
+                                                    const filePath = file.startsWith('http') ? file : `http://localhost:8000/storage/${file}`;
+                                                    const fileName = file.includes('/') ? file.split('/').pop() : file;
+                                                    return (
+                                                        <a
+                                                            key={index}
+                                                            href={filePath}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="block text-blue-600 hover:underline"
+                                                        >
+                                                            {fileName}
+                                                        </a>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
-                                    </div>
-
-                                    {/* Additional Information */}
-                                    <div className="border-b border-gray-200 pb-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-4">11. Additional Information</h3>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">How Did You Hear About Us</label>
-                                                <p className="text-gray-900">{selectedSubmission.how_did_you_hear || "-"}</p>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium text-gray-500">Additional Message</label>
-                                                <p className="text-gray-900 whitespace-pre-wrap">{selectedSubmission.message || "-"}</p>
-                                            </div>
-                                            {selectedSubmission.uploaded_files && parseJsonField(selectedSubmission.uploaded_files).length > 0 && (
-                                                <div>
-                                                    <label className="text-sm font-medium text-gray-500">Uploaded Files</label>
-                                                    <div className="mt-2 space-y-1">
-                                                        {parseJsonField(selectedSubmission.uploaded_files).map((file, index) => (
-                                                            <a
-                                                                key={index}
-                                                                href={`http://localhost:8000/storage/${file}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="block text-blue-600 hover:underline"
-                                                            >
-                                                                {file.split('/').pop()}
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                    )}
 
                                     {/* Submission Info */}
                                     <div>

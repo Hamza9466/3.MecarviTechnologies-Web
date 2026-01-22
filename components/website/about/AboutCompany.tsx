@@ -97,7 +97,7 @@ export default function AboutCompany() {
         </div>
 
         {/* Right Panel - Light Blue Background with Text */}
-        <div className="bg-blue-100 p-8 md:p-12 lg:p-16 flex items-start pt-8 lg:pt-12 w-full">
+        <div className="bg-blue-100 p-8 md:p-12 lg:p-16 flex items-start w-full">
           <div className="w-full max-w-2xl ml-4 md:ml-8 lg:ml-22">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-4 sm:mb-6 md:mb-8">
               {displayData.company_title}
