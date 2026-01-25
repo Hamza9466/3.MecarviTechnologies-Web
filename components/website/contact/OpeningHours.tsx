@@ -49,7 +49,7 @@ export default function HoursOfOperation() {
                                 }
                             }
                         }
-                        
+
                         // Set hours
                         if (data.data.hours_of_operation) {
                             const activeHours = data.data.hours_of_operation
@@ -83,52 +83,72 @@ export default function HoursOfOperation() {
 
     const renderHoursItem = (hour: HoursOfOperation) => {
         return (
-            <div key={hour.id} className="px-6 lg:border-l lg:border-white/40 first:border-l-0">
-                <h3 className="font-semibold mb-4">{hour.category_title}:</h3>
-                <ul className="space-y-2 text-sm opacity-90">
+            <div key={hour.id} className="bg-white p-8 rounded-4xl border-12 border-[#F0ECF8] shadow-sm transition-all duration-300 hover:shadow-md flex flex-col w-full max-w-[360px] mx-auto">
+                {/* Title with Gradient Background like in image */}
+                <div className="mb-6">
+                    <div className="inline-block bg-linear-to-r from-indigo-600 to-pink-500 px-6 py-2 rounded-full shadow-md">
+                        <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                            {hour.category_title.replace(':', '')}
+                        </h3>
+                    </div>
+                </div>
+
+                {/* Divider line like in image */}
+                <div className="w-full h-px bg-gray-300 mb-6"></div>
+
+                {/* Hours List */}
+                <ul className="grid grid-cols-2 gap-x-4 gap-y-4">
                     {hour.monday_friday_hours && (
-                        <li>Monday - Friday: {hour.monday_friday_hours}</li>
+                        <li className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Monday - Friday</span>
+                            <span className="text-sm font-medium text-gray-700">{hour.monday_friday_hours}</span>
+                        </li>
                     )}
                     {hour.saturday_hours && (
-                        <li>Saturday: {hour.saturday_hours}</li>
+                        <li className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Saturday</span>
+                            <span className="text-sm font-medium text-gray-700">{hour.saturday_hours}</span>
+                        </li>
                     )}
-                    {hour.sunday_hours ? (
-                        <li>Sunday: {hour.sunday_hours}</li>
-                    ) : hour.sunday_status ? (
-                        <li>Sunday: {hour.sunday_status}</li>
-                    ) : null}
-                    {hour.public_holidays_hours ? (
-                        <li>Public Holidays: {hour.public_holidays_hours}</li>
-                    ) : hour.public_holidays_status ? (
-                        <li>Public Holidays: {hour.public_holidays_status}</li>
-                    ) : null}
+                    {(hour.sunday_hours || hour.sunday_status) && (
+                        <li className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Sunday</span>
+                            <span className="text-sm font-medium text-gray-700">{hour.sunday_hours || hour.sunday_status}</span>
+                        </li>
+                    )}
+                    {(hour.public_holidays_hours || hour.public_holidays_status) && (
+                        <li className="flex flex-col gap-0.5">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Public Holidays</span>
+                            <span className="text-sm font-medium text-gray-700">{hour.public_holidays_hours || hour.public_holidays_status}</span>
+                        </li>
+                    )}
                 </ul>
             </div>
         );
     };
 
     return (
-        <section className="w-full bg-gradient-to-r from-pink-600 to-pink-500 h-[550px] ms-15  lg:w-[92%] ">
-            <div className=" mx-auto px-6 py-24 text-white">
-
+        <section className="w-full bg-[#F0EFEB] pt-12 pb-12 relative z-10 flex justify-center">
+            <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Title */}
-                <h2 className="text-center text-2xl font-semibold mb-12">
-                    {sectionTitle}:
+                <h2 className="text-center text-3xl font-bold text-gray-900 mb-16 relative">
+                    {sectionTitle}
+                    <span className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 w-16 h-1 bg-linear-to-r from-indigo-600 to-pink-500 rounded-full"></span>
                 </h2>
 
                 {/* Grid */}
                 {loading ? (
-                    <div className="text-center py-8">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                        <p className="mt-4 text-white/80">Loading hours of operation...</p>
+                    <div className="text-center py-20">
+                        <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+                        <p className="mt-4 text-gray-500 font-medium">Loading hours of operation...</p>
                     </div>
                 ) : hours.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 justify-items-center">
                         {hours.map((hour) => renderHoursItem(hour))}
                     </div>
                 ) : (
-                    <div className="text-center py-8 text-white/80">
-                        <p>No hours of operation available.</p>
+                    <div className="text-center py-12 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                        <p className="text-gray-500 text-sm font-medium">No hours of operation available.</p>
                     </div>
                 )}
             </div>

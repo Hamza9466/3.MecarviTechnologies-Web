@@ -3,49 +3,49 @@
 import { useState, useEffect } from "react";
 
 interface SocialMediaSection {
-    id: number;
-    heading: string | null;
-    description: string | null;
-    is_active: boolean;
+  id: number;
+  heading: string | null;
+  description: string | null;
+  is_active: boolean;
 }
 
 interface SocialLink {
-    id: number;
-    platform_name: string;
-    platform_url: string;
-    icon: string | null;
-    is_active: boolean;
-    sort_order: number;
+  id: number;
+  platform_name: string;
+  platform_url: string;
+  icon: string | null;
+  is_active: boolean;
+  sort_order: number;
 }
 
 // Default colors for social platforms
 const getPlatformColor = (platformName: string): string => {
-    const name = platformName.toLowerCase();
-    if (name.includes('facebook')) return '#1877F2';
-    if (name.includes('instagram')) return '#E4405F';
-    if (name.includes('tiktok')) return '#000000';
-    if (name.includes('youtube')) return '#FF0000';
-    if (name.includes('linkedin')) return '#0077B5';
-    if (name.includes('twitter') || name.includes('x')) return '#1DA1F2';
-    return '#6366F1'; // Default color
+  const name = platformName.toLowerCase();
+  if (name.includes('facebook')) return '#1877F2';
+  if (name.includes('instagram')) return '#E4405F';
+  if (name.includes('tiktok')) return '#000000';
+  if (name.includes('youtube')) return '#FF0000';
+  if (name.includes('linkedin')) return '#0077B5';
+  if (name.includes('twitter') || name.includes('x')) return '#1DA1F2';
+  return '#6366F1'; // Default color
 };
 
 // Helper function to get image URL
 const getImageUrl = (iconPath: string | null | undefined): string | null => {
-    if (!iconPath) return null;
-    if (iconPath.startsWith('http://') || iconPath.startsWith('https://')) {
-        return iconPath;
-    }
-    // Remove leading '/storage/' or 'storage/' if present
-    let cleanPath = iconPath;
-    if (cleanPath.startsWith('/storage/')) {
-        cleanPath = cleanPath.substring(9);
-    } else if (cleanPath.startsWith('storage/')) {
-        cleanPath = cleanPath.substring(8);
-    }
-    // Remove leading slash if present
-    cleanPath = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
-    return `http://localhost:8000/storage/${cleanPath}`;
+  if (!iconPath) return null;
+  if (iconPath.startsWith('http://') || iconPath.startsWith('https://')) {
+    return iconPath;
+  }
+  // Remove leading '/storage/' or 'storage/' if present
+  let cleanPath = iconPath;
+  if (cleanPath.startsWith('/storage/')) {
+    cleanPath = cleanPath.substring(9);
+  } else if (cleanPath.startsWith('storage/')) {
+    cleanPath = cleanPath.substring(8);
+  }
+  // Remove leading slash if present
+  cleanPath = cleanPath.startsWith('/') ? cleanPath.substring(1) : cleanPath;
+  return `http://localhost:8000/storage/${cleanPath}`;
 };
 
 export default function ContactCTA() {
@@ -110,9 +110,9 @@ export default function ContactCTA() {
   const description = section?.description || "Join the Mecarvi Prints family - we'd love to connect with you! Follow us on social media to share your feedback, engage with our community, stay in the loop with important updates, giveaways, special offers and so much more.";
 
   return (
-    <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 lg:mt-[-150px]">
-      <div className="max-w-[95%] mx-auto">
-        <div className="bg-gradient-to-r from-[#FBE8F4] to-[#DFF2F7] rounded-lg p-8 md:p-10 lg:p-12">
+    <section className="bg-white pt-15 pb-4 sm:pb-6 md:pb-8 px-1   sm:px-2 md:px-4 lg:px-6">
+      <div className="max-w-[95%] mx-auto ">
+        <div className="bg-gradient-to-r from-[#FBE8F4] to-[#DFF2F7] rounded-lg pt-4 pb-4 px-8 md:pt-6 md:pb-6 md:px-10 lg:pt-8 lg:pb-8 lg:px-12">
           <div className="text-left w-full">
             {loading ? (
               <div className="text-center py-8">
@@ -124,13 +124,13 @@ export default function ContactCTA() {
                 <h2 className="text-3xl sm:text-4xl md:text-3xl font-bold text-black mb-6">
                   {heading}
                 </h2>
-                <p className="text-black text-sm md:text-base leading-relaxed mb-8" style={{ width: '45%' }}>
+                <p className="text-black text-sm md:text-base leading-relaxed mb-8 max-w-2xl">
                   {description}
                 </p>
 
                 {/* Social Media Icons */}
                 {links.length > 0 ? (
-                  <div className="flex justify-start space-x-4 mb-8 flex-wrap gap-4">
+                  <div className="flex justify-start mb-8 flex-wrap gap-6 sm:gap-8">
                     {links.map((link) => {
                       const iconUrl = getImageUrl(link.icon);
                       const platformColor = getPlatformColor(link.platform_name);
@@ -142,8 +142,8 @@ export default function ContactCTA() {
                           href={link.platform_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="relative w-full h-[107px] cursor-pointer block"
-                          style={{ perspective: '1000px', maxWidth: '120px' }}
+                          className="relative w-full h-[107px] cursor-pointer block mx-auto sm:mx-0"
+                          style={{ perspective: '1000px', maxWidth: '190px', width: '100%' }}
                           onMouseEnter={() => setHoveredCard(cardId)}
                           onMouseLeave={() => setHoveredCard(null)}
                         >
@@ -156,7 +156,7 @@ export default function ContactCTA() {
                           >
                             {/* Front of card */}
                             <div
-                              className="absolute inset-0 w-full h-full bg-white rounded-[10px] flex flex-col items-center justify-center backface-hidden"
+                              className="absolute inset-0 w-full h-full bg-white rounded-[10px] flex flex-col items-center justify-center backface-hidden shadow-lg"
                               style={{
                                 backfaceVisibility: 'hidden',
                                 WebkitBackfaceVisibility: 'hidden'
@@ -176,7 +176,7 @@ export default function ContactCTA() {
 
                             {/* Back of card */}
                             <div
-                              className="absolute inset-0 w-full h-full rounded-[10px] flex flex-col items-center justify-center backface-hidden"
+                              className="absolute inset-0 w-full h-full rounded-[10px] flex flex-col items-center justify-center backface-hidden shadow-xl"
                               style={{
                                 backfaceVisibility: 'hidden',
                                 WebkitBackfaceVisibility: 'hidden',

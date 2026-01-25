@@ -395,6 +395,10 @@ export default function ContactEditor() {
     const getImageUrl = (iconPath: string | null | undefined): string | null => {
         if (!iconPath) return null;
         if (iconPath.startsWith('http://') || iconPath.startsWith('https://')) {
+            // Fix localhost URLs that might be missing port
+            if (iconPath.startsWith('http://localhost/storage/') || iconPath.startsWith('http://localhost/')) {
+                return iconPath.replace('http://localhost/', 'http://localhost:8000/');
+            }
             return iconPath;
         }
         // Remove leading '/storage/' or 'storage/' if present to avoid double paths
@@ -563,13 +567,17 @@ export default function ContactEditor() {
             if (card) {
                 // Update existing card
                 console.log(`Updating card ID: ${card.id}`);
-                await updateCard(card.id, cardPayload, data.iconFile || undefined);
-                setCardSuccess((prev) => ({ ...prev, [cardType]: 'Card updated successfully!' }));
+                const result = await updateCard(card.id, cardPayload, data.iconFile || undefined);
+                if (result?.success) {
+                    setCardSuccess((prev) => ({ ...prev, [cardType]: 'Card updated successfully!' }));
+                }
             } else {
                 // Create new card
                 console.log(`Creating new ${cardType} card`);
-                await createCard(cardPayload, data.iconFile || undefined);
-                setCardSuccess((prev) => ({ ...prev, [cardType]: 'Card created successfully!' }));
+                const result = await createCard(cardPayload, data.iconFile || undefined);
+                if (result?.success) {
+                    setCardSuccess((prev) => ({ ...prev, [cardType]: 'Card created successfully!' }));
+                }
             }
 
             // Refresh cards
@@ -1013,19 +1021,23 @@ export default function ContactEditor() {
             };
 
             if (linkId === 'new') {
-                await createSocialLink(payload, data.iconFile || undefined);
-                setSocialLinkSuccess((prev) => ({ ...prev, [linkId]: 'Social link created successfully!' }));
-                // Reset new link form
-                setNewSocialLinkData({
-                    platform_name: "",
-                    platform_url: "",
-                    iconFile: null,
-                    is_active: true,
-                    sort_order: socialLinks.length,
-                });
+                const result = await createSocialLink(payload, data.iconFile || undefined);
+                if (result?.success) {
+                    setSocialLinkSuccess((prev) => ({ ...prev, [linkId]: 'Social link created successfully!' }));
+                    // Reset new link form
+                    setNewSocialLinkData({
+                        platform_name: "",
+                        platform_url: "",
+                        iconFile: null,
+                        is_active: true,
+                        sort_order: socialLinks.length,
+                    });
+                }
             } else {
-                await updateSocialLink(linkId, payload, data.iconFile || undefined);
-                setSocialLinkSuccess((prev) => ({ ...prev, [linkId]: 'Social link updated successfully!' }));
+                const result = await updateSocialLink(linkId, payload, data.iconFile || undefined);
+                if (result?.success) {
+                    setSocialLinkSuccess((prev) => ({ ...prev, [linkId]: 'Social link updated successfully!' }));
+                }
             }
 
             // Refresh links
@@ -1334,6 +1346,10 @@ export default function ContactEditor() {
             }
 
             const formData = new FormData();
+            
+            // Laravel Method Spoofing for PUT request with files
+            formData.append('_method', 'PUT');
+
             if (memberData.first_name !== undefined) {
                 formData.append("first_name", memberData.first_name.trim());
             }
@@ -1354,7 +1370,7 @@ export default function ContactEditor() {
             }
 
             const response = await fetch(`http://localhost:8000/api/v1/team-members/${id}`, {
-                method: "PUT",
+                method: "POST",
                 headers: {
                     "Accept": "application/json",
                     "Authorization": `Bearer ${token}`,
@@ -1461,7 +1477,7 @@ export default function ContactEditor() {
 
             if (editingTeamMemberId !== null) {
                 // Update existing member
-                await updateTeamMember(editingTeamMemberId, {
+                const result = await updateTeamMember(editingTeamMemberId, {
                     first_name: currentTeamMember.first_name,
                     last_name: currentTeamMember.last_name,
                     role: currentTeamMember.role,
@@ -1469,10 +1485,12 @@ export default function ContactEditor() {
                     picture: currentTeamMember.picture,
                     order: currentTeamMember.order,
                 });
-                setTeamMemberSuccess("Team member updated successfully!");
+                if (result) {
+                    setTeamMemberSuccess("Team member updated successfully!");
+                }
             } else {
                 // Create new member
-                await createTeamMember({
+                const result = await createTeamMember({
                     first_name: currentTeamMember.first_name,
                     last_name: currentTeamMember.last_name,
                     role: currentTeamMember.role,
@@ -1480,7 +1498,9 @@ export default function ContactEditor() {
                     picture: currentTeamMember.picture,
                     order: currentTeamMember.order,
                 });
-                setTeamMemberSuccess("Team member created successfully!");
+                if (result) {
+                    setTeamMemberSuccess("Team member created successfully!");
+                }
             }
 
             // Reset form

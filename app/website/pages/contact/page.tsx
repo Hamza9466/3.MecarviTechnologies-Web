@@ -11,9 +11,7 @@ export default function Contact() {
       <Header />
       <ContactHero />
       <ContactForm />
-      <div className="bg-[#F0EFEB] py-8 -mt-20">
-        <OpeningHours />
-      </div>
+      <OpeningHours />
       <ContactCTA />
       <Footer />
     </main>

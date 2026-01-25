@@ -241,6 +241,9 @@ export function useContactPageCards() {
 
             const formData = new FormData();
 
+            // Laravel Method Spoofing for PUT request with files
+            formData.append('_method', 'PUT');
+
             // Add card_type if provided (for updates, it's optional)
             if (cardData.card_type) {
                 formData.append('card_type', cardData.card_type);
@@ -305,7 +308,7 @@ export function useContactPageCards() {
                 console.log(`  ${key}:`, value instanceof File ? value.name : value);
             }
 
-            const response = await fetch(`http://localhost:8000/api/v1/contact-page-cards/${id}/update`, {
+            const response = await fetch(`http://localhost:8000/api/v1/contact-page-cards/${id}`, {
                 method: "POST",
                 headers: {
                     "Accept": "application/json",

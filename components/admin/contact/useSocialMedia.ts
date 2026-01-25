@@ -231,6 +231,9 @@ export function useSocialMedia() {
 
             const formData = new FormData();
             
+            // Laravel Method Spoofing for PUT request with files
+            formData.append('_method', 'PUT');
+            
             // Only append fields that have non-empty, non-null values
             if (linkData.platform_name && linkData.platform_name.trim()) {
                 formData.append('platform_name', linkData.platform_name.trim());
@@ -248,7 +251,7 @@ export function useSocialMedia() {
                 formData.append('icon', iconFile);
             }
 
-            const response = await fetch(`http://localhost:8000/api/v1/social-links/${id}/update`, {
+            const response = await fetch(`http://localhost:8000/api/v1/social-links/${id}`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,

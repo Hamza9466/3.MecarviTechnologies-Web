@@ -57,7 +57,7 @@ export default function ContactForm() {
   const [cardsLoading, setCardsLoading] = useState(true);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [teamMembersLoading, setTeamMembersLoading] = useState(false);
-  
+
   const [formData, setFormData] = useState<ContactFormData>({
     first_name: "",
     last_name: "",
@@ -103,7 +103,7 @@ export default function ContactForm() {
     try {
       setCardsLoading(true);
       console.log("ContactForm: Fetching contact cards from API...");
-      
+
       const response = await fetch("http://localhost:8000/api/v1/contact-page-cards", {
         method: "GET",
         headers: {
@@ -116,11 +116,11 @@ export default function ContactForm() {
       if (response.ok) {
         const data = await response.json();
         console.log("ContactForm: Contact cards API response data:", data);
-        
+
         if (data.success && data.data?.contact_cards) {
           // Filter only active cards
           const activeCards = data.data.contact_cards.filter((card: ContactPageCard) => card.is_active);
-          
+
           // Define the desired order for card types
           const cardTypeOrder: { [key: string]: number } = {
             'call': 1,
@@ -130,7 +130,7 @@ export default function ContactForm() {
             'store_hours': 5,
             'online_hours': 6,
           };
-          
+
           // Sort by card type order first, then by sort_order
           const sortedCards = activeCards.sort((a: ContactPageCard, b: ContactPageCard) => {
             const orderA = cardTypeOrder[a.card_type] || 999;
@@ -140,7 +140,7 @@ export default function ContactForm() {
             }
             return a.sort_order - b.sort_order;
           });
-          
+
           console.log("ContactForm: Active cards found:", sortedCards.length, sortedCards);
           setContactCards(sortedCards);
         } else {
@@ -166,13 +166,13 @@ export default function ContactForm() {
       try {
         setHeroLoading(true);
         console.log("ContactForm: Fetching hero section from API...");
-        
+
         // Try with authentication token first
         const token = localStorage.getItem("token");
         const headers: HeadersInit = {
           "Accept": "application/json",
         };
-        
+
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
         }
@@ -194,7 +194,7 @@ export default function ContactForm() {
             heroSectionsLength: data.data?.hero_sections?.length || 0,
             fullData: data
           });
-          
+
           if (data.success && data.data?.hero_sections?.length > 0) {
             // Get the first active hero section or the first one
             const activeSection = data.data.hero_sections.find(
@@ -283,66 +283,64 @@ export default function ContactForm() {
     const iconUrl = getImageUrl(card.icon);
     const badgeTitle = card.badge_title || card.card_type.charAt(0).toUpperCase() + card.card_type.slice(1).replace('_', ' ');
     const label = card.label || '';
-    
+
     // Determine card height based on type
     const isHoursCard = card.card_type === 'store_hours' || card.card_type === 'online_hours';
-    const cardHeight = isHoursCard ? '180px' : '160px';
+    const cardHeight = '260px';
 
     return (
-      <div 
-        key={card.id} 
-        className="bg-white p-4 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition-shadow" 
-        style={{ width: '300px', height: cardHeight }}
+      <div
+        key={card.id}
+        className="bg-white p-6 rounded-4xl border-12 border-[#F0ECF8] shadow-xl transition-all duration-300 hover:shadow-2xl flex flex-col w-full max-w-[320px] mx-auto sm:mx-0"
+        style={{ height: cardHeight }}
       >
-        <div className="relative">
-          <button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold py-2 px-6 rounded-full mb-3 hover:from-pink-600 hover:to-purple-700 transition-all">
-            {badgeTitle}
-          </button>
-          {card.secondary_badge && (
-            <div className="absolute top-0 right-0">
-              <button 
-                onClick={() => {
-                  if (card.card_type === 'email') {
-                    setShowEmailPopup(true);
-                  }
-                }}
-                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs px-3 py-1 rounded-full hover:from-pink-600 hover:to-purple-700 transition-all"
-              >
-                {card.secondary_badge}
-              </button>
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-indigo-600 shrink-0">
+              {iconUrl ? (
+                <img
+                  src={iconUrl}
+                  alt={badgeTitle}
+                  className="w-6 h-6 object-contain"
+                  style={{ color: '#7E70E5' }}
+                  onError={(e) => {
+                    console.error("Image failed to load:", iconUrl);
+                    // Hide the image and show SVG fallback
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
+                />
+              ) : (
+                <svg className="w-6 h-6" style={{ color: '#7E70E5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {getDefaultIcon(card.card_type)}
+                </svg>
+              )}
             </div>
+            {label && (
+              <h4 className="text-gray-900 font-bold text-lg" style={{ fontFamily: 'Montserrat', fontWeight: 700 }}>
+                {label}:
+              </h4>
+            )}
+          </div>
+
+          {card.secondary_badge && (
+            <button
+              onClick={() => {
+                if (card.card_type === 'email') {
+                  setShowEmailPopup(true);
+                }
+              }}
+              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[10px] px-3 py-1 rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-semibold shadow-sm uppercase tracking-wider"
+            >
+              {card.secondary_badge}
+            </button>
           )}
         </div>
 
-        <div className="w-full h-px bg-gray-200 mb-3"></div>
+        <div className="w-full h-px bg-gray-300 mb-4"></div>
 
-        <div className="flex items-start space-x-3">
-          <div className="w-10 h-10 flex items-start justify-center flex-shrink-0 pt-1">
-            {iconUrl ? (
-              <img 
-                src={iconUrl} 
-                alt={badgeTitle} 
-                className="w-5 h-5 object-contain"
-                style={{ color: '#7E70E5' }}
-                onError={(e) => {
-                  console.error("Image failed to load:", iconUrl);
-                  // Hide the image and show SVG fallback
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
-              />
-            ) : (
-              <svg className="w-5 h-5" style={{ color: '#7E70E5' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {getDefaultIcon(card.card_type)}
-              </svg>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            {label && (
-              <h4 className="text-gray-900 font-bold text-sm" style={{ fontFamily: 'Montserrat', fontWeight: 600 }}>
-                {label}
-              </h4>
-            )}
+        <div className="flex-1 min-w-0">
+          <div className="space-y-1">
             {renderCardContent(card)}
           </div>
         </div>
@@ -379,29 +377,29 @@ export default function ContactForm() {
         return (
           <>
             {card.phone_number_1 && (
-              <p className="text-gray-600 text-xs mt-1 truncate">{card.phone_number_1}</p>
+              <p className="text-gray-600 text-[15px] truncate font-medium">{card.phone_number_1}</p>
             )}
             {card.phone_number_2 && (
-              <p className="text-gray-600 text-xs truncate">{card.phone_number_2}</p>
+              <p className="text-gray-600 text-[15px] truncate font-medium">{card.phone_number_2}</p>
             )}
           </>
         );
       case 'fax':
         return card.fax_number ? (
-          <p className="text-gray-600 text-xs mt-1 truncate">{card.fax_number}</p>
+          <p className="text-gray-600 text-[15px] truncate font-medium">{card.fax_number}</p>
         ) : null;
       case 'email':
         return card.email_address ? (
-          <p className="text-gray-600 text-xs mt-1 truncate">{card.email_address}</p>
+          <p className="text-gray-600 text-[15px] truncate font-medium">{card.email_address}</p>
         ) : null;
       case 'visit':
         return (
           <>
             {card.street_address && (
-              <p className="text-gray-600 text-xs mt-1 truncate">{card.street_address}</p>
+              <p className="text-gray-600 text-[15px] truncate font-medium">{card.street_address}</p>
             )}
             {(card.state_postal_code || card.country) && (
-              <p className="text-gray-600 text-xs truncate">
+              <p className="text-gray-600 text-[15px] truncate font-medium">
                 {[card.state_postal_code, card.country].filter(Boolean).join(', ')}
               </p>
             )}
@@ -412,13 +410,13 @@ export default function ContactForm() {
         return (
           <>
             {card.monday_friday_hours && (
-              <p className="text-gray-600 text-xs mt-1">Monday-Friday: {card.monday_friday_hours}</p>
+              <p className="text-gray-600 text-[15px] font-medium">Monday-Friday: {card.monday_friday_hours}</p>
             )}
             {card.saturday_hours && (
-              <p className="text-gray-600 text-xs">Saturday: {card.saturday_hours}</p>
+              <p className="text-gray-600 text-[15px] font-medium">Saturday: {card.saturday_hours}</p>
             )}
             {card.sunday_hours && (
-              <p className="text-gray-600 text-xs">Sunday: {card.sunday_hours}</p>
+              <p className="text-gray-600 text-[15px] font-medium">Sunday: {card.sunday_hours}</p>
             )}
           </>
         );
@@ -522,9 +520,9 @@ export default function ContactForm() {
 
   return (
     <>
-      <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 lg:mt-[-70px]">
+      <section className="bg-white pt-16 sm:pt-20 md:pt-24 pb-15 px-1 sm:px-2 md:px-4 lg:px-6 lg:mt-[-70px]">
         <div className="max-w-[95%] mx-auto">
-          <div className="rounded-lg p-8 md:p-10 lg:p-12">
+          <div className="rounded-lg p-8 md:p-10 lg:pt-12 lg:px-12 lg:pb-0">
             {/* Section Header */}
             <div className="text-center mb-12">
               {heroLoading ? (
@@ -551,7 +549,7 @@ export default function ContactForm() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 items-start">
               {/* Left Column - Contact Info with 6 Boxes */}
               <div className="space-y-0">
                 <div>
@@ -567,23 +565,17 @@ export default function ContactForm() {
                     <p className="ml-4 text-gray-600">Loading contact cards...</p>
                   </div>
                 ) : contactCards.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="flex flex-col gap-y-4">
                     {/* Row 1: First 2 cards */}
                     {contactCards.length > 0 && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
                         {contactCards.slice(0, 2).map((card) => renderContactCard(card))}
                       </div>
                     )}
                     {/* Row 2: Next 2 cards */}
                     {contactCards.length > 2 && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
                         {contactCards.slice(2, 4).map((card) => renderContactCard(card))}
-                      </div>
-                    )}
-                    {/* Row 3: Last 2 cards */}
-                    {contactCards.length > 4 && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {contactCards.slice(4, 6).map((card) => renderContactCard(card))}
                       </div>
                     )}
                   </div>
@@ -595,7 +587,7 @@ export default function ContactForm() {
               </div>
 
               {/* Right Column - Contact Form */}
-              <div className="bg-gray-50 rounded-lg p-2 md:p-3 lg:p-4 lg:mb-[60px] flex flex-col" style={{ height: '530px' }}>
+              <div className="bg-gray-50 rounded-lg p-4 sm:p-6 md:p-8 flex flex-col min-h-[530px]">
                 <h2 className="text-gray-900 text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
                   Contact Form
                 </h2>

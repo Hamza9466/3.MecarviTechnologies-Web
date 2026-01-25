@@ -62,10 +62,10 @@ export default function Services() {
       if (cardsResponse.ok) {
         const cardsData = await cardsResponse.json();
         if (cardsData.success && cardsData.data) {
-          const cards = Array.isArray(cardsData.data) 
-            ? cardsData.data 
+          const cards = Array.isArray(cardsData.data)
+            ? cardsData.data
             : (cardsData.data.service_cards || []);
-          
+
           // Sort by order field
           const sortedCards = cards
             .map((card: any) => ({
@@ -76,7 +76,7 @@ export default function Services() {
               order: card.order || 0,
             }))
             .sort((a: ServiceCard, b: ServiceCard) => a.order - b.order);
-          
+
           setServiceCards(sortedCards);
         }
       }
@@ -153,31 +153,31 @@ export default function Services() {
   }
 
   return (
-    <section 
+    <section
       className="py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden"
       style={
         section.background_image
           ? {
-              backgroundImage: `url(http://localhost:8000${section.background_image})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }
+            backgroundImage: `url(http://localhost:8000${section.background_image})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }
           : {}
       }
     >
       {/* Background color section - only show if no background image */}
       {!section.background_image && (
-        <div 
+        <div
           className="absolute top-0 left-0 w-full pointer-events-none"
-          style={{ 
-            height: '500px', 
+          style={{
+            height: '500px',
             backgroundColor: '#CEEEFA',
             zIndex: 0
           }}
         >
           {/* Bottom curved overlay */}
-          <svg 
+          <svg
             className="absolute bottom-0 left-0 w-full h-full pointer-events-none"
             preserveAspectRatio="none"
             viewBox="0 0 1200 500"
@@ -190,7 +190,7 @@ export default function Services() {
           </svg>
         </div>
       )}
-      
+
       <div className="max-w-[95%] mx-auto relative z-10">
         {/* Section Title */}
         <div className="text-center mb-12 md:mb-16">
