@@ -2,15 +2,27 @@ import React from 'react';
 import Header from '@/components/website/home/Header';
 import Footer from '@/components/website/home/Footer';
 import HeroSection from '@/components/website/service/HeroSection';
-import ServicesGrid from '@/components/website/service/ServicesGrid';
+import FeaturesSection from '@/components/website/service/FeaturesSection';
+import AnalyticsSection from '@/components/website/service/AnalyticsSection';
+import ChartSection from '@/components/website/service/ChartSection';
+import TabSection from '@/components/website/service/TabSection';
+import StatsSection from '@/components/website/service/StatsSection';
+import ShowcaseSection from '@/components/website/service/ShowcaseSection';
 import CallToAction from '@/components/website/service/CallToAction';
 
 export default function ServicePage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
-            <HeroSection />
-        
+            <div className="bg-white p-8 mt-20 rounded-2xl shadow-xl">
+                <HeroSection />
+            </div>
+            <FeaturesSection />
+            <AnalyticsSection />
+            <ChartSection />
+            <TabSection />
+            <StatsSection />
+            <ShowcaseSection />
             <Footer />
         </div>
     );

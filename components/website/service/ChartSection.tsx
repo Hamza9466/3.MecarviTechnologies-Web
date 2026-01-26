@@ -1,0 +1,78 @@
+"use client";
+
+import React from 'react';
+
+export default function ChartSection() {
+    return (
+        <section className="py-20 bg-white -mt-20">
+            <div className="container mx-auto px-4 w-[95%]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    {/* Left Content */}
+                    <div className="space-y-6 order-2 lg:order-1">
+                        <p className='text-blue-800 text-xl font-bold'>Performance metrics</p>
+                        <h2 className="text-4xl md:text-4xl font-bold text-gray-900 leading-tight max-w-lg">
+                            Track your progress with detailed analytics
+                        </h2>
+
+                        <p className="text-lg text-gray-600 leading-relaxed max-w-lg">
+                            Monitor key performance indicators and gain valuable insights into your business operations. Our comprehensive dashboard provides real-time data visualization and reporting tools to help you make informed decisions.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div className="flex items-start space-x-4">
+                                <div className="flex-shrink-0 w-7 h-7 bg-gray-200 rounded-lg flex items-center justify-center mt-1">
+                                    <svg className="w-4 h-4 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <p className="text-gray-700">Comprehensive data visualization tools</p>
+                            </div>
+
+                            <div className="flex items-start space-x-4">
+                                <div className="flex-shrink-0 w-7 h-7 bg-gray-200 rounded-lg flex items-center justify-center mt-1">
+                                    <svg className="w-4 h-4 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <p className="text-gray-700">Customizable reports and dashboards</p>
+                            </div>
+
+                            <div className="flex items-start space-x-4">
+                                <div className="flex-shrink-0 w-7 h-7 bg-gray-200 rounded-lg flex items-center justify-center mt-1">
+                                    <svg className="w-4 h-4 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <p className="text-gray-700">Real-time performance monitoring</p>
+                            </div>
+                        </div>
+
+                        <button className="text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1" style={{ backgroundColor: '#2B5BFD' }}>
+                            View Charts
+                        </button>
+                    </div>
+
+                    {/* Right Images */}
+                    <div className="space-y-6 order-1 lg:order-2">
+                        <div className="relative pl-8 pt-2 pb-2 rounded-2xl" style={{ backgroundColor: '#B3F7D5' }}>
+                            <img
+                                src="/assets/images/Chart.png"
+                                alt="Analytics Dashboard"
+                                className="w-full rounded-2xl"
+                            />
+                            <div className="absolute top-1/3 left-2/3 transform -translate-x-1/5 -translate-y-1/2 bg-white p-8 rounded-2xl shadow-lg z-10">
+                                <img
+                                    src="/assets/images/12.png"
+                                    alt="Performance Chart"
+                                    className="object-cover rounded-2xl "
+                                    style={{ width: '470px', height: '312px' }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+};
+
