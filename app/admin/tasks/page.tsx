@@ -4,40 +4,101 @@ import { useTasks } from "@/components/admin/tasks/useTasks";
 import { Task } from "@/components/admin/tasks/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState, useMemo, useEffect } from "react";
+import TaskListCard from "@/components/admin/tasks/TaskListCard";
+
+type SortOption = "name" | "date" | "priority" | "status";
 
 export default function TasksPage() {
   const router = useRouter();
   const { tasks, loading, error } = useTasks();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("name");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8; // 4 columns x 2 rows
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "todo":
-        return "bg-gray-100 text-gray-800";
-      case "in_progress":
-        return "bg-blue-100 text-blue-800";
-      case "review":
-        return "bg-yellow-100 text-yellow-800";
-      case "done":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  // Get user name from localStorage for avatar
+  const userName = typeof window !== "undefined" ? localStorage.getItem("userName") || "User" : "User";
+  const userInitial = userName.charAt(0).toUpperCase();
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "low":
-        return "bg-gray-100 text-gray-800";
-      case "medium":
-        return "bg-blue-100 text-blue-800";
-      case "high":
-        return "bg-orange-100 text-orange-800";
-      case "urgent":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  // Filter and sort tasks
+  const filteredAndSortedTasks = useMemo(() => {
+    let filtered = tasks.filter((task) => {
+      const matchesSearch =
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (task.taskId && task.taskId.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (task.projectName && task.projectName.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesSearch;
+    });
+
+    // Sort tasks
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "name":
+          return a.title.localeCompare(b.title);
+        case "date":
+          const aDate = new Date(a.startDate || a.createdAt).getTime();
+          const bDate = new Date(b.startDate || b.createdAt).getTime();
+          return bDate - aDate;
+        case "priority":
+          const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
+          const aPriority = priorityOrder[a.priority] || 1;
+          const bPriority = priorityOrder[b.priority] || 1;
+          return bPriority - aPriority;
+        case "status":
+          const statusOrder = { new: 1, todo: 2, in_progress: 3, review: 4, done: 5 };
+          const aStatus = statusOrder[a.status] || 1;
+          const bStatus = statusOrder[b.status] || 1;
+          return aStatus - bStatus;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  }, [tasks, searchQuery, sortBy]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredAndSortedTasks.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedTasks = filteredAndSortedTasks.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search or sort changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortBy]);
+
+  // Get all unique team members from all tasks for the team avatars row
+  const allTeamMembers = useMemo(() => {
+    const memberMap = new Map<number, { id: number; name: string; avatarUrl?: string }>();
+    tasks.forEach((task) => {
+      if (task.assignedTeam) {
+        task.assignedTeam.forEach((member) => {
+          if (!memberMap.has(member.id)) {
+            memberMap.set(member.id, {
+              id: member.id,
+              name: member.name,
+              avatarUrl: member.avatarUrl,
+            });
+          }
+        });
+      } else if (task.assignedTo && task.assignedToName) {
+        if (!memberMap.has(task.assignedTo)) {
+          memberMap.set(task.assignedTo, {
+            id: task.assignedTo,
+            name: task.assignedToName,
+            avatarUrl: task.assignedToAvatar,
+          });
+        }
+      }
+    });
+    return Array.from(memberMap.values());
+  }, [tasks]);
+
+  const visibleTeamMembers = allTeamMembers.slice(0, 7);
+  const additionalTeamMembers = allTeamMembers.length - 7;
 
   const handleView = (task: Task) => {
     router.push(`/admin/tasks/${task.id}`);
@@ -47,39 +108,120 @@ export default function TasksPage() {
     router.push(`/admin/tasks/edit/${task.id}`);
   };
 
+  const handleOptionsClick = (task: Task) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Could open a menu here, for now just navigate to edit
+    handleEdit(task);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Search is handled by the filteredAndSortedTasks useMemo
+  };
+
   return (
-    <div className="w-full">
-      {/* Header */}
-      <div className="bg-gray-100 px-6 py-4 mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">Tasks</h1>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/admin/tasks/kanban"
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-            </svg>
-            Kanban
-          </Link>
+    <div className="w-full bg-white min-h-screen">
+      {/* Header Section */}
+      <div className="px-6 py-6 border-b border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold text-gray-900">Tasks List</h1>
+          <div className="flex items-center gap-4">
+            {/* Breadcrumbs */}
+            <div className="text-sm text-gray-600">
+              <Link href="/admin/tasks" className="hover:text-gray-900">
+                Tasks
+              </Link>
+              <span className="mx-2">/</span>
+              <span className="text-gray-900 font-medium">Tasks List</span>
+            </div>
+            {/* User Avatar */}
+            <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-semibold">
+              {userInitial}
+            </div>
+          </div>
+        </div>
+
+        {/* Control Bar */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          {/* Left: New Task Button */}
           <Link
             href="/admin/tasks/create"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Create Task
+            New Task
           </Link>
+
+          {/* Center: Sort By Dropdown */}
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-gray-600 font-medium">Sort By:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <option value="name">Name</option>
+              <option value="date">Date</option>
+              <option value="priority">Priority</option>
+              <option value="status">Status</option>
+            </select>
+          </div>
+
+          {/* Center: Team Avatars */}
+          {allTeamMembers.length > 0 && (
+            <div className="flex items-center gap-1">
+              {visibleTeamMembers.map((member) => (
+                <div key={member.id} className="relative">
+                  {member.avatarUrl ? (
+                    <img
+                      src={member.avatarUrl}
+                      alt={member.name}
+                      className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center">
+                      <span className="text-white text-xs font-medium">
+                        {member.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {additionalTeamMembers > 0 && (
+                <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center">
+                  <span className="text-gray-600 text-xs font-medium">+{additionalTeamMembers}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Right: Search */}
+          <form onSubmit={handleSearch} className="flex items-center gap-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search Task"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+            <button
+              type="submit"
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            >
+              Search
+            </button>
+          </form>
         </div>
       </div>
 
       {/* Content */}
-      <div className="px-6">
+      <div className="px-6 py-6">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-4">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
               <p className="text-gray-600">Loading tasks...</p>
             </div>
           </div>
@@ -90,114 +232,72 @@ export default function TasksPage() {
               Note: Backend API is not available. Using mock data for frontend development.
             </p>
           </div>
-        ) : tasks.length === 0 ? (
+        ) : filteredAndSortedTasks.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <p className="text-gray-600 mb-4">No tasks found.</p>
             <p className="text-sm text-gray-500">
-              Tasks will appear here once they are created.
+              {searchQuery ? "Try adjusting your search criteria." : "Tasks will appear here once they are created."}
             </p>
-            <Link
-              href="/admin/tasks/create"
-              className="mt-4 inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-            >
-              Create Your First Task
-            </Link>
+            {!searchQuery && (
+              <Link
+                href="/admin/tasks/create"
+                className="mt-4 inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+              >
+                Create Your First Task
+              </Link>
+            )}
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Task
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Project
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Assigned To
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Priority
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Due Date
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {tasks.map((task) => (
-                  <tr
-                    key={task.id}
-                    onClick={() => handleView(task)}
-                    className="hover:bg-gray-50 cursor-pointer"
+          <>
+            {/* Task Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              {paginatedTasks.map((task) => (
+                <TaskListCard
+                  key={task.id}
+                  task={task}
+                  onClick={() => handleView(task)}
+                  onOptionsClick={handleOptionsClick(task)}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Previous
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === page
+                        ? "bg-purple-600 text-white"
+                        : "border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                    }`}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{task.title}</div>
-                      {task.description && (
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
-                          {task.description}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {task.projectName || "No Project"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {task.assignedToName || "Unassigned"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                          task.status
-                        )}`}
-                      >
-                        {task.status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityColor(
-                          task.priority
-                        )}`}
-                      >
-                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {task.dueDate
-                        ? new Date(task.dueDate).toLocaleDateString()
-                        : "No due date"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(task);
-                        }}
-                        className="text-blue-600 hover:text-blue-900 mr-4"
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
+                    {page}
+                  </button>
                 ))}
-              </tbody>
-            </table>
-          </div>
+
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
   );
 }
-
