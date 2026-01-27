@@ -4,7 +4,7 @@ import React from 'react';
 
 const AnalyticsSection: React.FC = () => {
     return (
-        <section className="py-20 -mt-20 relative overflow-hidden" style={{ backgroundColor: '#fcf5ffffon ' }}>
+        <section className="py-20 -mt-20 relative overflow-hidden" style={{ backgroundColor: '#fef6fcff ' }}>
 
             <div className="container mx-auto px-4 w-[95%] relative z-10">
                 {/* Section Title */}
