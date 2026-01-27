@@ -68,7 +68,7 @@ export default function AboutCompany() {
     <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="relative grid grid-cols-1 lg:grid-cols-[30%_1fr] gap-0 min-h-[500px] md:min-h-[600px] lg:min-h-[700px]">
         {/* Left Panel - Dark Blue Background with Logo on Mobile */}
-        <div className="bg-blue-900 p-8 md:p-12 lg:p-16 relative min-h-[300px] lg:min-h-0 flex items-center justify-center lg:block">
+        <div className="bg-blue-900 p-8 md:p-12 lg:p-16 relative min-h-[300px] lg:min-h-0 flex items-center justify-center lg:block" data-aos="fade-up">
           {/* White Panel with Logo - Visible on mobile, positioned on desktop */}
           <div className="lg:absolute lg:top-1/2 lg:left-[calc(30%-4rem)] lg:-translate-y-1/2 lg:z-20 bg-white rounded-2xl p-6 sm:p-8 md:p-10 lg:p-12 shadow-xl max-w-lg w-full max-w-[90%] sm:max-w-[85%] md:max-w-[450px] lg:w-[500px] lg:max-w-none">
             <div className="relative w-full aspect-[4/2]">
@@ -97,7 +97,7 @@ export default function AboutCompany() {
         </div>
 
         {/* Right Panel - Light Blue Background with Text */}
-        <div className="bg-blue-100 p-8 md:p-12 lg:p-16 flex items-start w-full">
+        <div className="bg-blue-100 p-8 md:p-12 lg:p-16 flex items-start w-full" data-aos="fade-up">
           <div className="w-full max-w-2xl ml-4 md:ml-8 lg:ml-22">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-4 sm:mb-6 md:mb-8">
               {displayData.company_title}

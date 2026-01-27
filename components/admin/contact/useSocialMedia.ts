@@ -50,7 +50,7 @@ export function useSocialMedia() {
             if (response.ok) {
                 const data = await response.json();
                 console.log("Social media API response data:", data);
-                
+
                 if (data.success && data.data) {
                     if (data.data.social_media_section) {
                         setSection(data.data.social_media_section);
@@ -78,16 +78,16 @@ export function useSocialMedia() {
                     console.error("Error parsing response:", e);
                     errorData = { message: `Server error (${response.status}). Please check the server logs.` };
                 }
-                let errorMessage = errorData.message || errorData.error || 
-                    (response.status === 500 
-                        ? "Internal server error (500). Please check the server logs or contact support." 
+                let errorMessage = errorData.message || errorData.error ||
+                    (response.status === 500
+                        ? "Internal server error (500). Please check the server logs or contact support."
                         : `Failed to fetch social media (${response.status})`);
-                
+
                 // Check if it's a database table missing error
                 if (errorData.error && errorData.error.includes('does not exist')) {
                     errorMessage = "Database table does not exist. Please run database migrations on the backend server.";
                 }
-                
+
                 setError(errorMessage);
                 setSection(null);
                 setLinks([]);
@@ -124,21 +124,21 @@ export function useSocialMedia() {
             console.log("Save section response status:", response.status);
             const responseData = await response.json().catch(() => ({}));
             console.log("Save section response data:", responseData);
-            
+
             if (response.ok) {
                 if (responseData.success && responseData.data?.social_media_section) {
                     setSection(responseData.data.social_media_section);
                     return { success: true, section: responseData.data.social_media_section };
                 } else {
                     const errorMsg = responseData.message || "Failed to save social media section";
-                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                         `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                     ).join('; ') : '';
                     throw new Error(validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg);
                 }
             } else {
                 const errorMsg = responseData.message || `Failed to save social media section (${response.status})`;
-                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                     `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                 ).join('; ') : '';
                 const fullError = validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg;
@@ -162,7 +162,7 @@ export function useSocialMedia() {
             }
 
             const formData = new FormData();
-            
+
             // Only append fields that have non-empty, non-null values
             if (linkData.platform_name && linkData.platform_name.trim()) {
                 formData.append('platform_name', linkData.platform_name.trim());
@@ -192,21 +192,21 @@ export function useSocialMedia() {
             console.log("Create link response status:", response.status);
             const responseData = await response.json().catch(() => ({}));
             console.log("Create link response data:", responseData);
-            
+
             if (response.ok) {
                 if (responseData.success && responseData.data?.social_link) {
                     setLinks((prev) => [...prev, responseData.data.social_link]);
                     return { success: true, link: responseData.data.social_link };
                 } else {
                     const errorMsg = responseData.message || "Failed to create social link";
-                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                         `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                     ).join('; ') : '';
                     throw new Error(validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg);
                 }
             } else {
                 const errorMsg = responseData.message || `Failed to create social link (${response.status})`;
-                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                     `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                 ).join('; ') : '';
                 const fullError = validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg;
@@ -230,10 +230,10 @@ export function useSocialMedia() {
             }
 
             const formData = new FormData();
-            
+
             // Laravel Method Spoofing for PUT request with files
             formData.append('_method', 'PUT');
-            
+
             // Only append fields that have non-empty, non-null values
             if (linkData.platform_name && linkData.platform_name.trim()) {
                 formData.append('platform_name', linkData.platform_name.trim());
@@ -263,7 +263,7 @@ export function useSocialMedia() {
             console.log("Update link response status:", response.status);
             const responseData = await response.json().catch(() => ({}));
             console.log("Update link response data:", responseData);
-            
+
             if (response.ok) {
                 if (responseData.success && responseData.data?.social_link) {
                     setLinks((prev) =>
@@ -272,14 +272,14 @@ export function useSocialMedia() {
                     return { success: true, link: responseData.data.social_link };
                 } else {
                     const errorMsg = responseData.message || "Failed to update social link";
-                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                         `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                     ).join('; ') : '';
                     throw new Error(validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg);
                 }
             } else {
                 const errorMsg = responseData.message || `Failed to update social link (${response.status})`;
-                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                     `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                 ).join('; ') : '';
                 const fullError = validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg;

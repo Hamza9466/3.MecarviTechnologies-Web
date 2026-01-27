@@ -89,7 +89,7 @@ export default function FeaturedJobs() {
     <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="max-w-[95%] mx-auto">
         {/* Title and Tagline */}
-        <div className="text-center mb-12 md:mb-16">
+        <div className="text-center mb-12 md:mb-16" data-aos="fade-up">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             {sectionTitle || "FEATURED JOBS"}
           </h2>
@@ -99,7 +99,7 @@ export default function FeaturedJobs() {
         </div>
 
         {/* Jobs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" data-aos="fade-up">
           {jobs.map((job, index) => (
             <div
               key={job.id}

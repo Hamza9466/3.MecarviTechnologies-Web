@@ -250,9 +250,9 @@ export default function OurFacts() {
       }
     >
       {/* Top Row - Full Width */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 w-full max-w-full overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 w-full max-w-full overflow-hidden" data-aos="fade-up">
         {/* Top Left - Pink Background with Years */}
-        <div className="p-8 md:p-12 lg:p-16 flex items-center justify-center min-h-[300px] md:min-h-[400px]" style={{ backgroundColor: '#E60F77' }}>
+        <div className="p-8 md:p-12 lg:p-16 flex items-center justify-center min-h-[300px] md:min-h-[400px]" style={{ backgroundColor: '#E60F77' }} data-aos="fade-up">
           <div className="text-white text-center lg:text-left">
             <div className="text-7xl sm:text-8xl md:text-9xl lg:text-10xl xl:text-11xl font-bold pl-4 md:pl-8 lg:pl-12">
               {largeNumber}
@@ -261,7 +261,7 @@ export default function OurFacts() {
         </div>
 
         {/* Top Right - Background with Circular Indicators */}
-        <div className="p-8 md:p-12 lg:p-16 min-h-[300px] md:min-h-[400px] overflow-x-auto" style={{ backgroundColor: '#F3F4F6' }}>
+        <div className="p-8 md:p-12 lg:p-16 min-h-[300px] md:min-h-[400px] overflow-x-auto" style={{ backgroundColor: '#F3F4F6' }} data-aos="fade-up">
           <div className="w-full max-w-full">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-700 mb-6 md:mb-8">
               {sectionTitle}
@@ -340,7 +340,7 @@ export default function OurFacts() {
       </div>
 
       {/* Bottom Section - Background with Overlay Card */}
-      <div className="relative w-full">
+      <div className="relative w-full" data-aos="fade-up">
         {/* Full Width Background */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[500px] sm:min-h-[450px] md:min-h-[500px] lg:min-h-[500px] w-full">
           <div style={{ backgroundColor: '#E60F77' }}></div>

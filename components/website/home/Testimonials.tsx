@@ -220,16 +220,16 @@ export default function Testimonials() {
       <div className="max-w-[95%] mx-auto">
         {/* Header Section */}
         <div className="text-center mb-7">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-wide" style={{ color: '#E60F77' }}>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-wide" style={{ color: '#E60F77' }} data-aos="fade-up">
             {mainHeading}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[30%_70%] gap-6 sm:gap-8 md:gap-12 lg:gap-12">
           {/* Left Side - Stats Card */}
-          <div className="rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 shadow-xl h-full flex flex-col" style={{ backgroundColor: '#FDE7F3' }}>
+          <div className="rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 shadow-xl h-full flex flex-col" style={{ backgroundColor: '#FDE7F3' }} data-aos="fade-up">
             {/* Rating */}
-            <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-black mb-4 sm:mb-6 text-center">
+            <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-black mb-4 sm:mb-6 text-center" >
               {averageRating}
             </div>
 
@@ -295,12 +295,12 @@ export default function Testimonials() {
           </div>
 
           {/* Right Side - Testimonials */}
-          <div className="h-full flex flex-col lg:mr-6 xl:mr-8">
+          <div className="h-full flex flex-col lg:mr-6 xl:mr-8" data-aos="fade-up">
             {/* Single Card with Two Testimonials and Center Line */}
-            <div className="bg-gradient-to-b from-blue-100 to-purple-100 rounded-2xl px-4 sm:px-6 md:px-8 pt-4 sm:pt-6 md:pt-8 pb-8 sm:pb-12 shadow-lg w-full relative flex flex-col h-full">
+            <div className="bg-gradient-to-b from-blue-100 to-purple-100 rounded-2xl px-4 sm:px-6 md:px-8 pt-4 sm:pt-6 md:pt-8 pb-8 sm:pb-12 shadow-lg w-full relative flex flex-col h-full" data-aos="fade-up">
               <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 lg:gap-12 relative flex-1">
                 {/* Left Testimonial */}
-                <div className="flex-1">
+                <div className="flex-1" >
                   {/* Testimonial Text */}
                   <p className="text-black text-xs sm:text-sm md:text-base mb-4 sm:mb-6 leading-relaxed line-clamp-3 min-h-[3.75rem] sm:min-h-[4.5rem] md:min-h-[4.875rem]">
                     "{currentReview.review_quote}"

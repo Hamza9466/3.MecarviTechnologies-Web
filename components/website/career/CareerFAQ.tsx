@@ -69,7 +69,7 @@ export default function CareerFAQ() {
     <section className="bg-white px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="max-w-[95%] mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12" data-aos="fade-up">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">
             {sectionTitle}
           </h2>
@@ -85,7 +85,7 @@ export default function CareerFAQ() {
           <>
             {/* FAQ Items - Two Column Layout */}
             {faqs.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8" data-aos="fade-up">
                 {faqs
                   .filter(faq => faq.is_active) // Only show active FAQs
                   .sort((a, b) => a.sort_order - b.sort_order) // Sort by sort_order

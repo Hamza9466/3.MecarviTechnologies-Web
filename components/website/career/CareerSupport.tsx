@@ -399,7 +399,7 @@ export default function CareerSupport() {
       <div className="max-w-[95%] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
           {/* Left Column - Quick Support */}
-          <div className="bg-gray-50 rounded-lg p-8 md:p-10 lg:p-12">
+          <div className="bg-gray-50 rounded-lg p-8 md:p-10 lg:p-12" data-aos="fade-up">
             {loadingSupport ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
@@ -530,7 +530,7 @@ export default function CareerSupport() {
           </div>
 
           {/* Right Column - Contact Form */}
-          <div className="bg-gray-50 rounded-lg p-8 md:p-10 lg:p-12">
+          <div className="bg-gray-50 rounded-lg p-8 md:p-10 lg:p-12" data-aos="fade-up">
             <p className="text-gray-700 text-sm md:text-base mb-6">
               Fill out the form and we'll be in touch shortly.
             </p>

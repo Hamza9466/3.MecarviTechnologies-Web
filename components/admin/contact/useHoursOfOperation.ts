@@ -48,7 +48,7 @@ export function useHoursOfOperation() {
             if (response.ok) {
                 const data = await response.json();
                 console.log("Hours of operation API response data:", data);
-                
+
                 if (data.success && data.data) {
                     if (data.data.section_title) {
                         setSectionTitle(data.data.section_title);
@@ -75,16 +75,16 @@ export function useHoursOfOperation() {
                     console.error("Error parsing response:", e);
                     errorData = { message: `Server error (${response.status}). Please check the server logs.` };
                 }
-                let errorMessage = errorData.message || errorData.error || 
-                    (response.status === 500 
-                        ? "Internal server error (500). Please check the server logs or contact support." 
+                let errorMessage = errorData.message || errorData.error ||
+                    (response.status === 500
+                        ? "Internal server error (500). Please check the server logs or contact support."
                         : `Failed to fetch hours of operation (${response.status})`);
-                
+
                 // Check if it's a database table missing error
                 if (errorData.error && errorData.error.includes('does not exist') && errorData.error.includes('hours_of_operation')) {
                     errorMessage = "Database table 'hours_of_operation' does not exist. Please run database migrations on the backend server.";
                 }
-                
+
                 setError(errorMessage);
                 setHours([]);
             }
@@ -119,21 +119,21 @@ export function useHoursOfOperation() {
             console.log("Create hours response status:", response.status);
             const responseData = await response.json().catch(() => ({}));
             console.log("Create hours response data:", responseData);
-            
+
             if (response.ok) {
                 if (responseData.success && responseData.data?.hours_of_operation) {
                     setHours((prev) => [...prev, responseData.data.hours_of_operation]);
                     return { success: true, hours: responseData.data.hours_of_operation };
                 } else {
                     const errorMsg = responseData.message || "Failed to create hours of operation";
-                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                         `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                     ).join('; ') : '';
                     throw new Error(validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg);
                 }
             } else {
                 const errorMsg = responseData.message || `Failed to create hours of operation (${response.status})`;
-                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                     `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                 ).join('; ') : '';
                 const fullError = validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg;
@@ -169,7 +169,7 @@ export function useHoursOfOperation() {
             console.log("Update hours response status:", response.status);
             const responseData = await response.json().catch(() => ({}));
             console.log("Update hours response data:", responseData);
-            
+
             if (response.ok) {
                 if (responseData.success && responseData.data?.hours_of_operation) {
                     setHours((prev) =>
@@ -178,14 +178,14 @@ export function useHoursOfOperation() {
                     return { success: true, hours: responseData.data.hours_of_operation };
                 } else {
                     const errorMsg = responseData.message || "Failed to update hours of operation";
-                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                         `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                     ).join('; ') : '';
                     throw new Error(validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg);
                 }
             } else {
                 const errorMsg = responseData.message || `Failed to update hours of operation (${response.status})`;
-                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                     `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                 ).join('; ') : '';
                 const fullError = validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg;

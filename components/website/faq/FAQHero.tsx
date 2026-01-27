@@ -53,7 +53,7 @@ export default function FAQHero() {
 
       <div className="max-w-7xl mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
         {/* Main Title */}
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center w-full pt-16 sm:pt-12 md:pt-16">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center w-full pt-16 sm:pt-12 md:pt-16" data-aos="fade-up">
           {loading ? "Loading..." : heroTitle}
         </h1>
       </div>

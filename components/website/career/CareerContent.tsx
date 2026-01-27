@@ -44,7 +44,7 @@ export default function CareerContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8 items-center">
           {/* Text Content */}
-          <div className="w-full space-y-6 text-center">
+          <div className="w-full space-y-6 text-center" data-aos="fade-up">
             {contentData.heading && (
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
                 {contentData.heading}
@@ -59,12 +59,12 @@ export default function CareerContent() {
 
           {/* Image */}
           {contentData.image && (
-            <div className="w-full max-w-3xl relative">
-              <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden">
+            <div className="w-full max-w-3xl relative" data-aos="fade-up">
+              <div className="relative w-full  h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden">
                 <img
                   src={contentData.image.startsWith('http') ? contentData.image : `http://localhost:8000${contentData.image}`}
                   alt="Career content"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full  object-cover"
                 />
               </div>
             </div>

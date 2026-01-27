@@ -38,16 +38,16 @@ const TabSection: React.FC = () => {
             <div className="container mx-auto px-4 w-[95%]">
                 {/* Heading and Description - Above tabs */}
                 <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-2">
+                    <h2 className="text-4xl font-bold text-gray-900 mb-2" data-aos="fade-up">
                         We Provide Expert Service
                     </h2>
-                    <p className="text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-gray-600 max-w-2xl mx-auto" data-aos="fade-up">
                         We aim to earn your trust and have a long term relationship with you. Our team provides exceptional automotive services to keep your vehicle running smoothly.
                     </p>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex justify-center items-center mb-12 ">
+                <div className="flex justify-center items-center mb-12 " data-aos="fade-up">
                     {tabs.map((tab, index) => (
                         <React.Fragment key={index}>
                             <div
@@ -68,7 +68,7 @@ const TabSection: React.FC = () => {
                 </div>
 
                 {/* Tab Content */}
-                <div className="text-white -mt-8 p-12 rounded-2xl grid grid-cols-1 lg:grid-cols-2 gap-8" style={{ backgroundColor: '#3A3A3A' }}>
+                <div className="text-white -mt-8 p-12 rounded-2xl grid grid-cols-1 lg:grid-cols-2 gap-8" style={{ backgroundColor: '#3A3A3A' }} data-aos="fade-up">
                     {activeTab === 0 && (
                         <>
                             {/* Tab 1: Image left, paragraph right */}

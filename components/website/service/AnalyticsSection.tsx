@@ -4,9 +4,18 @@ import React from 'react';
 
 const AnalyticsSection: React.FC = () => {
     return (
-        <section className="py-20 bg-white -mt-20">
-            <div className="container mx-auto px-4 w-[95%]">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <section className="py-20 -mt-20 relative overflow-hidden" style={{ backgroundColor: '#fcf5ffffon ' }}>
+
+            <div className="container mx-auto px-4 w-[95%] relative z-10">
+                {/* Section Title */}
+                <div className="text-center mb-16">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4" data-aos="fade-up">
+                        Analytics & Insights
+                    </h2>
+                    <div className="w-24 h-1 bg-purple-600 mx-auto"></div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" data-aos="fade-up">
                     {/* Left Images */}
                     <div className="space-y-6 order-1 lg:order-1">
                         <div className="relative pl-8 pt-8 pb-8 rounded-2xl" style={{ backgroundColor: '#B1DEEF' }}>

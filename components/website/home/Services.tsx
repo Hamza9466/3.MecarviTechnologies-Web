@@ -132,7 +132,7 @@ export default function Services() {
 
   if (loading) {
     return (
-      <section className="py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden">
+      <section className="py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden" >
         <div className="max-w-[95%] mx-auto">
           <div className="text-center mb-12">
             <div className="h-12 bg-gray-200 rounded animate-pulse mb-4 mx-auto max-w-md"></div>
@@ -175,6 +175,7 @@ export default function Services() {
             backgroundColor: '#CEEEFA',
             zIndex: 0
           }}
+          
         >
           {/* Bottom curved overlay */}
           <svg
@@ -193,8 +194,8 @@ export default function Services() {
 
       <div className="max-w-[95%] mx-auto relative z-10">
         {/* Section Title */}
-        <div className="text-center mb-12 md:mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-12 md:mb-16" data-aos="fade-up">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4" >
             {section.main_title}
           </h2>
           <p className="text-gray-600 text-base sm:text-lg md:text-xl max-w-3xl mx-auto">
@@ -204,7 +205,7 @@ export default function Services() {
 
         {/* Services Grid - 4 cards per row */}
         {services.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-12 md:mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-12 md:mb-16" data-aos="fade-up">
             {services.map((service) => (
               <div
                 key={service.id}

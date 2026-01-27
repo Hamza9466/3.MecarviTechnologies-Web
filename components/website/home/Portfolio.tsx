@@ -386,7 +386,7 @@ export default function Portfolio() {
     >
       {/* Header Section */}
       <div className="relative bg-white px-1 sm:px-2 md:px-4 lg:px-6 py-3 md:py-4 lg:py-5">
-        <div className="max-w-[95%] mx-auto relative z-10 px-2 sm:px-0">
+        <div className="max-w-[95%] mx-auto relative z-10 px-2 sm:px-0" data-aos="fade-up">
           {/* PORTFOLIO Title */}
           <h2 className="text-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 uppercase mb-2 sm:mb-3">
             {mainHeading}
@@ -400,7 +400,7 @@ export default function Portfolio() {
       </div>
 
       {/* Photo Collage Section - Full Width Auto Slide */}
-      <div className="relative w-full" style={{ minHeight: '400px', height: '400px', overflow: 'hidden', backgroundColor: '#fce7f3' }}>
+      <div className="relative w-full" style={{ minHeight: '400px', height: '400px', overflow: 'hidden', backgroundColor: '#fce7f3' }} data-aos="fade-up">
         {/* Navigation Buttons */}
         <button
           onClick={goToPrevious}

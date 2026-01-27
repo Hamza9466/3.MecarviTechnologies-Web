@@ -278,12 +278,12 @@ export default function WhatWeCreate() {
       
       <div className="max-w-[95%] mx-auto relative z-10">
         {/* Title */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white text-center mb-12 md:mb-16">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white text-center mb-12 md:mb-16" data-aos="fade-up">
           {sectionData?.section_title || "What We Create"}
         </h1>
 
         {/* Main Content - Single White Container */}
-        <div className="bg-white rounded-2xl pt-0 pb-8 md:pb-10 px-8 md:px-10 shadow-2xl relative">
+        <div className="bg-white rounded-2xl pt-0 pb-8 md:pb-10 px-8 md:px-10 shadow-2xl relative" data-aos="fade-up">
           {/* Navigation Tabs - At Top of White Container */}
           <div className="flex items-center justify-center gap-3 mb-8 md:mb-12">
             {/* Left Arrow */}
@@ -369,7 +369,7 @@ export default function WhatWeCreate() {
 
           {/* Content Area */}
           {selectedTab ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-start" >
               {/* Left Column - Dashboard Images */}
               <div className="order-2 lg:order-1 -ml-8 md:-ml-10 -mb-8 md:-mb-10">
                 <div className="relative w-full aspect-[4/5]">

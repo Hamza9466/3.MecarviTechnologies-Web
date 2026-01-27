@@ -136,7 +136,7 @@ export default function TaskKanban({
       <DragOverlay>
         {activeTask ? (
           <div className="opacity-50">
-            <TaskCard task={activeTask} onClick={() => {}} onEdit={() => {}} />
+            <TaskCard task={activeTask} onClick={() => { }} onEdit={() => { }} />
           </div>
         ) : null}
       </DragOverlay>

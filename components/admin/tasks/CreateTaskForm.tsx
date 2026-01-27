@@ -274,9 +274,8 @@ export default function CreateTaskForm({ task }: CreateTaskFormProps) {
           value={formData.title}
           onChange={handleInputChange}
           placeholder="Enter task title"
-          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 bg-white ${
-            errors.title ? "border-red-500" : "border-gray-300"
-          }`}
+          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-gray-900 bg-white ${errors.title ? "border-red-500" : "border-gray-300"
+            }`}
         />
         {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
       </div>
@@ -500,9 +499,8 @@ export default function CreateTaskForm({ task }: CreateTaskFormProps) {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            isDragging ? "border-purple-500 bg-purple-50" : "border-gray-300 bg-gray-50"
-          }`}
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragging ? "border-purple-500 bg-purple-50" : "border-gray-300 bg-gray-50"
+            }`}
         >
           <input
             ref={fileInputRef}

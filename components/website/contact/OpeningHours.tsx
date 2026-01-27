@@ -131,19 +131,19 @@ export default function HoursOfOperation() {
         <section className="w-full bg-[#F0EFEB] pt-12 pb-12 relative z-10 flex justify-center">
             <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Title */}
-                <h2 className="text-center text-3xl font-bold text-gray-900 mb-16 relative">
+                <h2 className="text-center text-3xl font-bold text-gray-900 mb-16 relative" data-aos="fade-up">
                     {sectionTitle}
                     <span className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 w-16 h-1 bg-linear-to-r from-indigo-600 to-pink-500 rounded-full"></span>
                 </h2>
 
                 {/* Grid */}
                 {loading ? (
-                    <div className="text-center py-20">
+                    <div className="text-center py-20" data-aos="fade-up">
                         <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
                         <p className="mt-4 text-gray-500 font-medium">Loading hours of operation...</p>
                     </div>
                 ) : hours.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 justify-items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 justify-items-center" data-aos="fade-up">
                         {hours.map((hour) => renderHoursItem(hour))}
                     </div>
                 ) : (

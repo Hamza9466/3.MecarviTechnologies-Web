@@ -90,12 +90,12 @@ export default function CoreValues() {
     <section className="bg-white pt-0 pb-8 sm:pb-12 md:pb-16 px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="max-w-[95%] mx-auto">
         {/* Title */}
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 text-center mb-6 md:mb-8">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 text-center mb-6 md:mb-8" data-aos="fade-up">
           Core Values
         </h2>
 
         {/* Values Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" data-aos="fade-up">
           {values.map((value, index) => {
             const colorScheme = colorSchemes[index % colorSchemes.length];
             return (

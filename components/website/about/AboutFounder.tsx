@@ -57,7 +57,7 @@ export default function AboutFounder() {
 
   return (
     <section className="bg-white pt-8 sm:pt-12 md:pt-16 pb-0 px-1 sm:px-2 md:px-4 lg:px-6">
-      <div className="max-w-[95%] mx-auto">
+      <div className="max-w-[95%] mx-auto" data-aos="fade-up">
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600 text-center mb-8 md:mb-12">
           {displayData.founder_title}
         </h2>

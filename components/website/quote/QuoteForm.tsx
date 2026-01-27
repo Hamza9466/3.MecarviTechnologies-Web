@@ -189,9 +189,9 @@ export default function QuoteForm() {
 
   return (
     <section className="px-4 sm:px-6 md:px-8 lg:px-12 pt-10 pb-12 md:pb-16">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl mx-auto" >
         {/* Form Container */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 md:p-8 lg:p-10 shadow-2xl">
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg p-6 md:p-8 lg:p-10 shadow-2xl" data-aos="fade-up">
           {/* Step Indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-center">

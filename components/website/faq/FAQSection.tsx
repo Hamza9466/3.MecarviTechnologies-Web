@@ -178,7 +178,7 @@ export default function FAQSection() {
       <div className="w-full max-w-full mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-[25%_75%] gap-8 md:gap-12">
           {/* Left Navigation Menu */}
-          <div className="relative">
+          <div className="relative" data-aos="fade-up">
             <div className="space-y-6">
               {/* Navigation Menu */}
               <div className="bg-white rounded-lg p-4 md:p-6 shadow-sm border border-gray-100 sticky top-24">
@@ -297,7 +297,7 @@ export default function FAQSection() {
           </div>
 
           {/* Right FAQ Display Area */}
-          <div className="relative">
+          <div className="relative" data-aos="fade-up">
             <div className="space-y-6">
                 {/* Paragraph Text */}
                 <div className="mb-8 md:mb-12">

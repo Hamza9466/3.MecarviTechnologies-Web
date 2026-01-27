@@ -64,9 +64,9 @@ export default function MissionVision() {
   return (
     <section className="bg-white pb-16 sm:pb-20 md:pb-24 pt-0 px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="max-w-[95%] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8" >
           {/* Mission Statement Card */}
-          <div className="bg-teal-900 rounded-2xl p-8 md:p-10 lg:p-12">
+          <div className="bg-teal-900 rounded-2xl p-8 md:p-10 lg:p-12" data-aos="fade-up">
             <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold text-white mb-6 md:mb-8">
               {displayData.mission_title}
             </h2>
@@ -76,7 +76,7 @@ export default function MissionVision() {
           </div>
 
           {/* Vision Statement Card */}
-          <div className="bg-teal-900 rounded-2xl p-8 md:p-10 lg:p-12">
+          <div className="bg-teal-900 rounded-2xl p-8 md:p-10 lg:p-12" data-aos="fade-up">
             <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold text-white mb-6 md:mb-8">
               {displayData.vision_title}
             </h2>

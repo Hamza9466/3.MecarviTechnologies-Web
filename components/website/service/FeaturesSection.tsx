@@ -6,9 +6,17 @@ const FeaturesSection: React.FC = () => {
     return (
         <section className="py-20 bg-white -mt-10">
             <div className="container mx-auto px-4 w-[95%]">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                {/* Section Title */}
+                <div className="text-center mb-16">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4" data-aos="fade-up">
+                        Our Features
+                    </h2>
+                    <div className="w-24 h-1 bg-purple-600 mx-auto"></div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" >
                     {/* Left Content */}
-                    <div className="space-y-6">
+                    <div className="space-y-6" data-aos="fade-up">
                         <p className='text-blue-800 text-xl font-bold'>Business analytics</p>
                         <h2 className="text-4xl md:text-4xl font-bold text-gray-900 leading-tight max-w-lg">
                             Accelerate your workflow and minimise your time
@@ -53,7 +61,7 @@ const FeaturesSection: React.FC = () => {
                     </div>
 
                     {/* Right Images */}
-                    <div className="relative">
+                    <div className="relative" data-aos="fade-up">
                         <div className="relative pl-8 pt-8 pb-8 rounded-2xl" style={{ backgroundColor: '#DFD1ED' }}>
                             <img
                                 src="/assets/images/features_img_one.png"

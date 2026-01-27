@@ -66,7 +66,7 @@ export default function CareerHero() {
       <div className="max-w-[95%] mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
         {/* Title and Subtitle */}
         {heroData.title && heroData.subtitle && (
-          <div className="text-center">
+          <div className="text-center" data-aos="fade-up">
             <h1 className="text-2xl sm:text-3xl lg:pt-[-15px] md:text-4xl lg:text-5xl font-bold text-white text-center w-full pt-16 sm:pt-12 md:pt-16 mb-6">
               {heroData.title}
             </h1>

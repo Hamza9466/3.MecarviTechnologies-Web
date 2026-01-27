@@ -121,11 +121,11 @@ export default function BusinessSuccess() {
           : {}
       }
     >
-      <div className="max-w-[95%] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      <div className="max-w-[95%] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center" >
         {/* Left Content */}
-        <div className="space-y-6 md:space-y-8">
+        <div className="space-y-6 md:space-y-8" data-aos="fade-up">
           {/* Main Heading */}
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-pink-500 leading-tight">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-pink-500 leading-tight" data-aos="fade-up">
             {content.main_title}
           </h2>
 
@@ -255,7 +255,7 @@ export default function BusinessSuccess() {
         </div>
 
         {/* Right Content - Images */}
-        <div className="relative">
+        <div className="relative" data-aos="fade-up">
           {/* Main Image Container */}
           <div className="relative overflow-visible">
             {/* Main Portrait Image */}

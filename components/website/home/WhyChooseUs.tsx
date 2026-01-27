@@ -156,15 +156,16 @@ export default function WhyChooseUs() {
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
       } : {}}
+      
     >
-      <div className="max-w-[95%] mx-auto">
+      <div className="max-w-[95%] mx-auto" >
         {/* Title - Centered */}
-        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 text-center mb-12 md:mb-16">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 text-center mb-12 md:mb-16" data-aos="fade-up">
           {sectionTitle}
         </h2>
 
         {/* Main Content Container */}
-        <div className="overflow-hidden">
+        <div className="overflow-hidden" data-aos="fade-up">
           <div 
             className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center rounded-lg p-6 md:p-8 relative overflow-hidden" 
           >

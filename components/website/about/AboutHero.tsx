@@ -95,7 +95,7 @@ export default function AboutHero() {
 
       <div className="max-w-[95%] mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
         {/* Content */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center leading-tight pt-16 sm:pt-12 md:pt-16">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center leading-tight pt-16 sm:pt-12 md:pt-16" data-aos="fade-up">
           {displayData.title_part_1} <span className="text-white">{displayData.title_part_2}</span>
         </h1>
       </div>

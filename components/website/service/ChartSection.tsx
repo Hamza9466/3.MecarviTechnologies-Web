@@ -6,7 +6,15 @@ export default function ChartSection() {
     return (
         <section className="py-20 bg-white -mt-20">
             <div className="container mx-auto px-4 w-[95%]">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                {/* Section Title */}
+                <div className="text-center mb-16">
+                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4" data-aos="fade-up">
+                        Performance Charts
+                    </h2>
+                    <div className="w-24 h-1 bg-purple-600 mx-auto"></div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" data-aos="fade-up">
                     {/* Left Content */}
                     <div className="space-y-6 order-2 lg:order-1">
                         <p className='text-blue-800 text-xl font-bold'>Performance metrics</p>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import AOSProvider from "./providers/AOSProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -10,20 +11,21 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Mecarvi Technologies - Welcome to Our Mecarvi Signs",
-  description: "Wanna know more about out us please have a look below and explore us more",
+  description:
+    "Wanna know more about out us please have a look below and explore us more",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
         className={`${inter.variable} font-sans antialiased m-0 p-0 overflow-x-hidden`}
       >
-        {children}
+        <AOSProvider>{children}</AOSProvider>
       </body>
     </html>
   );

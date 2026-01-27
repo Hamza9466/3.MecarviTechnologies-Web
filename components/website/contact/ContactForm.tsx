@@ -524,7 +524,7 @@ export default function ContactForm() {
         <div className="max-w-[95%] mx-auto">
           <div className="rounded-lg p-8 md:p-10 lg:pt-12 lg:px-12 lg:pb-0">
             {/* Section Header */}
-            <div className="text-center mb-12">
+            <div className="text-center mb-12" data-aos="fade-up">
               {heroLoading ? (
                 <div className="py-8">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600"></div>
@@ -551,7 +551,7 @@ export default function ContactForm() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 items-start">
               {/* Left Column - Contact Info with 6 Boxes */}
-              <div className="space-y-0">
+              <div className="space-y-0" data-aos="fade-up">
                 <div>
 
 
@@ -587,7 +587,7 @@ export default function ContactForm() {
               </div>
 
               {/* Right Column - Contact Form */}
-              <div className="bg-gray-50 rounded-lg p-4 sm:p-6 md:p-8 flex flex-col min-h-[530px]">
+              <div className="bg-gray-50 rounded-lg p-4 sm:p-6 md:p-8 flex flex-col min-h-[530px]" data-aos="fade-up">
                 <h2 className="text-gray-900 text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
                   Contact Form
                 </h2>

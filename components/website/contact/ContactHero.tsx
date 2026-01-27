@@ -106,7 +106,7 @@ export default function ContactHero() {
         ) : (
           <>
             {/* Main Title */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center w-full pt-20 sm:pt-24 md:pt-28 mb-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center w-full pt-20 sm:pt-24 md:pt-28 mb-8" data-aos="fade-up">
               {heroData?.heading || "Contact Us"}
             </h1>
           </>

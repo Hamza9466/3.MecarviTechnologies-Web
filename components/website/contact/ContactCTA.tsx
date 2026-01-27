@@ -110,7 +110,7 @@ export default function ContactCTA() {
   const description = section?.description || "Join the Mecarvi Prints family - we'd love to connect with you! Follow us on social media to share your feedback, engage with our community, stay in the loop with important updates, giveaways, special offers and so much more.";
 
   return (
-    <section className="bg-white pt-15 pb-4 sm:pb-6 md:pb-8 px-1   sm:px-2 md:px-4 lg:px-6">
+    <section className="bg-white pt-15 pb-4 sm:pb-6 md:pb-8 px-1   sm:px-2 md:px-4 lg:px-6" data-aos="fade-up">
       <div className="max-w-[95%] mx-auto ">
         <div className="bg-gradient-to-r from-[#FBE8F4] to-[#DFF2F7] rounded-lg pt-4 pb-4 px-8 md:pt-6 md:pb-6 md:px-10 lg:pt-8 lg:pb-8 lg:px-12">
           <div className="text-left w-full">

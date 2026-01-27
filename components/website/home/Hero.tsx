@@ -115,12 +115,12 @@ export default function Hero() {
   const titleLines = displayData.title ? displayData.title.split("\n").filter(line => line.trim()) : [];
 
   return (
-    <section 
+    <section
       className="min-h-[120vh] sm:min-h-[130vh] md:min-h-screen flex items-center justify-center px-1 sm:px-2 md:px-4 lg:px-6 pt-20 sm:pt-24 pb-12 sm:pb-16 relative overflow-visible"
     >
       {/* Background Image or Gradient */}
       {displayData.background_image ? (
-        <div 
+        <div
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{
             backgroundImage: `url(http://localhost:8000${displayData.background_image})`,
@@ -134,7 +134,7 @@ export default function Hero() {
         />
       ) : (
         /* Default Gradient Background */
-        <svg 
+        <svg
           className="absolute inset-0 w-full h-full pointer-events-none"
           preserveAspectRatio="none"
           viewBox="0 0 1440 800"
@@ -146,7 +146,7 @@ export default function Hero() {
               <stop offset="100%" stopColor="#0040EA" />
             </linearGradient>
           </defs>
-          <path 
+          <path
             d="M0,0 L1440,0 L1440,800 L0,800 Z"
             fill="url(#blueGradient)"
           />
@@ -154,9 +154,9 @@ export default function Hero() {
       )}
 
       {/* Vector5 Image - Top Left */}
-      <div 
+      <div
         className="absolute top-0 left-0 pointer-events-none"
-        style={{ 
+        style={{
           zIndex: 1,
           width: '400px',
           height: '400px',
@@ -176,9 +176,9 @@ export default function Hero() {
       </div>
 
       {/* Vector6 Image - Top Right */}
-      <div 
+      <div
         className="absolute top-0 right-0 pointer-events-none"
-        style={{ 
+        style={{
           zIndex: 1,
           width: '400px',
           height: '400px',
@@ -196,8 +196,8 @@ export default function Hero() {
           }}
         />
       </div>
-      
-      <div className="max-w-[95%] mx-auto grid grid-cols-1 md:grid-cols-[50%_50%] gap-4 sm:gap-6 md:gap-8 lg:gap-10 items-center w-full relative z-10">
+
+      <div className="max-w-[95%] mx-auto grid grid-cols-1 md:grid-cols-[50%_50%] gap-4 sm:gap-6 md:gap-8 lg:gap-10 items-center w-full relative z-10" data-aos="fade-up">
         {/* Left Content */}
         <div className="text-white space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6 text-center md:text-left order-2 md:order-1 px-2 sm:px-0">
           {loading ? (

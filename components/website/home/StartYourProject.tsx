@@ -92,7 +92,7 @@ export default function StartYourProject() {
     <section className="pt-16 sm:pt-20 md:pt-24 pb-0 px-1 sm:px-2 md:px-4 lg:px-6" style={{ background: 'linear-gradient(to bottom, #1e3a8a, #000000)' }}>
       <div className="max-w-[95%] mx-auto">
         {/* Top Section */}
-        <div className="text-center mb-12 md:mb-16">
+        <div className="text-center mb-12 md:mb-16" data-aos="fade-up">
           {/* Main Heading */}
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-pink-500 mb-4">
             {requestQuoteTitle}
@@ -120,7 +120,7 @@ export default function StartYourProject() {
         </div>
 
         {/* Two Cards Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 mt-12 md:mt-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 mt-12 md:mt-16" data-aos="fade-up">
           {/* Left Card - Dark Green */}
           <div className="bg-[#2d5016] p-8 md:p-10 lg:p-12 text-white">
             {/* Icon/Image */}

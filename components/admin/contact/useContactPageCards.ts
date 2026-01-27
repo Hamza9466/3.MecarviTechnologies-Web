@@ -100,16 +100,16 @@ export function useContactPageCards() {
                     console.error("Error parsing response:", e);
                     errorData = { message: `Server error (${response.status}). Please check the server logs.` };
                 }
-                let errorMessage = errorData.message || errorData.error || 
-                    (response.status === 500 
-                        ? "Internal server error (500). Please check the server logs or contact support." 
+                let errorMessage = errorData.message || errorData.error ||
+                    (response.status === 500
+                        ? "Internal server error (500). Please check the server logs or contact support."
                         : `Failed to fetch contact cards (${response.status})`);
-                
+
                 // Check if it's a database table missing error
                 if (errorData.error && errorData.error.includes('does not exist') && errorData.error.includes('contact_cards')) {
                     errorMessage = "Database table 'contact_cards' does not exist. Please run database migrations on the backend server.";
                 }
-                
+
                 setError(errorMessage);
                 setCards([]);
             }
@@ -202,21 +202,21 @@ export function useContactPageCards() {
 
             const responseData = await response.json().catch(() => ({}));
             console.log("Create card response data:", responseData);
-            
+
             if (response.ok) {
                 if (responseData.success && responseData.data?.contact_card) {
                     setCards((prev) => [...prev, responseData.data.contact_card]);
                     return { success: true, card: responseData.data.contact_card };
                 } else {
                     const errorMsg = responseData.message || "Failed to create card";
-                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                         `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                     ).join('; ') : '';
                     throw new Error(validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg);
                 }
             } else {
                 const errorMsg = responseData.message || `Failed to create card (${response.status})`;
-                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                     `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                 ).join('; ') : '';
                 const fullError = validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg;
@@ -320,7 +320,7 @@ export function useContactPageCards() {
             console.log("Update card response status:", response.status);
             const responseData = await response.json().catch(() => ({}));
             console.log("Update card response data:", responseData);
-            
+
             if (response.ok) {
                 if (responseData.success && responseData.data?.contact_card) {
                     setCards((prev) =>
@@ -329,14 +329,14 @@ export function useContactPageCards() {
                     return { success: true, card: responseData.data.contact_card };
                 } else {
                     const errorMsg = responseData.message || "Failed to update card";
-                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                    const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                         `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                     ).join('; ') : '';
                     throw new Error(validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg);
                 }
             } else {
                 const errorMsg = responseData.message || `Failed to update card (${response.status})`;
-                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) => 
+                const validationErrors = responseData.errors ? Object.entries(responseData.errors).map(([field, errors]: [string, any]) =>
                     `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`
                 ).join('; ') : '';
                 const fullError = validationErrors ? `${errorMsg} - ${validationErrors}` : errorMsg;

@@ -1,69 +1,96 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 
 const HeroSection: React.FC = () => {
+    const [currentSlide, setCurrentSlide] = useState(0);
+
+    const slides = [
+        {
+            image: "/assets/images/gallery-1.webp",
+            smallText: "YOU THINK WE BUILT YOUR VISION",
+            mainHeading: "Elevating Your Business",
+            outlinedHeading: "With Industry Experts",
+            description: "We are dedicated to building long-term partnerships with our clients, ensuring their success.",
+            backgroundText: "IT SOLUTION"
+        },
+        {
+            image: "/assets/images/gallery-50.webp",
+            smallText: "INNOVATION MEETS EXCELLENCE",
+            mainHeading: "Transform Your Digital",
+            outlinedHeading: "Presence Today",
+            description: "Our cutting-edge solutions propel your business into the future of technology.",
+            backgroundText: "DIGITAL TRANSFORM"
+        }
+    ];
+
+    const nextSlide = () => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+    };
+
+    const prevSlide = () => {
+        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    };
+
+    const currentSlideData = slides[currentSlide];
+
     return (
-        <section className="relative h-screen pt-24 overflow-hidden rounded-t-3xl rounded-b-3xl">
+        <section className="relative h-[70vh] pt-24 overflow-hidden rounded-t-3xl rounded-b-3xl">
             {/* Background Image */}
             <div className="absolute inset-0">
                 <div
-                    className="w-full h-full bg-cover bg-center bg-no-repeat"
-                    style={{ backgroundImage: "url('/assets/images/gallery-1.webp')" }}
+                    className="w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-500"
+                    style={{ backgroundImage: `url('${currentSlideData.image}')` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
             </div>
 
             {/* Content */}
-         <div className="relative z-10 h-full flex items-center justify-end">
-    <div className="w-full px-6 md:px-20 lg:pr-32">
-        <div className="text-white max-w-3xl ml-auto text-left">
+            <div className="relative z-10 h-full flex items-end justify-end pb-15">
+                <div className="w-full px-6 md:px-20 lg:pr-32">
+                    <div className="text-white max-w-3xl ml-auto text-left" data-aos="fade-up">
 
-            {/* Small heading */}
-            <p className="text-sm md:text-base ps-15 font-light tracking-wider mb-4 text-gray-200 uppercase">
-                YOU THINK WE BUILT YOUR VISION
-            </p>
+                        {/* Small heading */}
+                        <p className="text-sm md:text-base ps-50 font-light tracking-wider mb-2 text-gray-200 uppercase">
+                            {currentSlideData.smallText}
+                        </p>
 
-            {/* Main heading */}
-            <h1 className="text-3xl md:text-5xl ps-15 lg:text-5xl font-bold mb-4 leading-tight">
-                Elevating Your Business
-            </h1>
+                        {/* Main heading */}
+                        <h1 className="text-2xl md:text-4xl ps-50 lg:text-4xl font-bold mb-2 leading-tight">
+                            {currentSlideData.mainHeading}
+                        </h1>
 
-            {/* Outlined heading */}
-            <h2
-                className="text-3xl md:text-5xl ps-15 lg:text-5xl font-bold mb-6 leading-tight text-transparent"
-                style={{ WebkitTextStroke: '2px white' }}
-            >
-                With Industry Experts
-            </h2>
+                        {/* Outlined heading */}
+                        <h2
+                            className="text-2xl md:text-4xl ps-50 lg:text-4xl font-bold mb-4 leading-tight text-transparent"
+                            style={{ WebkitTextStroke: '2px white' }}
+                        >
+                            {currentSlideData.outlinedHeading}
+                        </h2>
 
-            {/* Description */}
-            <p className="text-base ps-15 md:text-lg mb-8 text-gray-100 leading-relaxed">
-                We are dedicated to building long-term partnerships with our clients, ensuring their success.
-            </p>
+                        {/* Description */}
+                        <p className="text-sm ps-50 w-[95%] md:text-base mb-6 text-gray-100 leading-relaxed">
+                            {currentSlideData.description}
+                        </p>
 
-            {/* Background Text */}
-            <div className="relative mb-8">
-                <h2
-                    className="text-5xl md:text-5xl ps-15 font-bold leading-tight text-transparent"
-                    style={{ WebkitTextStroke: '2px #676B78' }}
-                >
-                    IT SOLUTION
-                </h2>
+                        {/* Background Text */}
+                        <div className="relative mb-6">
+                            <h2
+                                className="text-4xl md:text-4xl ps-50 font-bold leading-tight text-transparent"
+                                style={{ WebkitTextStroke: '2px #676B78' }}
+                            >
+                                {currentSlideData.backgroundText}
+                            </h2>
+                        </div>
+
+                        {/* CTA */}
+                        <button className="bg-purple-600 ms-50 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
+                            Get Started Now
+                        </button>
+
+                    </div>
+                </div>
             </div>
-
-            {/* CTA */}
-            <button className="bg-purple-600 ms-15 hover:bg-purple-700 text-white px-10 py-5 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
-                Get Started Now
-            </button>
-
-        </div>
-    </div>
-</div>
-
-
-
-
 
             {/* Left Slider Button with Background Image */}
             <div className="absolute left-0 top-1/2 transform -translate-y-1/2 z-20">
@@ -76,6 +103,7 @@ const HeroSection: React.FC = () => {
                     }}
                 >
                     <button
+                        onClick={prevSlide}
                         className="absolute bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-full shadow-lg transition-all duration-300"
                         style={{
                             top: "50%",
@@ -101,6 +129,7 @@ const HeroSection: React.FC = () => {
                     }}
                 >
                     <button
+                        onClick={nextSlide}
                         className="absolute bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-full shadow-lg transition-all duration-300"
                         style={{
                             top: "50%",

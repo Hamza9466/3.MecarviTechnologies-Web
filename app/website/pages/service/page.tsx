@@ -21,7 +21,6 @@ export default function ServicePage() {
             <AnalyticsSection />
             <ChartSection />
             <TabSection />
-            <StatsSection />
             <ShowcaseSection />
             <Footer />
         </div>
