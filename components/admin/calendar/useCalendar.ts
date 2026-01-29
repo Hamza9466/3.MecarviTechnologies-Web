@@ -114,7 +114,7 @@ const getMockEvents = (): CalendarEvent[] => {
     {
       id: 6,
       title: "Spruko Meetup",
-      description: "Team meetup event",
+      description: "Team meetup event to align on weekly goals, blockers, and next sprint planning.",
       date: `${currentYear}-02-02`,
       category: "office",
       color: "text-blue-700",
@@ -124,7 +124,7 @@ const getMockEvents = (): CalendarEvent[] => {
     {
       id: 7,
       title: "Harcates Birthday",
-      description: "Birthday celebration",
+      description: "Birthday celebration with cake cutting and a small get-together for the whole team.",
       date: `${currentYear}-02-04`,
       category: "birthday",
       color: "text-orange-700",
@@ -134,7 +134,7 @@ const getMockEvents = (): CalendarEvent[] => {
     {
       id: 8,
       title: "Festival Day",
-      description: "Cultural festival",
+      description: "Cultural festival with traditional performances, food stalls, and community activities.",
       date: `${currentYear}-02-05`,
       category: "festival",
       color: "text-red-700",
@@ -144,7 +144,7 @@ const getMockEvents = (): CalendarEvent[] => {
     {
       id: 9,
       title: "My Rest Day",
-      description: "Personal rest day",
+      description: "Personal rest day to recharge and focus on wellbeing. No meetings scheduled this day.",
       date: `${currentYear}-02-07`,
       category: "other",
       color: "text-yellow-700",
@@ -154,7 +154,7 @@ const getMockEvents = (): CalendarEvent[] => {
     {
       id: 10,
       title: "Music Festival",
-      description: "Annual music festival",
+      description: "Annual music festival featuring multiple artists, live performances, and family-friendly fun.",
       date: `${currentYear}-02-10`,
       category: "festival",
       color: "text-red-700",
@@ -164,7 +164,7 @@ const getMockEvents = (): CalendarEvent[] => {
     {
       id: 11,
       title: "Music Festival",
-      description: "Annual music festival",
+      description: "Annual music festival featuring multiple artists, live performances, and family-friendly fun.",
       date: `${currentYear}-02-11`,
       category: "festival",
       color: "text-red-700",
@@ -174,7 +174,7 @@ const getMockEvents = (): CalendarEvent[] => {
     {
       id: 12,
       title: "Lifestyle Conference",
-      description: "Conference event",
+      description: "Conference event covering lifestyle, productivity, and wellness with guest speakers and panels.",
       date: `${currentYear}-02-13`,
       category: "office",
       color: "text-blue-700",
@@ -204,7 +204,7 @@ const getMockEvents = (): CalendarEvent[] => {
     {
       id: 15,
       title: "Team Weekly Brownbag",
-      description: "Weekly team meeting",
+      description: "Weekly team meeting to share updates, demo progress, and discuss improvements together.",
       date: `${currentYear}-02-21`,
       category: "office",
       color: "text-blue-700",

@@ -1,6 +1,6 @@
 "use client";
 
-import { EventCategory, CalendarEvent } from "./types";
+import { EventCategory, CalendarEvent, EventCategoryType } from "./types";
 import EventCategoryButton from "./EventCategoryButton";
 import UpcomingEventItem from "./UpcomingEventItem";
 
@@ -36,8 +36,8 @@ export default function CalendarSidebar({
 
       {/* Upcoming Events Section */}
       <div className="flex-1 overflow-y-auto">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Upcoming Events</h3>
-        <div className="space-y-0">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Events</h3>
+        <div className="space-y-2">
           {upcomingEvents.length > 0 ? (
             upcomingEvents.map((event, index) => (
               <UpcomingEventItem
