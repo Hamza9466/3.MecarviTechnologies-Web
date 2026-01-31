@@ -1,6 +1,7 @@
 import React from 'react';
 import Header from '@/components/website/home/Header';
 import Footer from '@/components/website/home/Footer';
+import ServiceHero from '@/components/website/service/ServiceHero';
 import HeroSection from '@/components/website/service/HeroSection';
 import FeaturesSection from '@/components/website/service/FeaturesSection';
 import AnalyticsSection from '@/components/website/service/AnalyticsSection';
@@ -14,7 +15,8 @@ export default function ServicePage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
-            <div className="bg-white p-8 mt-20 rounded-2xl shadow-xl">
+            <ServiceHero />
+            <div className="bg-white p-8 mt-0 rounded-2xl shadow-xl">
                 <HeroSection />
             </div>
             <FeaturesSection />

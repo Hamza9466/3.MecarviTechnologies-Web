@@ -1,0 +1,654 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import AdminTabs from "@/components/admin/AdminTabs";
+import HeroSectionEditor from '@/components/admin/services/HeroSectionEditor';
+import FeaturesEditor from '@/components/admin/services/FeaturesEditor';
+import AnalyticsEditor from '@/components/admin/services/AnalyticsEditor';
+import ChartEditor from '@/components/admin/services/ChartEditor';
+import TabEditor from '@/components/admin/services/TabEditor';
+import ShowcaseEditor from '@/components/admin/services/ShowcaseEditor';
+import FeaturesSectionEditor from '@/components/admin/services/FeaturesSectionEditor';
+import ComingSoonEditor from "@/components/admin/services/ComingSoonEditor";
+
+export default function ServicesPageEditor() {
+  const [activeTab, setActiveTab] = useState('Hero Section');
+  const [saving, setSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Service Hero Section State
+  const [heroData, setHeroData] = useState({
+    heading: 'Our Services',
+    subheading: 'Professional IT Solutions',
+    description: 'We provide comprehensive technology solutions to help your business grow',
+    is_active: true
+  });
+
+  // Hero Section State - Start empty, load from API
+  const [heroSectionData, setHeroSectionData] = useState([]);
+
+  // Features Section State (integrated with API)
+  const [featuresData, setFeaturesData] = useState({
+    sectionTitle: 'Business analytics',
+    subtitle: 'Business analytics',
+    title: 'Accelerate your workflow and minimise your time',
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    features: [
+      'Fully customisable for developers',
+      'Variants and Component properties',
+      'Interactions for easy prototyping'
+    ],
+    buttonText: 'Try Free Version',
+    mainImage: '',
+    smallImage: ''
+  });
+
+  // Analytics Section State
+  const [analyticsData, setAnalyticsData] = useState({
+    sectionTitle: 'Analytics & Insights',
+    title: 'Transform your data into actionable insights',
+    subtitle: 'Data insights',
+    description: 'Harness the power of advanced analytics to make informed decisions and drive business growth. Our comprehensive tools help you visualize trends, identify patterns, and optimize performance.',
+    features: [
+      'Real-time data processing and analysis',
+      'Interactive dashboards and custom reports',
+      'AI-powered predictions and recommendations'
+    ],
+    buttonText: 'Explore Analytics',
+    buttonUrl: '/analytics',
+    mainImage: '/assets/images/analytic_img.png',
+    smallImage: '/assets/images/analytic_small.png'
+  });
+
+  // Chart Section State
+  const [chartData, setChartData] = useState({
+    sectionTitle: 'Performance Charts',
+    title: 'Track your progress with detailed analytics',
+    subtitle: 'Performance metrics',
+    description: 'Monitor key performance indicators and gain valuable insights into your business operations. Our comprehensive dashboard provides real-time data visualization and reporting tools to help you make informed decisions.',
+    features: [
+      'Comprehensive data visualization tools',
+      'Customizable reports and dashboards',
+      'Real-time performance monitoring'
+    ],
+    buttonText: 'View Charts',
+    buttonUrl: '/charts',
+    mainImage: '/assets/images/Chart.png',
+    smallImage: '/assets/images/12.png'
+  });
+
+  // Tab Section State
+  const [tabData, setTabData] = useState({
+    sectionTitle: 'We Provide Expert Service',
+    sectionDescription: 'We aim to earn your trust and have a long term relationship with you. Our team provides exceptional automotive services to keep your vehicle running smoothly.',
+    tabs: [
+      {
+        title: 'Additional Services',
+        icon: '',
+        content: 'Our team provides a wide range of automotive services to keep your vehicle running smoothly. From basic maintenance to complex repairs, we ensure reliable and professional service.',
+        image: '/assets/images/analytic_small.png',
+        features: []
+      },
+      {
+        title: 'Our Advantages',
+        icon: '',
+        content: 'Our advantages make us stand out from the rest. We combine quality, transparency, and reliability to provide exceptional service for every customer.',
+        image: '',
+        features: [
+          'We Make It Easy',
+          'OEM Factory Parts Warranty',
+          'Fair And Transparent Pricing',
+          'Happiness Guaranteed'
+        ]
+      },
+      {
+        title: 'About Company',
+        icon: '',
+        content: 'Learn more about our company values, mission, and commitment to providing exceptional service to our customers.',
+        image: '',
+        features: [
+          {
+            heading: 'We Make It Easy',
+            text: 'Our streamlined process ensures getting your vehicle serviced is simple and hassle-free, from booking to completion.'
+          },
+          {
+            heading: 'OEM Factory Parts Warranty',
+            text: 'All our repairs come with genuine OEM parts and comprehensive warranty coverage for your peace of mind.'
+          },
+          {
+            heading: 'Fair And Transparent Pricing',
+            text: 'We provide detailed quotes with no hidden fees, ensuring you know exactly what you are paying for.'
+          },
+          {
+            heading: 'Happiness Guaranteed',
+            text: 'Your satisfaction is our priority. We stand behind our work with a satisfaction guarantee on all services.'
+          }
+        ]
+      }
+    ]
+  });
+
+  // Showcase Section State
+  const [showcaseData, setShowcaseData] = useState({
+    sectionTitle: 'Book Appointment',
+    badge: '• BOOK APPOINTMENT NOW •',
+    title: 'Book a Time That Works for You Easy, and Hassle-Free!',
+    description: 'Ready to take your business technology to the next level? Our expert team is here to help you find the right solutions tailored to your needs.',
+    backgroundImage: '/assets/images/shape-5.webp',
+    mainImage: '/assets/images/gallery-8.webp',
+    backgroundShape: '/assets/images/shape-3.webp',
+    cards: [
+      {
+        title: 'Improving Your Business Planning',
+        description: 'We envision a future where our clients are at the forefront of their industries, setting new standards of excellence.',
+        icon: ''
+      },
+      {
+        title: 'Improving Your Business Planning',
+        description: 'We envision a future where our clients are at the forefront of their industries, setting new standards of excellence.',
+        icon: ''
+      }
+    ]
+  });
+
+  // Features Section State (used for both Features and Features Section tabs)
+  const [featuresSectionData, setFeaturesSectionData] = useState({
+    section_title: 'Our Amazing Features',
+    subtitle: 'Discover what makes us special',
+    title: 'Why Choose Us',
+    description: 'We offer the best features for your needs',
+    features: [
+      {
+        title: 'Fast Performance',
+        description: 'Lightning fast response times'
+      },
+      {
+        title: '24/7 Support',
+        description: 'Round the clock assistance'
+      }
+    ],
+    button_text: 'Learn More',
+    main_image: '',
+    small_image: ''
+  });
+
+  const tabs = [
+    "Hero Section",
+    "Features",
+    "Analytics",
+    "Chart",
+    "Tab Section",
+    "Features Section",
+    "Showcase"
+  ];
+
+  // Load existing data on component mount
+  useEffect(() => {
+    const loadServicePageData = async () => {
+      try {
+        console.log('=== Starting to load service page data ===');
+
+        const response = await fetch('http://localhost:8000/api/v1/service-page');
+        console.log('API Response Status:', response.status);
+        console.log('API Response Headers:', response.headers);
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('=== Full API Response ===');
+          console.log('Success:', result.success);
+          console.log('Data:', result.data);
+          console.log('Full Response Object:', result);
+
+          // Handle both single service page and array of service pages
+          let servicePages = [];
+          if (result.data && result.data.service_pages) {
+            console.log('Service page data found:', result.data.service_pages);
+            if (Array.isArray(result.data.service_pages)) {
+              servicePages = result.data.service_pages;
+              console.log('Found array of service pages:', servicePages.length);
+            } else {
+              servicePages = [result.data.service_pages];
+              console.log('Found single service page, converting to array');
+            }
+          } else {
+            console.log('❌ No service page data found in response');
+            console.log('Available keys in result.data:', Object.keys(result.data || {}));
+          }
+
+          // Update hero data with the first service page data
+          if (servicePages.length > 0) {
+            const firstPage = servicePages[0];
+            setHeroData({
+              heading: firstPage.page_heading?.replace(' - Slide 1', '') || 'Our Services',
+              subheading: firstPage.small_text || 'Professional IT Solutions',
+              description: firstPage.description || 'We provide comprehensive technology solutions to help your business grow',
+              is_active: true
+            });
+
+            // Convert service pages back to hero slides
+            const heroSlides = servicePages.map((page: any, index: number) => {
+              console.log(`Processing slide ${index + 1}:`, {
+                id: page.id,
+                bg_image: page.bg_image,
+                small_text: page.small_text,
+                main_heading: page.main_heading
+              });
+
+              return {
+                id: page.id || index + 1,
+                image: page.bg_image ? (page.bg_image.startsWith('http') ? page.bg_image : `http://localhost:8000${page.bg_image}`) : '',
+                smallText: page.small_text || '',
+                mainHeading: page.main_heading || '',
+                outlinedHeading: page.outlined_heading || '',
+                description: page.description || '',
+                backgroundText: page.background_text || '',
+                buttonText: page.button_text || 'Get Started Now',
+                buttonUrl: page.button_url || '/contact'
+              };
+            });
+
+            // Update with API data
+            setHeroSectionData(heroSlides);
+            console.log('Loaded slides from API:', heroSlides.length);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading service page data:', error);
+        // Keep default values if API call fails
+      }
+    };
+
+    // Load Features Sections data
+    const loadFeaturesSectionsData = async () => {
+      try {
+      });
+
+  // Convert service pages back to hero slides
+  const heroSlides = servicePages.map((page: any, index: number) => {
+    console.log(`Processing slide ${index + 1}:`, {
+      id: page.id,
+      bg_image: page.bg_image,
+      small_text: page.small_text,
+      main_heading: page.main_heading
+
+            // First, test API connection and authentication
+            const token = localStorage.getItem('token');
+      console.log('Using token:', token ? 'Token exists' : 'No token found');
+
+      // Test API connection
+      const testResponse = await fetch('http://localhost:8000/api/v1/service-page', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token || ''}`,
+        }
+      });
+
+      console.log('API Test Response Status:', testResponse.status);
+      if(!testResponse.ok) {
+      const errorText = await testResponse.text();
+      console.error('API Connection Test Failed:', testResponse.status, errorText);
+      throw new Error(`API Connection failed: ${testResponse.status} - ${errorText}`);
+    }
+
+    // Save Features Section if active tab is Features Section or Features
+    if (activeTab === 'Features Section' || activeTab === 'Features') {
+      console.log('Saving Features Section data...');
+
+      const formData = new FormData();
+
+      // Use the featuresSectionData for both tabs to ensure consistency
+      const dataToSave = activeTab === 'Features Section' ? featuresSectionData : {
+        section_title: featuresData.sectionTitle,
+        subtitle: featuresData.subtitle,
+        title: featuresData.title,
+        description: featuresData.description,
+        features: featuresData.features.map(title => ({ title, description: '' })),
+        button_text: featuresData.buttonText,
+        main_image: featuresData.mainImage,
+        small_image: featuresData.smallImage
+      };
+
+      // Add all text fields
+      formData.append('section_title', dataToSave.section_title);
+      formData.append('subtitle', dataToSave.subtitle);
+      formData.append('title', dataToSave.title);
+      formData.append('description', dataToSave.description);
+      formData.append('button_text', dataToSave.button_text);
+
+      // Add features array
+      dataToSave.features.forEach((feature, index) => {
+        formData.append(`features[${index}][title]`, feature.title);
+        formData.append(`features[${index}][description]`, feature.description);
+      });
+
+      // Handle main image upload
+      if (dataToSave.main_image && dataToSave.main_image.startsWith('blob:')) {
+        try {
+          const response = await fetch(dataToSave.main_image);
+          const blob = await response.blob();
+          const file = new File([blob], 'main-image.jpg', { type: 'image/jpeg' });
+          formData.append('main_image', file);
+        } catch (error) {
+          console.error('Error processing main image:', error);
+        }
+      }
+
+      // Handle small image upload
+      if (dataToSave.small_image && dataToSave.small_image.startsWith('blob:')) {
+        try {
+          const response = await fetch(dataToSave.small_image);
+          const blob = await response.blob();
+          const file = new File([blob], 'small-image.jpg', { type: 'image/jpeg' });
+          formData.append('small_image', file);
+        } catch (error) {
+          console.error('Error processing small image:', error);
+        }
+      }
+
+      // Try to update existing Features Section or create new one
+      try {
+        // First, try to get existing Features Sections to see if we should update
+        const getResponse = await fetch('http://localhost:8000/api/v1/features-sections', {
+          headers: {
+            'Authorization': `Bearer ${token || ''}`
+          }
+        });
+
+        if (getResponse.ok) {
+          const getResult = await getResponse.json();
+          if (getResult.data && getResult.data.features_sections && getResult.data.features_sections.length > 0) {
+            // Update existing section
+            const existingId = getResult.data.features_sections[0].id;
+            formData.append('_method', 'PUT');
+
+            const updateResponse = await fetch(`http://localhost:8000/api/v1/features-sections/${existingId}`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token || ''}`
+              },
+              body: formData
+            });
+
+            if (updateResponse.ok) {
+              console.log('Features Section updated successfully');
+            } else {
+              throw new Error(`Failed to update Features Section: ${updateResponse.status}`);
+            }
+          } else {
+            // Create new section
+            const createResponse = await fetch('http://localhost:8000/api/v1/features-sections', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token || ''}`
+              },
+              body: formData
+            });
+
+            if (createResponse.ok) {
+              console.log('Features Section created successfully');
+            } else {
+              throw new Error(`Failed to create Features Section: ${createResponse.status}`);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error saving Features Section:', error);
+        throw error;
+      }
+    }
+
+    // Save all hero slides as separate service page records
+    if (heroSectionData.length === 0) {
+      throw new Error('No hero slide data to save');
+    }
+
+    console.log('Saving', heroSectionData.length, 'slides...');
+    console.log('Slides to save:', heroSectionData);
+
+    // Save slides sequentially to avoid overwriting
+    const results = [];
+    for (let index = 0; index < heroSectionData.length; index++) {
+      const slide = heroSectionData[index];
+      console.log(`\n=== Processing Slide ${index + 1} ===`);
+      console.log('Slide data:', slide);
+      // Create FormData for file upload
+      const formData = new FormData();
+
+      // Add all text fields - each slide gets its own record
+      formData.append('page_heading', `${heroData.heading} - Slide ${index + 1}`);
+      formData.append('small_text', slide.smallText || '');
+      formData.append('main_heading', slide.mainHeading || '');
+      formData.append('outlined_heading', slide.outlinedHeading || '');
+      formData.append('description', slide.description || '');
+      formData.append('background_text', slide.backgroundText || '');
+      formData.append('button_text', slide.buttonText || 'Get Started Now');
+      formData.append('button_url', slide.buttonUrl && slide.buttonUrl.trim() ? slide.buttonUrl : '/contact');
+
+      // For PUT requests, we need to indicate we want to update
+      if (slide.id && typeof slide.id === 'number') {
+        formData.append('_method', 'PUT');
+      }
+
+      // Handle image upload - check if it's a blob URL (newly uploaded) or regular URL
+      if (slide.image && slide.image.startsWith('blob:')) {
+        // Convert blob URL back to file
+        try {
+          const response = await fetch(slide.image);
+          const blob = await response.blob();
+          const file = new File([blob], `slide-${index + 1}-image.jpg`, { type: 'image/jpeg' });
+          formData.append('bg_image', file);
+        } catch (error) {
+          console.error('Error processing image:', error);
+          // If we can't process the blob, skip the image upload
+        }
+      } else if (slide.image && !slide.image.startsWith('http')) {
+        // If it's a relative path, we need to handle it differently
+        // For now, we'll skip it and let the API keep the existing image
+        console.log('Skipping relative image path for slide', index + 1);
+      }
+
+      // Debug: Log FormData contents
+      console.log(`\n=== Slide ${index + 1} FormData contents ===`);
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}:`, value.name, value.type, value.size);
+        } else {
+          console.log(`${key}:`, value);
+        }
+      }
+
+      // Use POST with _method override for better compatibility
+      const method = 'POST';
+      const url = slide.id && typeof slide.id === 'number'
+        ? `http://localhost:8000/api/v1/service-page/${slide.id}`
+        : 'http://localhost:8000/api/v1/service-page';
+
+      console.log(`Using ${method} method${slide.id ? ' with _method=PUT' : ''} for slide ${index + 1}`);
+
+      const apiResponse = await fetch(url, {
+        method: method,
+        headers: {
+          'Authorization': `Bearer ${token || ''}`,
+          // Don't set Content-Type when using FormData - it will be set automatically
+        },
+        body: formData
+      });
+
+      console.log(`Save API Response Status for Slide ${index + 1}:`, apiResponse.status);
+
+      if (!apiResponse.ok) {
+        const errorText = await apiResponse.text();
+        console.error(`API Error for slide ${index + 1}:`, apiResponse.status, errorText);
+
+        // If slide not found (404), try creating it instead
+        if (apiResponse.status === 404 && slide.id && typeof slide.id === 'number') {
+          console.log(`Slide ${index + 1} not found, creating new slide instead...`);
+
+          // Remove the _method and try creating as new slide
+          formData.delete('_method');
+
+          const createResponse = await fetch('http://localhost:8000/api/v1/service-page', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token || ''}`,
+            },
+            body: formData
+          });
+
+          if (createResponse.ok) {
+            const createResult = await createResponse.json();
+            console.log(`Slide ${index + 1} created successfully:`, createResult);
+            results.push(createResult);
+            continue; // Skip to next slide
+          } else {
+            const createErrorText = await createResponse.text();
+            throw new Error(`Failed to create slide ${index + 1}: ${createResponse.status} - ${createErrorText}`);
+          }
+        }
+
+        throw new Error(`Failed to save slide ${index + 1}: ${apiResponse.status} - ${errorText}`);
+      }
+
+      const result = await apiResponse.json();
+      console.log(`Slide ${index + 1} saved successfully:`, result);
+      results.push(result);
+
+      // Add a small delay between saves to avoid conflicts
+      if (index < heroSectionData.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    console.log('\n=== All hero slides saved successfully! ===');
+    console.log('Results:', results);
+    setHasUnsavedChanges(false); // Reset unsaved changes flag
+    alert(`Successfully saved ${heroSectionData.length} hero slides${(activeTab === 'Features Section' || activeTab === 'Features') ? ' and Features Section' : ''}!`);
+  } catch (error) {
+    console.error("Error saving:", error);
+    alert('Error saving data: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  } finally {
+    setSaving(false);
+  }
+};
+
+return (
+  <div className="w-full">
+    {/* Header */}
+    <div className="bg-gray-100 px-6 py-4 mb-4">
+      <h1 className="text-xl font-semibold text-gray-900">Services Page</h1>
+    </div>
+
+    {/* Tabs */}
+    <div className="px-6 mb-4">
+      <AdminTabs tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+    </div>
+
+    {/* Edit Section */}
+    <div className="px-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-pink-600 mb-2">
+            {activeTab === "Hero Section" ? "Edit Hero Section" :
+              activeTab === "Features" ? "Edit Features Section" :
+                activeTab === "Analytics" ? "Edit Analytics Section" :
+                  activeTab === "Chart" ? "Edit Chart Section" :
+                    activeTab === "Tab Section" ? "Edit Tab Section" :
+                      activeTab === "Features Section" ? "Edit Features Section Management" :
+                        activeTab === "Showcase" ? "Edit Showcase Section" :
+                          "Edit Services Page"}
+          </h2>
+          <div className="h-1 bg-pink-600 w-full"></div>
+        </div>
+
+        {/* Content based on active tab */}
+
+        {/* Hero Section Tab */}
+        {activeTab === 'Hero Section' && (
+          <HeroSectionEditor
+            pageHeading={heroData.heading}
+            onPageHeadingChange={(value) => {
+              setHeroData({ ...heroData, heading: value });
+              setHasUnsavedChanges(true);
+            }}
+            slides={heroSectionData}
+            onSlidesChange={(slides) => {
+              setHeroSectionData(slides);
+              setHasUnsavedChanges(true);
+            }}
+          />
+        )}
+
+        {/* Features Tab */}
+        {activeTab === 'Features' && (
+          <FeaturesEditor
+            data={featuresData}
+            onChange={setFeaturesData}
+          />
+        )}
+
+        {/* Analytics Tab */}
+        {activeTab === 'Analytics' && (
+          <AnalyticsEditor
+            data={analyticsData}
+            onChange={setAnalyticsData}
+          />
+        )}
+
+        {/* Chart Tab */}
+        {activeTab === 'Chart' && (
+          <ChartEditor
+            data={chartData}
+            onChange={setChartData}
+          />
+        )}
+
+        {/* Tab Section Tab */}
+        {activeTab === 'Tab Section' && (
+          <TabEditor
+            data={tabData}
+            onChange={setTabData}
+          />
+        )}
+
+        {/* Features Section Tab */}
+        {activeTab === 'Features Section' && (
+          <FeaturesSectionEditor
+            data={featuresSectionData}
+            onChange={setFeaturesSectionData}
+          />
+        )}
+
+        {/* Showcase Tab */}
+        {activeTab === 'Showcase' && (
+          <ShowcaseEditor
+            data={showcaseData}
+            onChange={setShowcaseData}
+          />
+        )}
+
+        {/* Save Button */}
+        <div className="flex justify-end mt-8 pt-6 border-t border-gray-200">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {saving ? (
+              <>
+                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+              </>
+            ) : (
+              "Save"
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+      }
+

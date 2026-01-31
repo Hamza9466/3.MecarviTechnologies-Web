@@ -1,40 +1,127 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+
+interface ServicePageSlide {
+    id: number;
+    bg_image: string;
+    small_text: string;
+    main_heading: string;
+    outlined_heading: string;
+    description: string;
+    background_text: string;
+    button_text: string;
+    button_url: string;
+}
+
+interface SlideData {
+    id: number;
+    image: string;
+    smallText: string;
+    mainHeading: string;
+    outlinedHeading: string;
+    description: string;
+    backgroundText: string;
+    buttonText: string;
+    buttonUrl: string;
+}
 
 const HeroSection: React.FC = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [slides, setSlides] = useState<SlideData[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const slides = [
-        {
-            image: "/assets/images/gallery-1.webp",
-            smallText: "YOU THINK WE BUILT YOUR VISION",
-            mainHeading: "Elevating Your Business",
-            outlinedHeading: "With Industry Experts",
-            description: "We are dedicated to building long-term partnerships with our clients, ensuring their success.",
-            backgroundText: "IT SOLUTION"
-        },
-        {
-            image: "/assets/images/gallery-50.webp",
-            smallText: "INNOVATION MEETS EXCELLENCE",
-            mainHeading: "Transform Your Digital",
-            outlinedHeading: "Presence Today",
-            description: "Our cutting-edge solutions propel your business into the future of technology.",
-            backgroundText: "DIGITAL TRANSFORM"
-        }
-    ];
+    useEffect(() => {
+        const fetchSlides = async () => {
+            try {
+                setLoading(true);
+                console.log("Fetching service page slides from API...");
+
+                const response = await fetch("http://localhost:8000/api/v1/service-page", {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json",
+                    },
+                });
+
+                console.log("Service slides API response status:", response.status);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log("Service slides API response data:", data);
+
+                    if (data.success && data.data?.service_pages?.length > 0) {
+                        // Convert service pages to slide format
+                        const serviceSlides = data.data.service_pages.map((page: ServicePageSlide) => ({
+                            id: page.id,
+                            image: page.bg_image.startsWith('http') ? page.bg_image : `http://localhost:8000${page.bg_image}`,
+                            smallText: page.small_text,
+                            mainHeading: page.main_heading,
+                            outlinedHeading: page.outlined_heading,
+                            description: page.description,
+                            backgroundText: page.background_text,
+                            buttonText: page.button_text,
+                            buttonUrl: page.button_url
+                        }));
+
+                        console.log("Setting slides data:", serviceSlides);
+                        setSlides(serviceSlides);
+                    } else {
+                        console.warn("No service pages found in API response");
+                    }
+                } else {
+                    const errorText = await response.text().catch(() => "Unknown error");
+                    console.error("Failed to fetch service slides:", response.status, errorText);
+                }
+            } catch (err) {
+                console.error("Error fetching service slides:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSlides();
+    }, []);
 
     const nextSlide = () => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
+        if (slides.length > 0) {
+            setCurrentSlide((prev) => (prev + 1) % slides.length);
+        }
     };
 
     const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+        if (slides.length > 0) {
+            setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+        }
     };
 
-    const currentSlideData = slides[currentSlide];
+    const currentSlideData = slides[currentSlide] || null;
+
+    if (loading) {
+        return (
+            <section className="relative h-[70vh] pt-24 overflow-hidden rounded-t-3xl rounded-b-3xl">
+                <div className="flex items-center justify-center h-full">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                </div>
+            </section>
+        );
+    }
+
+    if (!currentSlideData || slides.length === 0) {
+        return (
+            <section className="relative h-[70vh] pt-24 overflow-hidden rounded-t-3xl rounded-b-3xl">
+                <div className="flex items-center justify-center h-full">
+                    <div className="text-center text-gray-500">
+                        <p>No slides available</p>
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
+
+
         <section className="relative h-[70vh] pt-24 overflow-hidden rounded-t-3xl rounded-b-3xl">
             {/* Background Image */}
             <div className="absolute inset-0">
@@ -84,9 +171,12 @@ const HeroSection: React.FC = () => {
                         </div>
 
                         {/* CTA */}
-                        <button className="bg-purple-600 ms-50 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl">
-                            Get Started Now
-                        </button>
+                        <a
+                            href={currentSlideData.buttonUrl || '/contact'}
+                            className="bg-purple-600 ms-50 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl inline-block"
+                        >
+                            {currentSlideData.buttonText || 'Get Started Now'}
+                        </a>
 
                     </div>
                 </div>
