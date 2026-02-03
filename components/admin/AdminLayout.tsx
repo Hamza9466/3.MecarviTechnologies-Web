@@ -270,6 +270,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ],
       },
       {
+        category: "AUTH",
+        items: [
+          {
+            name: "Auth",
+            href: "/login",
+            iconName: "users",
+            subItems: [
+              { name: "Sign In", href: "/login" },
+              { name: "Sign Up", href: "/signup" },
+              { name: "Forgot Password", href: "/forgot-password" },
+              { name: "Reset Password", href: "/reset-password" },
+            ],
+          },
+        ],
+      },
+      {
         category: "PAGES",
         items: [
           { name: "Manage users", href: "/admin/users", iconName: "users" },
