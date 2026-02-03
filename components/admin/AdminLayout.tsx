@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -10,6 +10,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [expandedItems, setExpandedItems] = useState<string[]>(["Pages", "Projects", "Tasks", "CRM"]);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (!pathname) return;
+    if (pathname === "/admin/estimate" || pathname.startsWith("/admin/estimate/")) {
+      setExpandedItems((prev) => {
+        const next = new Set(prev);
+        next.add("CRM");
+        next.add("Estimate");
+        return Array.from(next);
+      });
+    }
+
+    if (pathname === "/admin/invoice" || pathname.startsWith("/admin/invoice/")) {
+      setExpandedItems((prev) => {
+        const next = new Set(prev);
+        next.add("CRM");
+        next.add("Invoice");
+        return Array.from(next);
+      });
+    }
+  }, [pathname]);
 
   const toggleExpand = (item: string) => {
     setExpandedItems((prev) =>
@@ -224,6 +245,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { name: "Deals", href: "/admin/crm/deals", iconName: "deals" },
           { name: "Chat", href: "/admin/chat", iconName: "chat" },
           { name: "Calendar", href: "/admin/calendar", iconName: "calendar" },
+          { name: "Employees", href: "/admin/employee", iconName: "users" },
+          { name: "Teams", href: "/admin/teams", iconName: "users" },
+          {
+            name: "Invoice",
+            href: "/admin/invoice",
+            iconName: "files",
+            subItems: [
+              { name: "List", href: "/admin/invoice" },
+              { name: "Create", href: "/admin/invoice/create" },
+              { name: "Detail", href: "/admin/invoice/1" },
+            ],
+          },
+          {
+            name: "Estimate",
+            href: "/admin/estimate",
+            iconName: "quote",
+            subItems: [
+              { name: "List", href: "/admin/estimate" },
+              { name: "Create", href: "/admin/estimate/create" },
+              { name: "View", href: "/admin/estimate/1" },
+            ],
+          },
         ],
       },
       {
@@ -366,6 +409,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                               
                               // Special handling for Project Details - match any project detail page
                               if (subItem.name === "Project Details" && pathname?.match(/^\/admin\/projects\/\d+$/)) {
+                                isSubActive = true;
+                              }
+
+                              // Special handling for Estimate View - match any estimate view page
+                              if (
+                                subItem.name === "View" &&
+                                pathname?.match(/^\/admin\/estimate\/[^/]+$/) &&
+                                pathname !== "/admin/estimate/create"
+                              ) {
+                                isSubActive = true;
+                              }
+
+                              // Special handling for Invoice Detail - match any invoice detail page
+                              if (
+                                subItem.name === "Detail" &&
+                                pathname?.match(/^\/admin\/invoice\/[^/]+$/) &&
+                                pathname !== "/admin/invoice/create"
+                              ) {
                                 isSubActive = true;
                               }
                               
