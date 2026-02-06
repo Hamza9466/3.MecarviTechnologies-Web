@@ -245,7 +245,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           { name: "Deals", href: "/admin/crm/deals", iconName: "deals" },
           { name: "Chat", href: "/admin/chat", iconName: "chat" },
           { name: "Calendar", href: "/admin/calendar", iconName: "calendar" },
-          { name: "Employees", href: "/admin/employee", iconName: "users" },
+          {
+            name: "Employee",
+            href: "/admin/employee",
+            iconName: "users",
+            subItems: [
+              { name: "Add Employee", href: "/admin/employee/create" },
+              { name: "Employee List", href: "/admin/employee" },
+            ],
+          },
           { name: "Teams", href: "/admin/teams", iconName: "users" },
           {
             name: "Invoice",

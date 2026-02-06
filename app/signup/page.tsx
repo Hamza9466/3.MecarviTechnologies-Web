@@ -107,30 +107,14 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
-        <div className="hidden lg:flex flex-col bg-gray-50 overflow-hidden">
-          <div className="pt-8 pr-8 pb-0 pl-[70px]">
-            <div className="relative h-10 w-56">
-              <Image src="/assets/images/logo.webp" alt="Mecarvi Technologies" fill className="object-contain" />
-            </div>
-            <p className="mt-6 max-w-md text-gray-700 text-base leading-relaxed">
-              The most straightforward way to manage your projects, invoices, and teams—all in one place.
-            </p>
-          </div>
-
-          <div className="mt-[70px] flex-1">
-            <div className="w-[calc(100%-70px)] ml-[70px] h-full">
-              <div className="bg-white shadow-xl border border-gray-200 overflow-hidden rounded-tl-xl h-full">
-                <div className="relative w-full h-full">
-                  <Image
-                    src="/assets/images/49TX8jOWzRs1BMlR1748264596.jpg"
-                    alt="Dashboard preview"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="relative hidden lg:block">
+          <Image
+            src="/assets/images/49TX8jOWzRs1BMlR1748264596.jpg"
+            alt="Auth"
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
 
         <div className="flex items-center justify-center px-4 py-10 lg:px-10">
