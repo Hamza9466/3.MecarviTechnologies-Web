@@ -50,20 +50,24 @@ export default function Header() {
 
           {/* Centered Navigation Panel - Hidden on mobile/tablet */}
           <nav
-            className={`hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/3 -translate-y-1/2 rounded-none rounded-bl-2xl rounded-br-2xl px-4 xl:px-8 py-6 xl:py-10 items-center gap-3 xl:gap-6 z-20 whitespace-nowrap transition-all duration-1000`}
+            className={`hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/3 -translate-y-1/2 rounded-none rounded-bl-2xl rounded-br-2xl px-4 xl:px-8 py-8 xl:py-12 items-center gap-3 xl:gap-6 z-20 whitespace-nowrap transition-all duration-1000`}
             style={{
               borderTopLeftRadius: 0,
               borderTopRightRadius: 0,
               backgroundImage: 'url(/assets/images/Rectangle-28.png)',
-              backgroundSize: 'contain',
+              backgroundSize: '100% 100%',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              width: '755px', marginTop: '10px',
+              width: 'auto',
+              minWidth: '580px',
+              marginTop: '10px',
+              paddingTop: '32px',
+              paddingBottom: '32px',
             }}
           >
             <Link
               href="/"
-              className={`text-xs lg:ps-3 xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/" ? "font-semibold" : ""
+              className={`text-xs lg:ps-4 xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/" ? "font-semibold" : ""
                 }`}
             >
               Home

@@ -140,7 +140,7 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
       }
 
       // Determine the correct method and URL based on whether we have a homePageId
-      const isUpdate = homePageId !== null;
+      const isUpdate = homePageId !== null && homePageId !== undefined;
       const method = isUpdate ? "POST" : "POST"; // Laravel typically uses POST for both create and update with _method parameter
       const url = isUpdate
         ? `http://localhost:8000/api/v1/home-page/${homePageId}`
@@ -184,15 +184,28 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
       }
 
       console.log("Hero Editor - Parsed response:", responseData);
+      console.log("Hero Editor - Response status:", response.status);
+      console.log("Hero Editor - Response headers:", response.headers);
 
       if (!response.ok) {
-        let errorMessage = "Failed to save home page";
+        let errorMessage = `Failed to save home page (Status: ${response.status})`;
         if (responseData.errors) {
           const errorMessages = Object.values(responseData.errors).flat() as string[];
           errorMessage = errorMessages.join(", ");
+          console.log("Hero Editor - Validation errors:", responseData.errors);
         } else if (responseData.message) {
           errorMessage = responseData.message;
+        } else if (responseData.error) {
+          errorMessage = responseData.error;
+        } else {
+          errorMessage = `Server error with status ${response.status}. Check Laravel logs for details.`;
         }
+        console.error("Hero Editor - Full error details:", {
+          status: response.status,
+          statusText: response.statusText,
+          responseData,
+          errorMessage
+        });
         throw new Error(errorMessage);
       }
 
@@ -264,34 +277,31 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
       setSuccess("");
       const token = localStorage.getItem("token");
 
-      // Try using FormData in the body for DELETE request
-      const imageTypeParam = imageType === "background" ? "background_image" : "secondary_image";
-      const formData = new FormData();
-      formData.append("image_type", imageTypeParam);
-
-      // Add Laravel method spoofing for DELETE
-      formData.append("_method", "DELETE");
+      // Use the correct field deletion endpoint
+      const imageField = imageType === "background" ? "background_image" : "secondary_image";
 
       console.log("Hero Editor - Deleting image:", {
         homePageId,
         imageType,
-        imageTypeParam,
+        imageField,
       });
 
-      const response = await fetch(`http://localhost:8000/api/v1/home-page/${homePageId}`, {
-        method: "POST", // Use POST with _method parameter for Laravel
+      const response = await fetch(`http://localhost:8000/api/v1/home-page/${homePageId}/field/${imageField}`, {
+        method: "DELETE",
         headers: {
           "Accept": "application/json",
+          "Content-Type": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
         },
-        body: formData,
       });
 
       console.log("Hero Editor - Delete response status:", response.status);
+      console.log("Hero Editor - Delete raw response:", await response.text());
 
       let responseData;
       try {
         const text = await response.text();
+        console.log("Hero Editor - Delete response text:", text);
         responseData = text ? JSON.parse(text) : {};
       } catch (parseError) {
         console.error("Parse error:", parseError);
@@ -303,20 +313,31 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
         }
       }
 
+      console.log("Hero Editor - Delete parsed response:", responseData);
+
       if (!response.ok) {
         let errorMessage = `Failed to delete ${imageType} image`;
         if (responseData.errors) {
           const errorMessages = Object.values(responseData.errors).flat() as string[];
           errorMessage = errorMessages.join(", ");
+          console.log("Hero Editor - Delete validation errors:", responseData.errors);
         } else if (responseData.message) {
           errorMessage = responseData.message;
         } else if (responseData.error) {
           errorMessage = responseData.error;
+        } else {
+          errorMessage = `Server error with status ${response.status}. Check Laravel logs.`;
         }
+        console.error("Hero Editor - Delete full error details:", {
+          status: response.status,
+          statusText: response.statusText,
+          responseData,
+          errorMessage
+        });
         throw new Error(errorMessage);
       }
 
-      // Update form data to remove the deleted image
+      // Update form data to remove the deleted image immediately
       if (imageType === "background") {
         setFormData((prev) => ({
           ...prev,
@@ -331,8 +352,17 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
         }));
       }
 
-      // Refresh data from API to get updated state
-      await fetchHomePageData();
+      // Show immediate success message
+      setSuccess(`${imageType === "background" ? "Background" : "Secondary"} image cleared from display!`);
+
+      // Try to update backend (may not work due to Laravel logic)
+      console.log("Hero Editor - Attempting backend update...");
+      try {
+        await fetchHomePageData();
+        console.log("Hero Editor - Backend update completed");
+      } catch (err) {
+        console.warn("Hero Editor - Backend update failed, but local state cleared:", err);
+      }
 
       setSuccess(`${imageType === "background" ? "Background" : "Secondary"} image deleted successfully!`);
       setTimeout(() => setSuccess(""), 3000);
@@ -470,15 +500,36 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
                     className="object-cover"
                   />
                 ) : (
-                  <img
-                    src={`http://localhost:8000${formData.backgroundImageUrl}`}
-                    alt="Background"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      console.error("Failed to load background image:", formData.backgroundImageUrl);
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+                  <>
+                    <img
+                      src={formData.backgroundImageUrl?.startsWith('http') 
+                        ? formData.backgroundImageUrl 
+                        : `http://localhost:8000${formData.backgroundImageUrl}`}
+                      alt="Background"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error("Failed to load background image:", formData.backgroundImageUrl);
+                        console.error("Attempted URL:", formData.backgroundImageUrl?.startsWith('http') 
+                          ? formData.backgroundImageUrl 
+                          : `http://localhost:8000${formData.backgroundImageUrl}`);
+                        console.error("Note: Run 'php artisan storage:link' in your Laravel backend to fix this issue");
+                        e.currentTarget.style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                      onLoad={() => {
+                        console.log("Background image loaded successfully");
+                      }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-xs text-center p-2" style={{display: 'none'}}>
+                      <div>
+                        <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                        Image not found
+                      </div>
+                    </div>
+                  </>
                 )}
                 <button
                   onClick={() => handleDeleteImage("background")}

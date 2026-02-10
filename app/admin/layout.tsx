@@ -12,6 +12,11 @@ export default function AdminLayoutWrapper({ children }: { children: React.React
   useEffect(() => {
     // Check if user is authenticated
     const checkAuth = () => {
+      if (pathname?.startsWith("/admin/auth")) {
+        setIsAuthenticated(true);
+        return;
+      }
+
       const authStatus = localStorage.getItem("isAuthenticated");
       if (authStatus === "true") {
         setIsAuthenticated(true);
@@ -31,6 +36,10 @@ export default function AdminLayoutWrapper({ children }: { children: React.React
         <div className="text-gray-600">Loading...</div>
       </div>
     );
+  }
+
+  if (pathname?.startsWith("/admin/auth")) {
+    return <>{children}</>;
   }
 
   // Only render admin layout if authenticated

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { apiUrl } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -50,11 +51,11 @@ export default function LoginPage() {
         password: loginData.password,
       };
 
-      console.log("Sending login request to:", "http://localhost:8000/api/v1/login");
+      console.log("Sending login request to:", apiUrl("/api/v1/login"));
       console.log("Request body:", requestBody);
 
       // API call to login endpoint
-      const response = await fetch("http://localhost:8000/api/v1/login", {
+      const response = await fetch(apiUrl("/api/v1/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,7 +109,7 @@ export default function LoginPage() {
       
       // Handle CORS or network errors
       if (error.message?.includes("Failed to fetch") || error.message?.includes("NetworkError")) {
-        setError("Cannot connect to the server. Please ensure the backend is running on http://localhost:8000");
+        setError("Cannot connect to the server. Please ensure the backend is running.");
       } else {
         setError(error.message || "Network error. Please check your connection and try again.");
       }
@@ -149,11 +150,11 @@ export default function LoginPage() {
         password_confirmation: registerData.confirmPassword,
       };
 
-      console.log("Sending registration request to:", "http://localhost:8000/api/v1/register");
+      console.log("Sending registration request to:", apiUrl("/api/v1/register"));
       console.log("Request body:", requestBody);
 
       // API call to register endpoint
-      const response = await fetch("http://localhost:8000/api/v1/register", {
+      const response = await fetch(apiUrl("/api/v1/register"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -209,7 +210,7 @@ export default function LoginPage() {
       
       // Handle CORS or network errors
       if (error.message?.includes("Failed to fetch") || error.message?.includes("NetworkError")) {
-        setError("Cannot connect to the server. Please ensure the backend is running on http://localhost:8000");
+        setError("Cannot connect to the server. Please ensure the backend is running.");
       } else {
         setError(error.message || "Network error. Please check your connection and try again.");
       }

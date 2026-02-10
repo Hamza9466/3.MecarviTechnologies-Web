@@ -243,6 +243,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         category: "CRM",
         items: [
           { name: "Deals", href: "/admin/crm/deals", iconName: "deals" },
+          { name: "Clients", href: "/admin/crm/clients", iconName: "users" },
+          { name: "Contracts", href: "/admin/contracts", iconName: "files" },
           { name: "Chat", href: "/admin/chat", iconName: "chat" },
           { name: "Calendar", href: "/admin/calendar", iconName: "calendar" },
           {
@@ -282,10 +284,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         items: [
           {
             name: "Auth",
-            href: "/login",
+            href: "/admin/auth/sign-in",
             iconName: "users",
             subItems: [
-              { name: "Sign In", href: "/login" },
+              { name: "Sign In", href: "/admin/auth/sign-in" },
               { name: "Sign Up", href: "/signup" },
               { name: "Forgot Password", href: "/forgot-password" },
               { name: "Reset Password", href: "/reset-password" },

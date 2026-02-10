@@ -133,24 +133,31 @@ export default function Hero() {
           }}
         />
       ) : (
-        /* Default Gradient Background */
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          preserveAspectRatio="none"
-          viewBox="0 0 1440 800"
-          style={{ zIndex: 0, overflow: 'hidden' }}
-        >
-          <defs>
-            <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#00C6EC" />
-              <stop offset="100%" stopColor="#0040EA" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M0,0 L1440,0 L1440,800 L0,800 Z"
-            fill="url(#blueGradient)"
-          />
-        </svg>
+        /* Default Background Image */
+        <img
+          src="/assets/images/Vector - Copy - Copy.png"
+          alt="Default background"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ zIndex: 0 }}
+          onError={(e) => {
+            // Fallback to gradient if image fails
+            console.warn("Default background image failed to load, using gradient fallback");
+            const parent = e.currentTarget.parentElement;
+            if (parent) {
+              parent.innerHTML = `
+                <svg class="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 1440 800" style="z-index: 0; overflow: hidden;">
+                  <defs>
+                    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#00C6EC" />
+                      <stop offset="100%" stop-color="#0040EA" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M0,0 L1440,0 L1440,800 L0,800 Z" fill="url(#blueGradient)" />
+                </svg>
+              `;
+            }
+          }}
+        />
       )}
 
       {/* Vector5 Image - Top Left */}
