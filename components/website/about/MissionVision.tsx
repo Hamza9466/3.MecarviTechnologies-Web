@@ -67,20 +67,20 @@ export default function MissionVision() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8" >
           {/* Mission Statement Card */}
           <div className="bg-teal-900 rounded-2xl p-8 md:p-10 lg:p-12" data-aos="fade-up">
-            <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold text-white mb-6 md:mb-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-semibold text-white mb-6 md:mb-8">
               {displayData.mission_title}
             </h2>
-            <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed">
+            <p className="text-gray-300 text-base sm:text-lg md:text-xl leading-relaxed">
               {displayData.mission_description}
             </p>
           </div>
 
           {/* Vision Statement Card */}
           <div className="bg-teal-900 rounded-2xl p-8 md:p-10 lg:p-12" data-aos="fade-up">
-            <h2 className="text-xl sm:text-3xl md:text-4xl font-semibold text-white mb-6 md:mb-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-semibold text-white mb-6 md:mb-8">
               {displayData.vision_title}
             </h2>
-            <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed">
+            <p className="text-gray-300 text-base sm:text-lg md:text-xl leading-relaxed">
               {displayData.vision_description}
             </p>
           </div>

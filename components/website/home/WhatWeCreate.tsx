@@ -240,7 +240,7 @@ export default function WhatWeCreate() {
 
   if (loading) {
     return (
-      <section className="py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden min-h-screen bg-white flex items-center justify-center">
+      <section className="pt-16 sm:pt-20 md:pt-24 pb-4 sm:pb-6 md:pb-8 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden min-h-screen bg-white flex items-center justify-center">
         <div className="text-gray-600 text-xl">Loading...</div>
       </section>
     );
@@ -414,7 +414,7 @@ export default function WhatWeCreate() {
 
                 {/* Main Heading */}
                 {selectedTab.main_heading && (
-                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 mb-6">
                     {selectedTab.main_heading}
                   </h2>
                 )}

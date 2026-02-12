@@ -22,15 +22,17 @@ export default function FAQSection() {
   const [introParagraph, setIntroParagraph] = useState("Find answers to commonly asked questions about our services, products, and processes. If you can't find what you're looking for, feel free to ask us a question using the form below.");
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [showAskQuestion, setShowAskQuestion] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     message: "",
   });
+  const [askQuestionHeading, setAskQuestionHeading] = useState("Ask a Question");
+  const [askQuestionDescription, setAskQuestionDescription] = useState("Can't find what you're looking for? Send us your question and we'll get back to you.");
 
   useEffect(() => {
     fetchData();
@@ -41,8 +43,12 @@ export default function FAQSection() {
       setLoading(true);
       
       // Fetch all data in parallel
-      const [introRes, categoriesRes, faqItemsRes] = await Promise.allSettled([
+      const [introRes, askQuestionRes, categoriesRes, faqItemsRes] = await Promise.allSettled([
         fetch("http://localhost:8000/api/v1/faq-intro-paragraph", {
+          method: "GET",
+          headers: { Accept: "application/json" },
+        }),
+        fetch("http://localhost:8000/api/v1/faq-ask-question-section", {
           method: "GET",
           headers: { Accept: "application/json" },
         }),
@@ -68,6 +74,20 @@ export default function FAQSection() {
         }
       }
 
+      // Handle FAQ Ask Question Section (form heading & description)
+      if (askQuestionRes.status === "fulfilled" && askQuestionRes.value.ok) {
+        try {
+          const askData = await askQuestionRes.value.json();
+          if (askData.success && askData.data?.faq_ask_question_section) {
+            const section = askData.data.faq_ask_question_section;
+            if (section.heading) setAskQuestionHeading(section.heading);
+            if (section.description) setAskQuestionDescription(section.description);
+          }
+        } catch (e) {
+          console.error("Error parsing FAQ ask question section:", e);
+        }
+      }
+
       // Handle Categories
       if (categoriesRes.status === "fulfilled" && categoriesRes.value.ok) {
         try {
@@ -84,31 +104,29 @@ export default function FAQSection() {
               }))
               .sort((a: FAQCategory, b: FAQCategory) => a.order - b.order);
             setCategories(sortedCats);
-            // Set first category as active if available
-            if (sortedCats.length > 0 && !activeCategory) {
-              setActiveCategory(sortedCats[0].id);
-            }
+            // Keep activeCategory null so "All Categories" shows all FAQs by default
           }
         } catch (e) {
           console.error("Error parsing categories:", e);
         }
       }
 
-      // Handle FAQ Items
+      // Handle FAQ Items - ensure we always get an array and parse every item
       if (faqItemsRes.status === "fulfilled" && faqItemsRes.value.ok) {
         try {
           const faqItemsData = await faqItemsRes.value.json();
           if (faqItemsData.success && faqItemsData.data) {
-            const items = Array.isArray(faqItemsData.data)
+            const raw = Array.isArray(faqItemsData.data)
               ? faqItemsData.data
-              : faqItemsData.data.faq_items || [];
+              : faqItemsData.data.faq_items;
+            const items = Array.isArray(raw) ? raw : raw != null ? [raw] : [];
             const sortedItems = items
-              .map((item: any) => ({
-                id: item.id,
-                faq_category_id: item.faq_category_id || item.category_id || 0,
+              .map((item: any, index: number) => ({
+                id: item.id ?? index,
+                faq_category_id: item.faq_category_id ?? item.category_id ?? 0,
                 question: item.question || "",
                 answer: item.answer || "",
-                order: item.order || 0,
+                order: item.order ?? index,
               }))
               .sort((a: FAQItem, b: FAQItem) => a.order - b.order);
             setFaqItems(sortedItems);
@@ -139,6 +157,7 @@ export default function FAQSection() {
         },
         body: JSON.stringify({
           name: formData.name.trim(),
+          email: formData.email.trim(),
           question_message: formData.message.trim(),
         }),
       });
@@ -151,7 +170,7 @@ export default function FAQSection() {
 
       if (data.success) {
         setSubmitSuccess(true);
-        setFormData({ name: "", message: "" });
+        setFormData({ name: "", email: "", message: "" });
         // Reset success message after 3 seconds
         setTimeout(() => {
           setSubmitSuccess(false);
@@ -193,49 +212,44 @@ export default function FAQSection() {
                 <nav className="space-y-2">
                   {loading ? (
                     <div className="text-center text-gray-500 py-4">Loading categories...</div>
-                  ) : categories.length > 0 ? (
-                    <>
-                      {categories.map((category) => (
-                        <button
-                          key={category.id}
-                          onClick={() => {
-                            setActiveCategory(category.id);
-                            setShowAskQuestion(false);
-                          }}
-                          className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                            activeCategory === category.id && !showAskQuestion
-                              ? "bg-pink-500 text-white font-semibold"
-                              : "text-gray-900 hover:bg-gray-100"
-                          }`}
-                        >
-                          {category.category_name}
-                        </button>
-                      ))}
-                    </>
                   ) : (
-                    <div className="text-center text-gray-500 py-4 text-sm">No categories available</div>
+                    <>
+                      {/* All Categories - show all FAQs */}
+                      <button
+                        onClick={() => setActiveCategory(null)}
+                        className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                          activeCategory === null
+                            ? "bg-pink-500 text-white font-semibold"
+                            : "text-gray-900 hover:bg-gray-100"
+                        }`}
+                      >
+                        All Categories
+                      </button>
+                      {categories.length > 0 ? (
+                        categories.map((category) => (
+                          <button
+                            key={category.id}
+                            onClick={() => setActiveCategory(category.id)}
+                            className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                              activeCategory === category.id
+                                ? "bg-pink-500 text-white font-semibold"
+                                : "text-gray-900 hover:bg-gray-100"
+                            }`}
+                          >
+                            {category.category_name}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="text-center text-gray-500 py-4 text-sm">No categories available</div>
+                      )}
+                    </>
                   )}
                   
-                  {/* Ask Question Button */}
-                  <button
-                    onClick={() => {
-                      setShowAskQuestion(true);
-                      setActiveCategory(null);
-                    }}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                      showAskQuestion
-                        ? "bg-pink-500 text-white font-semibold"
-                        : "text-gray-900 hover:bg-gray-100"
-                    }`}
-                  >
-                    Ask Question
-                  </button>
                 </nav>
               </div>
 
-              {/* Ask Question Form - Show only when Ask Question button is clicked */}
-              {showAskQuestion && (
-                <div className="rounded-lg shadow-sm border border-gray-100 p-6 md:p-8" style={{ backgroundColor: '#F3F4F6' }}>
+              {/* Ask Question Form - always visible */}
+              <div className="rounded-lg shadow-sm border border-gray-100 p-6 md:p-8" style={{ backgroundColor: '#F3F4F6' }}>
                   {submitSuccess && (
                     <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
                       Question submitted successfully! We'll get back to you soon.
@@ -250,6 +264,14 @@ export default function FAQSection() {
                     onSubmit={handleSubmitQuestion}
                     className="space-y-6"
                   >
+                    {/* Form Heading & Description - from API */}
+                    <div className="mb-4">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{askQuestionHeading}</h3>
+                      <p className="text-sm text-gray-600">
+                        {askQuestionDescription}
+                      </p>
+                    </div>
+
                     {/* Name Field */}
                     <div>
                       <label htmlFor="name" className="block text-sm font-bold text-gray-900 mb-2">
@@ -261,6 +283,22 @@ export default function FAQSection() {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="Enter your name"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                        required
+                      />
+                    </div>
+
+                    {/* Email Field */}
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-bold text-gray-900 mb-2">
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        id="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder="Enter your email"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                         required
                       />
@@ -282,17 +320,18 @@ export default function FAQSection() {
                       />
                     </div>
 
-                    {/* Submit Button */}
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {submitting ? "Submitting..." : "Ask Question Now"}
-                    </button>
+                    {/* Submit Button - smaller and centered on large screens */}
+                    <div className="flex justify-center">
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className="w-full lg:w-auto lg:max-w-xs lg:px-8 lg:py-2.5 text-base lg:text-sm bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {submitting ? "Submitting..." : "Ask Question Now"}
+                      </button>
+                    </div>
                   </form>
                 </div>
-              )}
             </div>
           </div>
 
@@ -323,8 +362,8 @@ export default function FAQSection() {
                   </div>
                   
                   <div className="space-y-4 pl-12">
-                    {column1FAQs.map((faq) => (
-                      <div key={faq.id} className="relative">
+                    {column1FAQs.map((faq, idx) => (
+                      <div key={`faq-c1-${faq.id}-${idx}`} className="relative">
                         {/* FAQ Item */}
                         <div className="border-2 border-pink-500 rounded-lg p-4 md:p-6 bg-white hover:shadow-md transition-shadow">
                           <button
@@ -379,8 +418,8 @@ export default function FAQSection() {
                   </div>
                   
                   <div className="space-y-4 pl-12">
-                    {column2FAQs.map((faq) => (
-                      <div key={faq.id} className="relative">
+                    {column2FAQs.map((faq, idx) => (
+                      <div key={`faq-c2-${faq.id}-${idx}`} className="relative">
                         {/* FAQ Item */}
                         <div className="border-2 border-pink-500 rounded-lg p-4 md:p-6 bg-white hover:shadow-md transition-shadow">
                           <button

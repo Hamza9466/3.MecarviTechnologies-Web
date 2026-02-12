@@ -5,8 +5,8 @@ import { useState, useEffect } from "react";
 interface HeroSectionData {
   title_part_1: string;
   title_part_2: string;
-  description_1: string;
-  description_2: string;
+  description_1: string | null;
+  description_2: string | null;
   hero_background_image: string | null;
   hero_image: string | null;
 }
@@ -41,8 +41,8 @@ export default function AboutHero() {
           setData({
             title_part_1: section.title_part_1 || "",
             title_part_2: section.title_part_2 || "",
-            description_1: section.description_1 || "",
-            description_2: section.description_2 || "",
+            description_1: section.description_1 || null,
+            description_2: section.description_2 || null,
             hero_background_image: getImageUrl(section.hero_background_image),
             hero_image: getImageUrl(section.hero_image),
           });
@@ -66,8 +66,8 @@ export default function AboutHero() {
   const displayData = data || {
     title_part_1: "About",
     title_part_2: "Mecarvi Technologies",
-    description_1: "Leading the industry with innovation, quality, and exceptional service since 1989.",
-    description_2: "We create exceptional signage solutions that help businesses stand out. With over 35 years of experience, we combine cutting-edge technology with traditional craftsmanship to deliver results that exceed expectations.",
+    description_1: null,
+    description_2: null,
     hero_background_image: null,
     hero_image: null,
   };
@@ -95,8 +95,8 @@ export default function AboutHero() {
 
       <div className="max-w-[95%] mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
         {/* Content */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center leading-tight pt-16 sm:pt-12 md:pt-16" data-aos="fade-up">
-          {displayData.title_part_1} <span className="text-white">{displayData.title_part_2}</span>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white text-center leading-tight pt-16 sm:pt-12 md:pt-16" data-aos="fade-up">
+          {displayData.title_part_1}
         </h1>
       </div>
     </section>

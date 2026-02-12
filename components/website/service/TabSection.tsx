@@ -208,7 +208,7 @@ const TabSection: React.FC = () => {
             <div className="container mx-auto px-4 w-[95%]">
                 {/* Heading and Description - Above tabs */}
                 <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-2" data-aos="fade-up">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 mb-2" data-aos="fade-up">
                         {tabData.sectionTitle}
                     </h2>
                     <p className="text-gray-600 max-w-2xl mx-auto" data-aos="fade-up">
@@ -249,9 +249,11 @@ const TabSection: React.FC = () => {
                         </React.Fragment>
                     ))}
                 </div>
+            </div>
 
-                {/* Tab Content */}
-                <div className="text-white -mt-8 p-12 rounded-2xl grid grid-cols-1 lg:grid-cols-2 gap-8" style={{ backgroundColor: '#3A3A3A' }} data-aos="fade-up">
+                {/* Tab Content - Full width dark block */}
+            <div className="w-full px-4 md:px-6 lg:px-8 -mt-8">
+                <div className="text-white p-8 md:p-12 rounded-t-2xl rounded-b-2xl grid grid-cols-1 lg:grid-cols-2 gap-8 w-full" style={{ backgroundColor: '#3A3A3A' }} data-aos="fade-up">
                     {activeTab === 0 && (
                         <>
                             {/* Tab 1: Image left, paragraph right */}
@@ -310,9 +312,9 @@ const TabSection: React.FC = () => {
 
                     {activeTab === 2 && (
                         <>
-                            {/* Tab 3: paragraph and bullet points in 2x2 grid */}
-                            <div className="flex justify-center items-center min-h-[300px] w-[1300px] px-8">
-                                <div className="grid grid-cols-2 gap-x-32 gap-y-8 w-full">
+                            {/* Tab 3: About Company - 2x2 grid with heading + text, vertically centered */}
+                            <div className="flex justify-center items-center min-h-[320px] w-full max-w-4xl mx-auto px-4 lg:px-8 col-span-1 lg:col-span-2">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 lg:gap-x-16 gap-y-8 w-full">
                                     {(tabData.tabs[2]?.features || [
                                         {
                                             heading: "We Make It Easy",
@@ -331,8 +333,8 @@ const TabSection: React.FC = () => {
                                             text: "Your satisfaction is our priority. We stand behind our work with a satisfaction guarantee on all services."
                                         }
                                     ]).map((item, index) => (
-                                        <div key={index} className="flex items-start space-x-4">
-                                            <div className="flex-shrink-0 ms-25 w-7 h-7 border-2 border-yellow-400 rounded-lg flex items-center justify-center mt-1">
+                                        <div key={index} className="flex items-start space-x-4 min-w-0">
+                                            <div className="flex-shrink-0 w-7 h-7 border-2 border-yellow-400 rounded-lg flex items-center justify-center mt-1">
                                                 <svg
                                                     className="w-4 h-4 text-yellow-400"
                                                     fill="none"
@@ -347,11 +349,11 @@ const TabSection: React.FC = () => {
                                                     />
                                                 </svg>
                                             </div>
-                                            <div className="flex-1">
+                                            <div className="flex-1 min-w-0">
                                                 <h4 className="text-lg font-semibold text-white mb-1">
                                                     {typeof item === 'string' ? item : item.heading}
                                                 </h4>
-                                                <p className="text-gray-300 text-sm w-[280px]">
+                                                <p className="text-gray-300 text-sm">
                                                     {typeof item === 'string' ? item : item.text}
                                                 </p>
                                             </div>

@@ -132,7 +132,7 @@ export default function SupportSection() {
             <div className="max-w-[95%] mx-auto">
                 {/* Section Header */}
                 <div className="text-center mb-12">
-                    <h2 className="text-gray-900 text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
+                    <h2 className="text-gray-900 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold mb-4">
                         {supportData.section_title}
                     </h2>
                     <h3 className="text-gray-900 text-2xl sm:text-3xl md:text-4xl font-semibold mb-4">

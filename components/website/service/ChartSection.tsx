@@ -116,7 +116,7 @@ export default function ChartSection() {
             <div className="container mx-auto px-4 w-[95%]">
                 {/* Section Title */}
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4" data-aos="fade-up">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 mb-4" data-aos="fade-up">
                         {chartData.sectionTitle}
                     </h2>
                     <div className="w-24 h-1 bg-purple-600 mx-auto"></div>
@@ -125,8 +125,7 @@ export default function ChartSection() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" data-aos="fade-up">
                     {/* Left Content */}
                     <div className="space-y-6 order-2 lg:order-1">
-                        <p className='text-blue-800 text-xl font-bold'>{chartData.subtitle}</p>
-                        <h2 className="text-4xl md:text-4xl font-bold text-gray-900 leading-tight max-w-lg">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 leading-tight max-w-lg">
                             {chartData.title}
                         </h2>
 
@@ -147,13 +146,6 @@ export default function ChartSection() {
                             ))}
                         </div>
 
-                        <a
-                            href={chartData.buttonUrl}
-                            className="text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 inline-block"
-                            style={{ backgroundColor: '#2B5BFD' }}
-                        >
-                            {chartData.buttonText}
-                        </a>
                     </div>
 
                     {/* Right Images */}
@@ -168,7 +160,7 @@ export default function ChartSection() {
                                     e.currentTarget.src = '/assets/images/Chart.png';
                                 }}
                             />
-                            <div className="absolute top-1/3 left-2/3 transform -translate-x-1/5 -translate-y-1/2 bg-white p-8 rounded-2xl shadow-lg z-10">
+                            <div className="absolute top-1/3 left-2/3 mt-8 transform -translate-x-1/5 -translate-y-1/2 bg-white p-8 rounded-2xl shadow-lg z-10">
                                 <img
                                     src={chartData.smallImage}
                                     alt="Performance Chart"

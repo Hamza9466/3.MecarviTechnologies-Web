@@ -410,7 +410,7 @@ export default function CareerSupport() {
                 <h3 className="text-blue-600 text-lg md:text-xl font-semibold mb-4">
                   Quick Support
                 </h3>
-                <h2 className="text-gray-900 text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
+                <h2 className="text-gray-900 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold mb-6">
                   {supportData.section_title || supportData.title || "Get in Touch"}
                 </h2>
                 {supportData.description && (

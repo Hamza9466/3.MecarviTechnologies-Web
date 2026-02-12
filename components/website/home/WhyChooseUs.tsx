@@ -149,7 +149,7 @@ export default function WhyChooseUs() {
 
   return (
     <section 
-      className="bg-white pt-16 sm:pt-20 md:pt-24 pb-10 px-1 sm:px-2 md:px-4 lg:px-6"
+      className="bg-white pt-4 sm:pt-6 md:pt-8 pb-10 px-1 sm:px-2 md:px-4 lg:px-6"
       style={backgroundImageUrl ? {
         backgroundImage: `url(${backgroundImageUrl})`,
         backgroundSize: 'cover',
@@ -160,7 +160,7 @@ export default function WhyChooseUs() {
     >
       <div className="max-w-[95%] mx-auto" >
         {/* Title - Centered */}
-        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 text-center mb-12 md:mb-16" data-aos="fade-up">
+        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 text-center mb-12 md:mb-16" data-aos="fade-up">
           {sectionTitle}
         </h2>
 
@@ -179,26 +179,19 @@ export default function WhyChooseUs() {
                 backgroundRepeat: 'no-repeat',
               }}
             />
-            {/* Left Area - Composite Image Layout */}
+            {/* Left Area - Composite Image Layout: second image overlaps first, same rounded edges */}
             <div className="order-2 lg:order-1 relative z-10">
               <div 
-                className="relative w-full aspect-[3/2] max-w-4xl mx-auto rounded-lg overflow-hidden" 
-                style={{ 
-                  backgroundImage: 'url(/assets/images/why-chose-us-bg-Copy.jpeg)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  minHeight: '500px',
-                  boxShadow: 'none',
-                }}
+                className="relative w-full aspect-[3/2] max-w-4xl mx-auto rounded-2xl overflow-visible bg-transparent" 
+                style={{ minHeight: '500px' }}
               >
-                {/* Top-Left: Image 1 */}
+                {/* First image - larger, behind */}
                 {image1Url && (
-                  <div className="absolute top-0 left-0 w-[65%] h-[60%] rounded-lg overflow-hidden">
+                  <div className="absolute top-0 left-0 w-[65%] h-[60%] rounded-2xl overflow-hidden z-0 shadow-lg">
                     <img
                       src={image1Url}
                       alt="Why Choose Us"
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-cover rounded-2xl"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
@@ -207,13 +200,13 @@ export default function WhyChooseUs() {
                   </div>
                 )}
                 
-                {/* Bottom-Right: Image 2 */}
+                {/* Second image - smaller, overlaps bottom-right of first, same rounded corners */}
                 {image2Url ? (
-                  <div className="absolute bottom-0 right-0 w-[45%] h-[50%] rounded-lg overflow-hidden">
+                  <div className="absolute bottom-[4%] right-[4%] w-[45%] h-[50%] rounded-2xl overflow-hidden z-10 shadow-lg">
                     <img
                       src={image2Url}
                       alt="Why Choose Us"
-                      className="w-full h-full object-contain rounded-lg"
+                      className="w-full h-full object-cover rounded-2xl"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
@@ -221,13 +214,13 @@ export default function WhyChooseUs() {
                     />
                   </div>
                 ) : image1Url && (
-                  <div className="absolute bottom-0 right-0 w-[45%] h-[50%] rounded-lg overflow-hidden">
+                  <div className="absolute bottom-[4%] right-[4%] w-[45%] h-[50%] rounded-2xl overflow-hidden z-10 shadow-lg">
                     <Image
                       src={fallbackImages[1]}
                       alt="Mecarvi Signs Logo"
                       fill
                       sizes="(max-width: 768px) 100vw, 45vw"
-                      className="object-contain rounded-lg"
+                      className="object-cover rounded-2xl"
                     />
                   </div>
                 )}
@@ -235,22 +228,22 @@ export default function WhyChooseUs() {
                 {/* Fallback if no images from API */}
                 {!image1Url && !image2Url && (
                   <>
-                    <div className="absolute top-0 left-0 w-[65%] h-[60%] rounded-lg overflow-hidden">
+                    <div className="absolute top-0 left-0 w-[65%] h-[60%] rounded-2xl overflow-hidden z-0 shadow-lg">
                       <Image
                         src={fallbackImages[0]}
                         alt="Sign Installation"
                         fill
                         sizes="(max-width: 768px) 100vw, 65vw"
-                        className="object-cover rounded-lg"
+                        className="object-cover rounded-2xl"
                       />
                     </div>
-                    <div className="absolute bottom-0 right-0 w-[45%] h-[50%] rounded-lg overflow-hidden">
+                    <div className="absolute bottom-[4%] right-[4%] w-[45%] h-[50%] rounded-2xl overflow-hidden z-10 shadow-lg">
                       <Image
                         src={fallbackImages[1]}
                         alt="Mecarvi Signs Logo"
                         fill
                         sizes="(max-width: 768px) 100vw, 45vw"
-                        className="object-contain rounded-lg"
+                        className="object-cover rounded-2xl"
                       />
                     </div>
                   </>

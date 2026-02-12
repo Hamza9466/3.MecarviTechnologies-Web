@@ -20,6 +20,7 @@ interface ProcessStep {
 interface SectionData {
   section_title: string;
   large_number: string;
+  small_description: string;
   background_image: string | null;
 }
 
@@ -70,6 +71,7 @@ export default function OurFacts() {
           setSectionData({
             section_title: data.data.our_facts_section.section_title || "Our Facts",
             large_number: data.data.our_facts_section.large_number || "15+",
+            small_description: data.data.our_facts_section.small_description || "",
             background_image: data.data.our_facts_section.background_image || null,
           });
         } else {
@@ -77,6 +79,7 @@ export default function OurFacts() {
           setSectionData({
             section_title: "Our Facts",
             large_number: "15+",
+            small_description: "",
             background_image: null,
           });
         }
@@ -85,6 +88,7 @@ export default function OurFacts() {
         setSectionData({
           section_title: "Our Facts",
           large_number: "15+",
+          small_description: "",
           background_image: null,
         });
       }
@@ -94,6 +98,7 @@ export default function OurFacts() {
       setSectionData({
         section_title: "Our Facts",
         large_number: "15+",
+        small_description: "",
         background_image: null,
       });
     }
@@ -219,6 +224,7 @@ export default function OurFacts() {
 
   // Fallback values
   const largeNumber = sectionData?.large_number || "15+";
+  const smallDescription = sectionData?.small_description || "";
   const sectionTitle = sectionData?.section_title || "Our Facts";
   const promiseTitle = promiseData?.title || "Our Promise";
   const promiseDescription =
@@ -237,7 +243,7 @@ export default function OurFacts() {
 
   return (
     <section
-      className="bg-white pt-0 pb-8 sm:pb-10 md:pb-12"
+      className="bg-white pt-0 pb-8 sm:pb-10 md:pb-12 overflow-hidden"
       style={
         backgroundImageUrl
           ? {
@@ -249,24 +255,29 @@ export default function OurFacts() {
           : {}
       }
     >
-      {/* Top Row - Full Width */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 w-full max-w-full overflow-hidden" data-aos="fade-up">
-        {/* Top Left - Pink Background with Years */}
+      {/* Top Row - Pink 40% / Gray 60% on large screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-[40%_1fr] gap-0 w-full max-w-full overflow-hidden" data-aos="fade-up">
+        {/* Top Left - Pink Background with Years (40% width on lg) */}
         <div className="p-8 md:p-12 lg:p-16 flex items-center justify-center min-h-[300px] md:min-h-[400px]" style={{ backgroundColor: '#E60F77' }} data-aos="fade-up">
           <div className="text-white text-center lg:text-left">
-            <div className="text-7xl sm:text-8xl md:text-9xl lg:text-10xl xl:text-11xl font-bold pl-4 md:pl-8 lg:pl-12">
+            <div className="mt-24 md:mt-28 lg:mt-32 xl:mt-36 text-7xl sm:text-8xl md:text-9xl lg:text-10xl xl:text-11xl font-bold pl-4 md:pl-8 lg:pl-12">
               {largeNumber}
             </div>
+            {smallDescription && (
+              <p className="mt-2 md:mt-3 text-sm sm:text-base md:text-lg text-white/90 pl-4 md:pl-8 lg:pl-12 max-w-md">
+                {smallDescription}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Top Right - Background with Circular Indicators */}
         <div className="p-8 md:p-12 lg:p-16 min-h-[300px] md:min-h-[400px] overflow-x-auto" style={{ backgroundColor: '#F3F4F6' }} data-aos="fade-up">
           <div className="w-full max-w-full">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-700 mb-6 md:mb-8">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-700 mb-6 md:mb-8">
               {sectionTitle}
             </h2>
-            <div className="flex flex-wrap gap-2 md:gap-4 lg:gap-6 justify-center lg:justify-start">
+            <div className="flex flex-wrap gap-2 md:gap-4 lg:gap-6 justify-center lg:justify-between w-full">
               {facts.length > 0 ? (
                 facts.map((fact) => {
                   // Parse percentage - handle both "99%" and "99" formats
@@ -278,14 +289,12 @@ export default function OurFacts() {
                   const dotX = 60 + 54 * Math.cos((angle * Math.PI) / 180);
                   const dotY = 60 + 54 * Math.sin((angle * Math.PI) / 180);
 
-                  // Format percentage for display - ensure it has % sign
-                  const displayPercentage = fact.percentage.includes('%')
-                    ? fact.percentage
-                    : `${fact.percentage}%`;
+                  // Display number only (no % sign)
+                  const displayValue = fact.percentage.replace(/%/g, '').trim() || fact.percentage;
 
                   return (
-                    <div key={fact.id} className="relative flex-shrink-0 flex flex-col items-center">
-                      <div className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-48 xl:h-48 relative">
+                    <div key={fact.id} className="relative flex-shrink-0 flex flex-col items-center lg:flex-1 lg:min-w-0">
+                      <div className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-48 lg:h-48 xl:w-52 xl:h-52 relative">
                         {/* Circle Background */}
                         <svg
                           className="w-full h-full transform -rotate-90"
@@ -315,19 +324,17 @@ export default function OurFacts() {
                             fill="#2563EB"
                           />
                         </svg>
-                        {/* Percentage Text - Centered */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-black">
-                            {displayPercentage}
-                          </div>
+                        {/* Number inside circle */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <span className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-black">
+                            {displayValue}
+                          </span>
                         </div>
                       </div>
-                      {/* Label - Below Circle */}
-                      <div className="text-center mt-2">
-                        <p className="text-sm sm:text-base md:text-lg text-gray-600 font-medium">
-                          {fact.label}
-                        </p>
-                      </div>
+                      {/* One line: label below (e.g. "numqua") - bold */}
+                      <p className="text-center mt-2 text-base sm:text-lg md:text-xl text-gray-800 font-bold whitespace-nowrap">
+                        {fact.label}
+                      </p>
                     </div>
                   );
                 })
@@ -339,21 +346,21 @@ export default function OurFacts() {
         </div>
       </div>
 
-      {/* Bottom Section - Background with Overlay Card */}
-      <div className="relative w-full" data-aos="fade-up">
-        {/* Full Width Background */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-[500px] sm:min-h-[450px] md:min-h-[500px] lg:min-h-[500px] w-full">
+      {/* Bottom Section - Background with Overlay Card (card aligned to top, no extra top space) */}
+      <div className="relative w-full overflow-hidden">
+        {/* Full Width Background - min height accommodates card content */}
+        <div className="grid grid-cols-1 lg:grid-cols-[40%_1fr] gap-0 min-h-[400px] sm:min-h-[420px] md:min-h-[450px] lg:min-h-[480px] w-full">
           <div style={{ backgroundColor: '#E60F77' }}></div>
           <div style={{ backgroundColor: '#F3F4F6' }}></div>
         </div>
 
-        {/* Single White Card Overlay - Constrained */}
-        <div className="absolute inset-0 flex items-center justify-center px-1 sm:px-2 md:px-4 lg:px-6 py-4 sm:py-6 md:py-8">
+        {/* Single White Card Overlay - aligned to top, contained within section */}
+        <div className="absolute inset-0 flex items-start justify-center px-1 sm:px-2 md:px-4 lg:px-6 pt-2 sm:pt-4 md:pt-6 pb-4 sm:pb-6 md:pb-8">
           <div className="max-w-[95%] w-full relative">
             <div className="bg-white rounded-2xl p-4 sm:p-8 md:p-12 lg:p-16 shadow-2xl">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
                 {/* Left Side - Our Promise */}
-                <div className="flex flex-col justify-center">
+                <div className="flex flex-col justify-center lg:border-r-2 lg:border-dotted lg:border-red-500 lg:pr-8">
                   <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4 md:mb-6">
                     {promiseTitle}
                   </h3>

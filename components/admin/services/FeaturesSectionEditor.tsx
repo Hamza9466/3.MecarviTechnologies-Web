@@ -14,7 +14,6 @@ interface FeaturesSectionData {
   title: string;
   description: string;
   features: Feature[];
-  button_text: string;
   main_image?: string;
   small_image?: string;
   main_image_file?: File;
@@ -35,7 +34,6 @@ export default function FeaturesSectionEditor({ data, onChange }: FeaturesSectio
     title: '',
     description: '',
     features: [],
-    button_text: '',
     main_image: '',
     small_image: ''
   });
@@ -56,11 +54,85 @@ export default function FeaturesSectionEditor({ data, onChange }: FeaturesSectio
       const newData = [...data];
       newData[editingIndex] = updated;
       onChange(newData);
+    } else if (data.length === 0) {
+      // No sections yet: treat form as the first section so parent has something to save
+      onChange([updated]);
+      setEditingIndex(0);
     }
   };
 
   const handleFileChange = (field: 'main_image_file' | 'small_image_file', file: File) => {
     handleFieldChange(field, file);
+  };
+
+  const applyRemovedMainImage = () => {
+    const updated = { ...currentSection, main_image: '', main_image_file: undefined };
+    setCurrentSection(updated);
+    if (editingIndex !== null) {
+      const newData = [...data];
+      newData[editingIndex] = updated;
+      onChange(newData);
+    } else if (data.length === 0) {
+      onChange([updated]);
+      setEditingIndex(0);
+    }
+  };
+
+  const removeMainImage = async () => {
+    if (currentSection.id) {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`http://localhost:8000/api/v1/features-sections/${currentSection.id}/field/main_image`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token || ''}` },
+        });
+        if (!res.ok) {
+          const err = await res.text();
+          alert('Failed to delete main image: ' + err);
+          return;
+        }
+      } catch (e) {
+        console.error('Error deleting main image:', e);
+        alert('Error deleting main image');
+        return;
+      }
+    }
+    applyRemovedMainImage();
+  };
+
+  const applyRemovedSmallImage = () => {
+    const updated = { ...currentSection, small_image: '', small_image_file: undefined };
+    setCurrentSection(updated);
+    if (editingIndex !== null) {
+      const newData = [...data];
+      newData[editingIndex] = updated;
+      onChange(newData);
+    } else if (data.length === 0) {
+      onChange([updated]);
+      setEditingIndex(0);
+    }
+  };
+
+  const removeSmallImage = async () => {
+    if (currentSection.id) {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`http://localhost:8000/api/v1/features-sections/${currentSection.id}/field/small_image`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token || ''}` },
+        });
+        if (!res.ok) {
+          const err = await res.text();
+          alert('Failed to delete small image: ' + err);
+          return;
+        }
+      } catch (e) {
+        console.error('Error deleting small image:', e);
+        alert('Error deleting small image');
+        return;
+      }
+    }
+    applyRemovedSmallImage();
   };
 
   const handleFeatureChange = (index: number, field: keyof Feature, value: string) => {
@@ -88,7 +160,6 @@ export default function FeaturesSectionEditor({ data, onChange }: FeaturesSectio
       title: '',
       description: '',
       features: [],
-      button_text: '',
       main_image: '',
       small_image: ''
     };
@@ -269,18 +340,6 @@ export default function FeaturesSectionEditor({ data, onChange }: FeaturesSectio
             </button>
           </div>
 
-          {/* Button Text */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
-            <input
-              type="text"
-              value={currentSection.button_text}
-              onChange={(e) => handleFieldChange('button_text', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
-              placeholder="Try Free Version"
-            />
-          </div>
-
           {/* Main Image */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Main Image</label>
@@ -295,24 +354,42 @@ export default function FeaturesSectionEditor({ data, onChange }: FeaturesSectio
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-gray-700 file:text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold"
             />
-            {currentSection.main_image && currentSection.main_image.trim() !== '' && (
-              <div className="mt-2">
-                <p className="text-xs text-gray-500">Current image:</p>
+            {currentSection.main_image && !currentSection.main_image_file && (
+              <div className="mt-2 flex items-start gap-2">
                 <img
-                  src={`http://localhost:8000${currentSection.main_image}`}
+                  src={currentSection.main_image.startsWith('http') ? currentSection.main_image : `http://localhost:8000${currentSection.main_image}`}
                   alt="Main image"
                   className="h-20 w-20 object-cover rounded"
-                  onLoad={() => console.log('Main image loaded successfully:', `http://localhost:8000${currentSection.main_image}`)}
                   onError={(e) => {
-                    console.error('Main image failed to load:', `http://localhost:8000${currentSection.main_image}`);
-                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNSA0MEgzNU00MCA0MEg1NU0yNSA0MFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxwYXRoIGQ9Ik0yNSAzMEgzNU00MCAzMEg1NU0yNSAzMFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxwYXRoIGQ9Ik0yNSA1MEgzNU00MCA1MEg1NU0yNSA1MFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjx0ZXh0IHg9IjQwIiB5PSI0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzlDQTNBRiIgZm9udC1zaXplPSIxMiIgZm9udC1mYW1pbHk9IkFyaWFsIj5JbWc8L3RleHQ+Cjwvc3ZnPgo=';
+                    e.currentTarget.src = '/assets/images/placeholder.png';
                   }}
                 />
+                <button
+                  type="button"
+                  onClick={removeMainImage}
+                  className="px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
               </div>
             )}
             {currentSection.main_image_file && (
-              <div className="mt-2">
-                <p className="text-xs text-green-600">New file: {currentSection.main_image_file.name}</p>
+              <div className="mt-2 flex items-start gap-2">
+                <img
+                  src={URL.createObjectURL(currentSection.main_image_file)}
+                  alt="Main image preview"
+                  className="h-20 w-20 object-cover rounded"
+                />
+                <div>
+                  <p className="text-xs text-green-600">New file: {currentSection.main_image_file.name}</p>
+                  <button
+                    type="button"
+                    onClick={removeMainImage}
+                    className="mt-1 px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -331,24 +408,42 @@ export default function FeaturesSectionEditor({ data, onChange }: FeaturesSectio
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-gray-700 file:text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold"
             />
-            {currentSection.small_image && currentSection.small_image.trim() !== '' && (
-              <div className="mt-2">
-                <p className="text-xs text-gray-500">Current image:</p>
+            {currentSection.small_image && !currentSection.small_image_file && (
+              <div className="mt-2 flex items-start gap-2">
                 <img
-                  src={`http://localhost:8000${currentSection.small_image}`}
+                  src={currentSection.small_image.startsWith('http') ? currentSection.small_image : `http://localhost:8000${currentSection.small_image}`}
                   alt="Small image"
                   className="h-20 w-20 object-cover rounded"
-                  onLoad={() => console.log('Small image loaded successfully:', `http://localhost:8000${currentSection.small_image}`)}
                   onError={(e) => {
-                    console.error('Small image failed to load:', `http://localhost:8000${currentSection.small_image}`);
-                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjgwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yNSA0MEgzNU00MCA0MEg1NU0yNSA0MFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxwYXRoIGQ9Ik0yNSAzMEgzNU00MCAzMEg1NU0yNSAzMFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxwYXRoIGQ9Ik0yNSA1MEgzNU00MCA1MEg1NU0yNSA1MFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjx0ZXh0IHg9IjQwIiB5PSI0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzlDQTNBRiIgZm9udC1zaXplPSIxMiIgZm9udC1mYW1pbHk9IkFyaWFsIj5JbWc8L3RleHQ+Cjwvc3ZnPgo=';
+                    e.currentTarget.src = '/assets/images/placeholder.png';
                   }}
                 />
+                <button
+                  type="button"
+                  onClick={removeSmallImage}
+                  className="px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
               </div>
             )}
             {currentSection.small_image_file && (
-              <div className="mt-2">
-                <p className="text-xs text-green-600">New file: {currentSection.small_image_file.name}</p>
+              <div className="mt-2 flex items-start gap-2">
+                <img
+                  src={URL.createObjectURL(currentSection.small_image_file)}
+                  alt="Small image preview"
+                  className="h-20 w-20 object-cover rounded"
+                />
+                <div>
+                  <p className="text-xs text-green-600">New file: {currentSection.small_image_file.name}</p>
+                  <button
+                    type="button"
+                    onClick={removeSmallImage}
+                    className="mt-1 px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             )}
           </div>

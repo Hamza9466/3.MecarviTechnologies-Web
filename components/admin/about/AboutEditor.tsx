@@ -15,14 +15,7 @@ const AboutEditor = forwardRef<AboutEditorRef>((props, ref) => {
 
   const [formData, setFormData] = useState({
     // Hero Section
-    heroBackgroundImage: null as File | null,
-    heroBackgroundImageUrl: null as string | null,
     heroTitlePart1: "",
-    heroTitlePart2: "",
-    heroDescription1: "",
-    heroDescription2: "",
-    heroImage: null as File | null,
-    heroImageUrl: null as string | null,
     
     // About the Founder
     founderTitle: "",
@@ -55,8 +48,6 @@ const AboutEditor = forwardRef<AboutEditorRef>((props, ref) => {
   const removedImagesRef = useRef<Set<string>>(new Set());
   
   // Refs for file inputs to clear them when removing images
-  const heroBackgroundImageInputRef = useRef<HTMLInputElement>(null);
-  const heroImageInputRef = useRef<HTMLInputElement>(null);
   const companyImageInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch data on mount
@@ -107,12 +98,6 @@ const AboutEditor = forwardRef<AboutEditorRef>((props, ref) => {
           setFormData((prev) => ({
             ...prev,
             heroTitlePart1: section.title_part_1 || "",
-            heroTitlePart2: section.title_part_2 || "",
-            heroDescription1: section.description_1 || "",
-            heroDescription2: section.description_2 || "",
-            // Only update image URLs if they weren't explicitly removed (use ref for current value)
-            heroBackgroundImageUrl: removedImagesRef.current.has("heroBackgroundImageUrl") ? null : (getImageUrl(section.hero_background_image) || prev.heroBackgroundImageUrl),
-            heroImageUrl: removedImagesRef.current.has("heroImageUrl") ? null : (getImageUrl(section.hero_image) || prev.heroImageUrl),
           }));
         }
       } else if (response.status === 404) {
@@ -378,27 +363,7 @@ const AboutEditor = forwardRef<AboutEditorRef>((props, ref) => {
   const saveHeroSection = async (token: string) => {
     console.log("Saving hero section...");
     const formDataToSend = new FormData();
-    
-    if (formData.heroBackgroundImage) {
-      formDataToSend.append("hero_background_image", formData.heroBackgroundImage);
-    } else if ((formData.heroBackgroundImageUrl === null || removedImagesRef.current.has("heroBackgroundImageUrl")) && heroSectionId) {
-      // Send empty string to remove the image
-      formDataToSend.append("hero_background_image", "");
-      console.log("Sending hero_background_image deletion request");
-    }
-    
-    if (formData.heroImage) {
-      formDataToSend.append("hero_image", formData.heroImage);
-    } else if ((formData.heroImageUrl === null || removedImagesRef.current.has("heroImageUrl")) && heroSectionId) {
-      // Send empty string to remove the image
-      formDataToSend.append("hero_image", "");
-      console.log("Sending hero_image deletion request");
-    }
-
     formDataToSend.append("title_part_1", formData.heroTitlePart1 || "");
-    formDataToSend.append("title_part_2", formData.heroTitlePart2 || "");
-    formDataToSend.append("description_1", formData.heroDescription1 || "");
-    formDataToSend.append("description_2", formData.heroDescription2 || "");
 
     const url = heroSectionId 
       ? `http://localhost:8000/api/v1/hero-section/${heroSectionId}`
@@ -446,11 +411,6 @@ const AboutEditor = forwardRef<AboutEditorRef>((props, ref) => {
       }
       setFormData((prev) => ({
         ...prev,
-        // Only update image URLs if they weren't explicitly removed (use ref for current value)
-        heroBackgroundImageUrl: removedImagesRef.current.has("heroBackgroundImageUrl") ? null : (getImageUrl(section.hero_background_image) || prev.heroBackgroundImageUrl),
-        heroImageUrl: removedImagesRef.current.has("heroImageUrl") ? null : (getImageUrl(section.hero_image) || prev.heroImageUrl),
-        heroBackgroundImage: null,
-        heroImage: null,
       }));
     }
   };
@@ -666,171 +626,21 @@ const AboutEditor = forwardRef<AboutEditorRef>((props, ref) => {
       <div className="border-b border-gray-200 pb-6">
         <h3 className="text-lg font-bold text-gray-900 mb-4">Hero Section</h3>
       <div className="space-y-4">
-          {/* Hero Background Image */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hero Background Image
-            </label>
-            <div className="flex items-center gap-4">
-              <label className="inline-block">
-                <input
-                  ref={heroBackgroundImageInputRef}
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange("heroBackgroundImage")}
-                />
-                <span className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer inline-block font-medium transition-colors">
-                  Choose File
-                </span>
-              </label>
-              <span className="text-sm text-gray-600">
-                {formData.heroBackgroundImage ? formData.heroBackgroundImage.name : formData.heroBackgroundImageUrl ? "Image uploaded" : "No file chosen"}
-              </span>
-              {(formData.heroBackgroundImage || formData.heroBackgroundImageUrl) ? (
-                <div className="flex items-center gap-2" key={`hero-bg-${refreshKey}`}>
-                  <div className="relative w-16 h-16 border border-gray-300 rounded-lg overflow-hidden bg-gray-200">
-                    {formData.heroBackgroundImage ? (
-                      <img
-                        src={URL.createObjectURL(formData.heroBackgroundImage)}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : formData.heroBackgroundImageUrl ? (
-                      <img
-                        src={formData.heroBackgroundImageUrl}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      console.log("Remove button clicked for heroBackgroundImage");
-                      handleRemoveImage("heroBackgroundImage", "heroBackgroundImageUrl", heroBackgroundImageInputRef);
-                    }}
-                    className="text-red-600 hover:text-red-700 text-sm font-medium cursor-pointer"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          </div>
-
           {/* Hero Title */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Title Part 1 (Black)
-              </label>
-              <input
-                type="text"
-                name="heroTitlePart1"
-                value={formData.heroTitlePart1}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Title Part 2 (Pink)
-              </label>
-              <input
-                type="text"
-                name="heroTitlePart2"
-                value={formData.heroTitlePart2}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
-              />
-            </div>
-          </div>
-
-          {/* Hero Description 1 (Tagline) */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description 1 (Tagline)
-          </label>
-          <input
-            type="text"
-              name="heroDescription1"
-              value={formData.heroDescription1}
-            onChange={handleInputChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
-          />
-        </div>
-
-          {/* Hero Description 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description 2
+              Title Part 1 (Black)
             </label>
-            <textarea
-              name="heroDescription2"
-              value={formData.heroDescription2}
+            <input
+              type="text"
+              name="heroTitlePart1"
+              value={formData.heroTitlePart1}
               onChange={handleInputChange}
-              rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none text-gray-900 bg-white"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
             />
           </div>
 
-          {/* Hero Image (Laptop) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hero Image (Laptop)
-            </label>
-            <div className="flex items-center gap-4">
-              <label className="inline-block">
-                <input
-                  ref={heroImageInputRef}
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleFileChange("heroImage")}
-                />
-                <span className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer inline-block font-medium transition-colors">
-                  Choose File
-                </span>
-              </label>
-              <span className="text-sm text-gray-600">
-                {formData.heroImage ? formData.heroImage.name : formData.heroImageUrl ? "Image uploaded" : "No file chosen"}
-              </span>
-              {(formData.heroImage || formData.heroImageUrl) ? (
-                <div className="flex items-center gap-2" key={`hero-img-${refreshKey}`}>
-                  <div className="relative w-16 h-16 border border-gray-300 rounded-lg overflow-hidden bg-gray-200">
-                    {formData.heroImage ? (
-                      <img
-                        src={URL.createObjectURL(formData.heroImage)}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : formData.heroImageUrl ? (
-                      <img
-                        src={formData.heroImageUrl}
-                        alt="Preview"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleRemoveImage("heroImage", "heroImageUrl", heroImageInputRef);
-                    }}
-                    className="text-red-600 hover:text-red-700 text-sm font-medium cursor-pointer"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : null}
-            </div>
           </div>
-        </div>
       </div>
 
       {/* About the Founder Section */}

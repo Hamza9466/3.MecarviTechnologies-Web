@@ -6,9 +6,9 @@ export default function ContactInfo() {
       <div className="max-w-[95%] mx-auto">
         <div className=" rounded-lg p-8 md:p-10 lg:p-12">
           <div className="text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 mb-6">
 We're always here for you!            </h2>
-            <p className="text-gray-700 text-sm md:text-base leading-relaxed">
+            <p className="text-gray-700 text-sm md:text-base leading-relaxed max-w-6xl mx-auto w-full">
 We'd love to hear from you! Our world-class customer service team is always here to assist with any questions or concerns. You can reach us via phone, email, live chat, or SMS during business hours. Alternatively, complete the contact form below and we'll get back to you within one business day.            </p>
           </div>
         </div>

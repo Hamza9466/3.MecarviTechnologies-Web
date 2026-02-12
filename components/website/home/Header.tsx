@@ -58,8 +58,8 @@ export default function Header() {
               backgroundSize: '100% 100%',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              width: 'auto',
-              minWidth: '580px',
+              width: '640px',
+              maxWidth: '95vw',
               marginTop: '10px',
               paddingTop: '32px',
               paddingBottom: '32px',
@@ -67,7 +67,7 @@ export default function Header() {
           >
             <Link
               href="/"
-              className={`text-xs lg:ps-4 xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/" ? "font-semibold" : ""
+              className={`text-sm lg:ps-4 xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/" ? "font-semibold" : ""
                 }`}
             >
               Home
@@ -75,7 +75,7 @@ export default function Header() {
 
             <Link
               href="/website/pages/about"
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/about" ? "font-semibold" : ""
+              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/about" ? "font-semibold" : ""
                 }`}
             >
               About us
@@ -83,7 +83,7 @@ export default function Header() {
 
             <Link
               href="/website/pages/faq"
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/faq" ? "font-semibold" : ""
+              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/faq" ? "font-semibold" : ""
                 }`}
             >
               FAQ
@@ -91,7 +91,7 @@ export default function Header() {
 
             <Link
               href="/website/pages/quote"
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/quote" ? "font-semibold" : ""
+              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/quote" ? "font-semibold" : ""
                 }`}
             >
               Quote
@@ -99,7 +99,7 @@ export default function Header() {
 
             <Link
               href="/products"
-              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname?.startsWith("/products") ? "font-semibold" : ""
+              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-sm xl:text-base font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname?.startsWith("/products") ? "font-semibold" : ""
                 }`}
             >
               Products
@@ -110,7 +110,7 @@ export default function Header() {
 
             <Link
               href="/website/pages/service"
-              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-xs xl:text-sm font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/service" ? "font-semibold" : ""
+              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-sm xl:text-base font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/service" ? "font-semibold" : ""
                 }`}
             >
               Service
@@ -121,7 +121,7 @@ export default function Header() {
 
             <Link
               href="/technologies"
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/technologies" ? "font-semibold" : ""
+              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/technologies" ? "font-semibold" : ""
                 }`}
             >
               Technologies
@@ -129,7 +129,7 @@ export default function Header() {
 
             <Link
               href="/website/pages/career"
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/career" ? "font-semibold" : ""
+              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/career" ? "font-semibold" : ""
                 }`}
             >
               Career
@@ -137,7 +137,7 @@ export default function Header() {
 
             <Link
               href="/website/pages/contact"
-              className={`text-xs xl:text-sm font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/contact" ? "font-semibold" : ""
+              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/contact" ? "font-semibold" : ""
                 }`}
             >
               Contact

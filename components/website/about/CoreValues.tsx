@@ -22,12 +22,19 @@ const colorSchemes = [
   { bgColor: "bg-pink-600", borderColor: "border-pink-600", textColor: "text-pink-600" },
 ];
 
+interface CoreValuesSection {
+  section_title: string;
+  section_description: string;
+}
+
 export default function CoreValues() {
   const [values, setValues] = useState<CoreValue[]>([]);
+  const [section, setSection] = useState<CoreValuesSection>({ section_title: "", section_description: "" });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchCoreValues();
+    fetchCoreValuesSection();
   }, []);
 
   const getImageUrl = (url: string | null | undefined): string | null => {
@@ -35,6 +42,27 @@ export default function CoreValues() {
     if (url.startsWith("http")) return url;
     if (url.startsWith("/storage")) return `http://localhost:8000${url}`;
     return `http://localhost:8000/storage/${url}`;
+  };
+
+  const fetchCoreValuesSection = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/core-values-section", {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.core_values_section) {
+          const s = data.data.core_values_section;
+          setSection({
+            section_title: s.section_title ?? "",
+            section_description: s.section_description ?? "",
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching core values section:", err);
+    }
   };
 
   const fetchCoreValues = async () => {
@@ -58,10 +86,10 @@ export default function CoreValues() {
               title: cv.title || "",
               description: cv.description || "",
               icon: getImageUrl(cv.icon),
-              order: cv.order || 0,
+              order: cv.order ?? 0,
             }))
             .sort((a: CoreValue, b: CoreValue) => a.order - b.order);
-          
+
           setValues(sortedValues);
         }
       }
@@ -89,13 +117,18 @@ export default function CoreValues() {
   return (
     <section className="bg-white pt-0 pb-8 sm:pb-12 md:pb-16 px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="max-w-[95%] mx-auto">
-        {/* Title */}
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 text-center mb-6 md:mb-8" data-aos="fade-up">
-          Core Values
+        {/* Section title and description */}
+        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 text-center mb-6 md:mb-8" data-aos="fade-up">
+          {section.section_title || "Core Values"}
         </h2>
+        {section.section_description && (
+          <p className="text-gray-600 text-base md:text-lg lg:text-xl text-center w-full mb-6 md:mb-8" data-aos="fade-up">
+            {section.section_description}
+          </p>
+        )}
 
         {/* Values Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" data-aos="fade-up">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-6 md:gap-8" data-aos="fade-up">
           {values.map((value, index) => {
             const colorScheme = colorSchemes[index % colorSchemes.length];
             return (
@@ -104,25 +137,25 @@ export default function CoreValues() {
                 className={`relative border-2 rounded-lg overflow-hidden bg-white ${colorScheme.borderColor}`}
               >
                 {/* Left vertical bar with number */}
-                <div className={`absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center ${colorScheme.bgColor}`}>
-                  <span className="text-white font-bold text-xl">{index + 1}</span>
+                <div className={`absolute left-0 top-0 bottom-0 w-14 flex items-center justify-center ${colorScheme.bgColor}`}>
+                  <span className="text-white font-bold text-2xl md:text-3xl lg:text-4xl">{index + 1}</span>
                 </div>
 
                 {/* Content area */}
-                <div className="pl-16 pr-4 py-4">
+                <div className="pl-16 pr-4 py-5">
                   {/* Icon */}
                   <div className={`mb-3 ${colorScheme.textColor}`}>
                     {value.icon ? (
                       <img
                         src={value.icon}
                         alt={value.title}
-                        className="w-8 h-8 object-contain"
+                        className="w-10 h-10 object-contain"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                         }}
                       />
                     ) : (
-                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
                         <circle cx="12" cy="8" r="4" />
                         <path d="M12 14c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z" />
                       </svg>
@@ -130,12 +163,12 @@ export default function CoreValues() {
                   </div>
 
                   {/* Title */}
-                  <h3 className={`text-lg font-semibold mb-2 ${colorScheme.textColor}`}>
+                  <h3 className={`text-xl md:text-2xl lg:text-3xl font-semibold mb-2 ${colorScheme.textColor}`}>
                     {value.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-gray-600 text-xs leading-relaxed">
+                  <p className="text-gray-600 text-base md:text-lg leading-relaxed">
                     {value.description}
                   </p>
                 </div>

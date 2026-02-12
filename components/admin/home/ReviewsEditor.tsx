@@ -26,8 +26,6 @@ const ReviewsEditor = forwardRef<ReviewsEditorRef>((props, ref) => {
     clientLabel: "Our Client",
     reviewCount: "5k+",
     heading: "Customer experiences that speak for themselves",
-    buttonText: "Book Now",
-    buttonUrl: "",
   });
 
   const [clientAvatars, setClientAvatars] = useState<
@@ -72,8 +70,6 @@ const ReviewsEditor = forwardRef<ReviewsEditorRef>((props, ref) => {
             clientLabel: "Our Client",
             reviewCount: "5k+",
             heading: "Customer experiences that speak for themselves",
-            buttonText: "Book Now",
-            buttonUrl: "",
           });
           setClientAvatars([
             { image: null, imageUrl: null },
@@ -98,8 +94,6 @@ const ReviewsEditor = forwardRef<ReviewsEditorRef>((props, ref) => {
           clientLabel: section.client_label || "Our Client",
           reviewCount: section.review_count || "5k+",
           heading: section.call_to_action_text || "Customer experiences that speak for themselves",
-          buttonText: section.button_text || "Book Now",
-          buttonUrl: section.button_url || "",
         });
         setClientAvatars([
           { image: null, imageUrl: section.avatar_1 || null },
@@ -372,8 +366,6 @@ const ReviewsEditor = forwardRef<ReviewsEditorRef>((props, ref) => {
       sectionFormData.append("call_to_action_text", formData.heading || "");
       sectionFormData.append("client_label", formData.clientLabel || "");
       sectionFormData.append("review_count", formData.reviewCount || "");
-      sectionFormData.append("button_text", formData.buttonText || "");
-      sectionFormData.append("button_url", formData.buttonUrl || "");
 
       // Append avatars
       clientAvatars.forEach((avatar, index) => {
@@ -638,36 +630,6 @@ const ReviewsEditor = forwardRef<ReviewsEditorRef>((props, ref) => {
                 placeholder="5k+"
               />
               <p className="text-xs text-gray-500 mt-1">Example: 5k+, 100+, etc.</p>
-            </div>
-
-            <div>
-              <label htmlFor="buttonText" className="block text-sm font-medium text-gray-700 mb-2">
-                Button Text
-              </label>
-              <input
-                type="text"
-                id="buttonText"
-                name="buttonText"
-                value={formData.buttonText}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
-                placeholder="Book Now"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="buttonUrl" className="block text-sm font-medium text-gray-700 mb-2">
-                Button URL (Optional)
-              </label>
-              <input
-                type="text"
-                id="buttonUrl"
-                name="buttonUrl"
-                value={formData.buttonUrl}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
-                placeholder="https://example.com/book"
-              />
             </div>
           </div>
         </div>

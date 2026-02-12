@@ -57,7 +57,7 @@ export default function CareerCards() {
       <div className="max-w-[95%] mx-auto">
         {/* Section Title */}
         {sectionTitle && (
-          <h2 className="text-gray-800 text-center text-xl sm:text-2xl md:text-3xl font-bold mb-12 md:mb-16" data-aos="fade-up">
+          <h2 className="text-gray-800 text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold mb-12 md:mb-16" data-aos="fade-up">
             {sectionTitle}
           </h2>
         )}

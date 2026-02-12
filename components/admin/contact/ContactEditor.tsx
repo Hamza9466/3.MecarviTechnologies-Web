@@ -549,16 +549,6 @@ export default function ContactEditor() {
                 if (data.country && data.country.trim()) {
                     cardPayload.country = data.country.trim();
                 }
-            } else if (cardType === 'store_hours' || cardType === 'online_hours') {
-                if (data.monday_friday_hours && data.monday_friday_hours.trim()) {
-                    cardPayload.monday_friday_hours = data.monday_friday_hours.trim();
-                }
-                if (data.saturday_hours && data.saturday_hours.trim()) {
-                    cardPayload.saturday_hours = data.saturday_hours.trim();
-                }
-                if (data.sunday_hours && data.sunday_hours.trim()) {
-                    cardPayload.sunday_hours = data.sunday_hours.trim();
-                }
             }
 
             console.log(`Saving ${cardType} card:`, cardPayload);
@@ -763,7 +753,7 @@ export default function ContactEditor() {
     };
 
     const handleSaveAllCards = async () => {
-        const cardTypes: ContactPageCard['card_type'][] = ['call', 'fax', 'email', 'visit', 'store_hours', 'online_hours'];
+        const cardTypes: ContactPageCard['card_type'][] = ['call', 'fax', 'email', 'visit'];
         let successCount = 0;
         let errorCount = 0;
 
@@ -847,9 +837,36 @@ export default function ContactEditor() {
             setSectionTitleError("");
             setSectionTitleSuccess("");
 
-            // Update section title for all hours entries
+            if (hoursOfOperation.length === 0) {
+                // No hours yet: create one default entry with this section title so it gets saved
+                try {
+                    await createHours({
+                        section_title: editableSectionTitle.trim(),
+                        category_title: "General",
+                        monday_friday_hours: null,
+                        saturday_hours: null,
+                        sunday_hours: null,
+                        sunday_status: null,
+                        public_holidays_hours: null,
+                        public_holidays_status: null,
+                        description_1: null,
+                        description_2: null,
+                        is_active: true,
+                        sort_order: 0,
+                    });
+                    setSectionTitleSuccess("Section title saved. One default hour entry was created—you can edit or add more below.");
+                    await fetchHours();
+                    setTimeout(() => setSectionTitleSuccess(""), 5000);
+                } catch (err: any) {
+                    setSectionTitleError(err?.message || "Failed to save section title. Please try again.");
+                }
+                return;
+            }
+
+            // Update section title for all existing hours entries
             let successCount = 0;
             let errorCount = 0;
+            let lastErrorMessage = "";
 
             for (const hour of hoursOfOperation) {
                 try {
@@ -858,19 +875,19 @@ export default function ContactEditor() {
                     };
                     await updateHours(hour.id, payload);
                     successCount++;
-                } catch (err) {
+                } catch (err: any) {
                     errorCount++;
+                    lastErrorMessage = err?.message || String(err);
                     console.error(`Failed to update section title for hour ${hour.id}:`, err);
                 }
             }
 
             if (successCount > 0) {
                 setSectionTitleSuccess(`Section title updated successfully for ${successCount} hour(s)${errorCount > 0 ? `, ${errorCount} failed` : ''}`);
-                // Refresh hours to get updated section title
                 await fetchHours();
                 setTimeout(() => setSectionTitleSuccess(""), 3000);
             } else {
-                setSectionTitleError(`Failed to update section title for all hours. Please try again.`);
+                setSectionTitleError(lastErrorMessage || "Failed to update section title for all hours. Please try again.");
             }
         } catch (err: any) {
             console.error("Error saving section title:", err);
@@ -1724,7 +1741,7 @@ export default function ContactEditor() {
                             </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {(['call', 'fax', 'email', 'visit', 'store_hours', 'online_hours'] as ContactPageCard['card_type'][]).map((cardType) => {
+                            {(['call', 'fax', 'email', 'visit'] as ContactPageCard['card_type'][]).map((cardType) => {
                                 const card = getCardByType(cardType);
                                 const data = cardData[cardType] || {
                                     badge_title: '',

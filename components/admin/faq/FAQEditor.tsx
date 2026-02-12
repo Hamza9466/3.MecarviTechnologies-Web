@@ -21,6 +21,9 @@ interface FAQPageData {
   paragraph_text: string;
   heroSectionId: number | null;
   introParagraphId: number | null;
+  ask_question_heading: string;
+  ask_question_description: string;
+  askQuestionSectionId: number | null;
 }
 
 interface UserQuestion {
@@ -45,6 +48,9 @@ export default function FAQEditor() {
     paragraph_text: "Find answers to commonly asked questions about our services, products, and processes. If you can't find what you're looking for, feel free to ask us a question using the form below.",
     heroSectionId: null,
     introParagraphId: null,
+    ask_question_heading: "Ask a Question",
+    ask_question_description: "Can't find what you're looking for? Send us your question and we'll get back to you.",
+    askQuestionSectionId: null,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -99,9 +105,10 @@ export default function FAQEditor() {
         }
       };
 
-      const [heroRes, introRes, categoriesRes, faqItemsRes, questionsRes] = await Promise.allSettled([
+      const [heroRes, introRes, askQuestionRes, categoriesRes, faqItemsRes, questionsRes] = await Promise.allSettled([
         fetchWithErrorHandling("http://localhost:8000/api/v1/faq-hero-section"),
         fetchWithErrorHandling("http://localhost:8000/api/v1/faq-intro-paragraph"),
+        fetchWithErrorHandling("http://localhost:8000/api/v1/faq-ask-question-section"),
         fetchWithErrorHandling("http://localhost:8000/api/v1/faq-categories"),
         fetchWithErrorHandling("http://localhost:8000/api/v1/faq-items"),
         fetchWithErrorHandling("http://localhost:8000/api/v1/user-submitted-questions", [405]), // Only suppress 405, not 404
@@ -152,6 +159,27 @@ export default function FAQEditor() {
           }
         } else {
           setEndpointStatus(prev => ({ ...prev, intro: false }));
+        }
+      }
+
+      // Handle FAQ Ask Question Section
+      if (askQuestionRes.status === "fulfilled") {
+        const response = askQuestionRes.value as any;
+        if (response.ok && !response._suppressError) {
+          try {
+            const askData = await response.json();
+            if (askData.success && askData.data?.faq_ask_question_section) {
+              const section = askData.data.faq_ask_question_section;
+              setPageData((prev) => ({
+                ...prev,
+                ask_question_heading: section.heading || prev.ask_question_heading,
+                ask_question_description: section.description || prev.ask_question_description,
+                askQuestionSectionId: section.id ?? null,
+              }));
+            }
+          } catch (e) {
+            console.error("Error parsing FAQ ask question section:", e);
+          }
         }
       }
 
@@ -384,6 +412,53 @@ export default function FAQEditor() {
     }
   };
 
+  const handleSaveAskQuestionSection = async () => {
+    const token = getToken();
+    if (!token) {
+      setError("Please login to save changes");
+      return;
+    }
+    try {
+      setSaving(true);
+      setError("");
+      const url = pageData.askQuestionSectionId
+        ? `http://localhost:8000/api/v1/faq-ask-question-section/${pageData.askQuestionSectionId}`
+        : "http://localhost:8000/api/v1/faq-ask-question-section";
+      const method = pageData.askQuestionSectionId ? "PUT" : "POST";
+      const response = await fetch(url, {
+        method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          heading: pageData.ask_question_heading,
+          description: pageData.ask_question_description,
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to save ask question section");
+      }
+      const data = await response.json();
+      if (data.success && data.data?.faq_ask_question_section) {
+        const section = data.data.faq_ask_question_section;
+        setPageData((prev) => ({
+          ...prev,
+          askQuestionSectionId: section.id ?? prev.askQuestionSectionId,
+        }));
+        setSuccess("Ask question section saved successfully!");
+        setTimeout(() => setSuccess(""), 3000);
+      }
+    } catch (err: any) {
+      console.error("Error saving ask question section:", err);
+      setError(err.message || "Failed to save ask question section");
+      setTimeout(() => setError(""), 5000);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSaveCategory = async (category: FAQCategory) => {
     const token = getToken();
     if (!token) {
@@ -550,16 +625,20 @@ export default function FAQEditor() {
             )
           );
         } else {
-          setFaqItems((prev) => [
-            ...prev,
-            {
-              id: savedFAQ.id,
-              faq_category_id: savedFAQ.faq_category_id || 0,
-              question: savedFAQ.question || "",
-              answer: savedFAQ.answer || "",
-              order: savedFAQ.order || prev.length + 1,
-            },
-          ]);
+          // Replace the temporary item (id < 0) with the saved one
+          setFaqItems((prev) =>
+            prev.map((f) =>
+              f.id === faq.id
+                ? {
+                    id: savedFAQ.id,
+                    faq_category_id: savedFAQ.faq_category_id || f.faq_category_id,
+                    question: savedFAQ.question || f.question,
+                    answer: savedFAQ.answer || f.answer,
+                    order: savedFAQ.order || f.order,
+                  }
+                : f
+            )
+          );
         }
         setSuccess("FAQ item saved successfully!");
         setTimeout(() => setSuccess(""), 3000);
@@ -722,6 +801,13 @@ export default function FAQEditor() {
       setTimeout(() => setError(""), 3000);
       return;
     }
+    // Prevent adding another new item until the current unsaved one is saved or cancelled
+    const hasUnsavedNew = faqItems.some((f) => f.id < 0);
+    if (hasUnsavedNew) {
+      setError("Please save or cancel the current new FAQ before adding another.");
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
     const maxOrder = faqItems.length > 0 ? Math.max(...faqItems.map((f) => f.order)) : 0;
     const newFAQ: FAQItem = {
       id: -Date.now(),
@@ -732,6 +818,14 @@ export default function FAQEditor() {
     };
     setFaqItems((prev) => [...prev, newFAQ]);
     setEditingFAQ(newFAQ);
+  };
+
+  const handleCancelFAQ = () => {
+    if (editingFAQ && editingFAQ.id < 0) {
+      // Remove the temporary new FAQ item if canceling
+      setFaqItems((prev) => prev.filter((f) => f.id !== editingFAQ.id));
+    }
+    setEditingFAQ(null);
   };
 
   if (loading) {
@@ -998,7 +1092,7 @@ export default function FAQEditor() {
                         {saving ? "Saving..." : "Save"}
                       </button>
                       <button
-                        onClick={() => setEditingFAQ(null)}
+                        onClick={handleCancelFAQ}
                         className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-medium"
                       >
                         Cancel
@@ -1017,16 +1111,61 @@ export default function FAQEditor() {
             </div>
           ))}
 
-          {/* Add New FAQ Item Card */}
+          {/* Add New FAQ Item Card - disabled when there is already an unsaved new item */}
           <div
             onClick={handleAddNewFAQ}
-            className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-white shadow-sm flex items-center justify-center min-h-[200px] cursor-pointer hover:border-pink-500 transition-colors"
+            className={`border-2 border-dashed rounded-lg p-4 bg-white shadow-sm flex items-center justify-center min-h-[200px] transition-colors ${
+              faqItems.some((f) => f.id < 0)
+                ? "border-gray-200 bg-gray-50 cursor-not-allowed opacity-70"
+                : "border-gray-300 cursor-pointer hover:border-pink-500"
+            }`}
           >
             <div className="w-16 h-16 bg-pink-600 rounded-full flex items-center justify-center">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ ASK QUESTION SECTION */}
+      <div>
+        <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-300 text-center uppercase">
+          FAQ ASK QUESTION SECTION
+        </h3>
+        <p className="text-sm text-gray-600 mb-3 text-center">Heading and description shown above the ask question form on the FAQ page.</p>
+        <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Heading</label>
+              <input
+                type="text"
+                value={pageData.ask_question_heading}
+                onChange={(e) => setPageData({ ...pageData, ask_question_heading: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white"
+                style={{ color: '#111827', WebkitTextFillColor: '#111827' }}
+                placeholder="Didn't Get Your Answer"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={pageData.ask_question_description}
+                onChange={(e) => setPageData({ ...pageData, ask_question_description: e.target.value })}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white"
+                style={{ color: '#111827', WebkitTextFillColor: '#111827' }}
+                placeholder="Lorem ipsum dolor sit amet consectetur adipisicing elit..."
+              />
+            </div>
+            <button
+              onClick={handleSaveAskQuestionSection}
+              disabled={saving}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save Ask Question Section"}
+            </button>
           </div>
         </div>
       </div>
@@ -1054,6 +1193,7 @@ export default function FAQEditor() {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">ID</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Name</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Email</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Question/Message</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Date</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Status</th>
@@ -1063,7 +1203,7 @@ export default function FAQEditor() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {userQuestions.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
+                    <td colSpan={7} className="px-4 py-8 text-center text-sm text-gray-500">
                       No questions submitted yet.
                     </td>
                   </tr>
@@ -1072,6 +1212,7 @@ export default function FAQEditor() {
                     <tr key={question.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">#{question.id}</td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{question.name}</td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">{question.email || '—'}</td>
                       <td className="px-4 py-3 text-sm text-gray-700 max-w-md">
                         <div 
                           className="truncate cursor-pointer hover:text-blue-600" 

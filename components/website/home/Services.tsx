@@ -132,14 +132,14 @@ export default function Services() {
 
   if (loading) {
     return (
-      <section className="py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden" >
+      <section className="pt-16 sm:pt-20 md:pt-24 pb-4 sm:pb-6 md:pb-8 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden" >
         <div className="max-w-[95%] mx-auto">
           <div className="text-center mb-12">
             <div className="h-12 bg-gray-200 rounded animate-pulse mb-4 mx-auto max-w-md"></div>
             <div className="h-6 bg-gray-200 rounded animate-pulse mx-auto max-w-2xl"></div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {[1, 2, 3, 4].map((i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white rounded-lg p-6 shadow-md h-64 animate-pulse">
                 <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4"></div>
                 <div className="h-6 bg-gray-200 rounded mb-3"></div>
@@ -154,7 +154,7 @@ export default function Services() {
 
   return (
     <section
-      className="py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden"
+      className="pt-16 sm:pt-20 md:pt-24 pb-4 sm:pb-6 md:pb-8 px-1 sm:px-2 md:px-4 lg:px-6 relative overflow-hidden"
       style={
         section.background_image
           ? {
@@ -195,7 +195,7 @@ export default function Services() {
       <div className="max-w-[95%] mx-auto relative z-10">
         {/* Section Title */}
         <div className="text-center mb-12 md:mb-16" data-aos="fade-up">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4" >
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 mb-4" >
             {section.main_title}
           </h2>
           <p className="text-gray-600 text-base sm:text-lg md:text-xl max-w-3xl mx-auto">
@@ -203,9 +203,9 @@ export default function Services() {
           </p>
         </div>
 
-        {/* Services Grid - 4 cards per row */}
+        {/* Services Grid - 3 cards per row */}
         {services.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-12 md:mb-16" data-aos="fade-up">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12 md:mb-16" data-aos="fade-up">
             {services.map((service) => (
               <div
                 key={service.id}

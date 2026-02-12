@@ -46,7 +46,7 @@ export default function CareerContent() {
           {/* Text Content */}
           <div className="w-full space-y-6 text-center" data-aos="fade-up">
             {contentData.heading && (
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
+              <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 leading-tight">
                 {contentData.heading}
               </h2>
             )}

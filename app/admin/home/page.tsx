@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import AdminTabs from "@/components/admin/AdminTabs";
 import HeroEditor from "@/components/admin/home/HeroEditor";
 import AboutEditor from "@/components/admin/home/AboutEditor";
-import ExploreEditor from "@/components/admin/home/ExploreEditor";
 import ServicesEditor from "@/components/admin/home/ServicesEditor";
 import WhatWeDoEditor from "@/components/admin/home/WhatWeDoEditor";
 import WhyChooseUsEditor from "@/components/admin/home/WhyChooseUsEditor";
@@ -112,7 +111,6 @@ export default function HomePageEditor() {
   const tabs = [
     "Hero",
     "About",
-    "Explore",
     "Services",
     "What We Create",
     "Why Choose Us",
@@ -139,7 +137,7 @@ export default function HomePageEditor() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-pink-600 mb-2">
-              {activeTab === "Quote" ? "Edit Quote Section" : activeTab === "Explore" ? "Edit Explore Page" : activeTab === "About" ? "About Home Page" : activeTab === "Portfolio" ? "Portfolio Section" : activeTab === "Services" ? "Edit Services Section" : activeTab === "Our Facts" ? "Edit Our Facts Section" : "Edit Home Page"}
+              {activeTab === "Quote" ? "Edit Quote Section" : activeTab === "About" ? "About Home Page" : activeTab === "Portfolio" ? "Portfolio Section" : activeTab === "Services" ? "Edit Services Section" : activeTab === "Our Facts" ? "Edit Our Facts Section" : "Edit Home Page"}
             </h2>
             {activeTab !== "Portfolio" && activeTab !== "Services" && <div className="h-1 bg-pink-600 w-full"></div>}
           </div>
@@ -147,7 +145,6 @@ export default function HomePageEditor() {
           {/* Content based on active tab */}
           {activeTab === "Hero" && <HeroEditor ref={heroEditorRef} />}
           {activeTab === "About" && <AboutEditor ref={aboutEditorRef} />}
-          {activeTab === "Explore" && <ExploreEditor />}
           {activeTab === "Services" && <ServicesEditor ref={servicesEditorRef} />}
           {activeTab === "What We Create" && <WhatWeDoEditor ref={whatWeDoEditorRef} />}
           {activeTab === "Why Choose Us" && <WhyChooseUsEditor ref={whyChooseUsEditorRef} />}

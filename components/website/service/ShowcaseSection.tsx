@@ -14,6 +14,7 @@ interface ShowcaseSectionData {
     id?: number;
     section_title: string;
     section_description: string;
+    section_image?: string;
     background_image?: string;
     background_image_mobile?: string;
     showcase_items: ShowcaseItem[];
@@ -71,6 +72,7 @@ const ShowcaseSection: React.FC = () => {
                             id: section.id,
                             section_title: section.section_title || 'Our Showcase',
                             section_description: section.section_description || 'Explore our amazing work and projects.',
+                            section_image: section.section_image || '',
                             background_image: section.background_image || '/assets/images/shape-5.webp',
                             background_image_mobile: section.background_image_mobile || '/assets/images/shape-5.webp',
                             showcase_items: section.showcase_items || []
@@ -124,7 +126,7 @@ const ShowcaseSection: React.FC = () => {
                             • OUR SHOWCASE •
                         </span>
 
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 leading-tight mb-6">
                             {showcaseData.section_title}
                         </h2>
 
@@ -186,11 +188,11 @@ const ShowcaseSection: React.FC = () => {
                                     <div className="bg-blue-700 w-64 h-64 rounded-[60%_40%_30%_70%_/_60%_30%_70%_40%] mr-30 mt-40"></div>
                                 </div>
                                 <img
-                                    src={showcaseData.showcase_items[0]?.image ?
-                                        (showcaseData.showcase_items[0].image.startsWith('http') ?
-                                            showcaseData.showcase_items[0].image :
-                                            `http://localhost:8000${showcaseData.showcase_items[0].image}`) :
-                                        '/assets/images/gallery-8.webp'
+                                    src={showcaseData.section_image
+                                        ? (showcaseData.section_image.startsWith('http') ? showcaseData.section_image : `http://localhost:8000${showcaseData.section_image}`)
+                                        : showcaseData.showcase_items[0]?.image
+                                            ? (showcaseData.showcase_items[0].image.startsWith('http') ? showcaseData.showcase_items[0].image : `http://localhost:8000${showcaseData.showcase_items[0].image}`)
+                                            : '/assets/images/gallery-8.webp'
                                     }
                                     alt="Showcase"
                                     className="w-full h-auto object-cover scale-120 relative z-10"

@@ -31,13 +31,11 @@ interface CardFormRendererProps {
     getImageUrl: (iconPath: string | null | undefined) => string | null;
 }
 
-const cardTypeLabels: Record<ContactPageCard['card_type'], string> = {
+const cardTypeLabels: Partial<Record<ContactPageCard['card_type'], string>> = {
     call: 'Call Card',
     fax: 'Fax Card',
     email: 'Email Card',
     visit: 'Visit Card',
-    store_hours: 'Store Hours Card',
-    online_hours: 'Online Hours Card',
 };
 
 export default function CardFormRenderer({
@@ -63,7 +61,7 @@ export default function CardFormRenderer({
     return (
         <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex justify-between items-center mb-3 pb-2 border-b border-gray-300">
-                <h4 className="font-semibold text-gray-800">{cardTypeLabels[cardType]}</h4>
+                <h4 className="font-semibold text-gray-800">{cardTypeLabels[cardType] ?? cardType}</h4>
                 {card && (
                     <button
                         onClick={() => onDelete(cardType)}
@@ -208,39 +206,6 @@ export default function CardFormRenderer({
                                 type="text"
                                 value={data.country || ''}
                                 onChange={(e) => onInputChange(cardType, 'country', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                            />
-                        </div>
-                    </>
-                )}
-
-                {/* Store Hours / Online Hours Fields */}
-                {(cardType === 'store_hours' || cardType === 'online_hours') && (
-                    <>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Monday-Friday Hours</label>
-                            <input
-                                type="text"
-                                value={data.monday_friday_hours || ''}
-                                onChange={(e) => onInputChange(cardType, 'monday_friday_hours', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Saturday Hours</label>
-                            <input
-                                type="text"
-                                value={data.saturday_hours || ''}
-                                onChange={(e) => onInputChange(cardType, 'saturday_hours', e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Sunday Hours</label>
-                            <input
-                                type="text"
-                                value={data.sunday_hours || ''}
-                                onChange={(e) => onInputChange(cardType, 'sunday_hours', e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 text-gray-900 bg-white text-sm"
                             />
                         </div>

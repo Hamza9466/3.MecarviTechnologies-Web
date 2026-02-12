@@ -31,6 +31,24 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
     fetchHomePageData();
   }, []);
 
+  // Normalize storage path (with leading slash)
+  const normalizePath = (path: string | null | undefined): string | null => {
+    if (path === null || path === undefined || path === "") return null;
+    const p = String(path).trim();
+    if (!p) return null;
+    return p.startsWith("/") ? p : `/${p}`;
+  };
+
+  // Use Next.js proxy so images load same-origin (avoids cross-origin and Laravel serving issues)
+  const getImageUrl = (path: string | null | undefined): string | null => {
+    if (path === null || path === undefined || path === "") return null;
+    const p = String(path).trim();
+    if (p.startsWith("http://") || p.startsWith("https://")) return p;
+    const normalized = normalizePath(path);
+    if (!normalized) return null;
+    return `/api/storage?path=${encodeURIComponent(normalized)}`;
+  };
+
   const fetchHomePageData = async () => {
     try {
       setLoading(true);
@@ -502,31 +520,25 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
                 ) : (
                   <>
                     <img
-                      src={formData.backgroundImageUrl?.startsWith('http') 
-                        ? formData.backgroundImageUrl 
-                        : `http://localhost:8000${formData.backgroundImageUrl}`}
+                      src={getImageUrl(formData.backgroundImageUrl) ?? ""}
                       alt="Background"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        console.error("Failed to load background image:", formData.backgroundImageUrl);
-                        console.error("Attempted URL:", formData.backgroundImageUrl?.startsWith('http') 
-                          ? formData.backgroundImageUrl 
-                          : `http://localhost:8000${formData.backgroundImageUrl}`);
-                        console.error("Note: Run 'php artisan storage:link' in your Laravel backend to fix this issue");
-                        e.currentTarget.style.display = 'none';
+                        const url = getImageUrl(formData.backgroundImageUrl);
+                        console.error("Failed to load background image:", formData.backgroundImageUrl, "→", url);
+                        console.error("Note: Run 'php artisan storage:link' in your Laravel backend if images are stored there.");
+                        e.currentTarget.style.display = "none";
                         const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                        if (fallback) fallback.style.display = 'flex';
-                      }}
-                      onLoad={() => {
-                        console.log("Background image loaded successfully");
+                        if (fallback) fallback.style.display = "flex";
                       }}
                     />
-                    <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-xs text-center p-2" style={{display: 'none'}}>
+                    <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-xs text-center p-2 bg-gray-200" style={{ display: "none" }}>
                       <div>
                         <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
-                        Image not found
+                        <span className="block font-medium">Image not found</span>
+                        <span className="block mt-1 text-[10px] leading-tight">Run <code className="bg-gray-300 px-1 rounded">php artisan storage:link</code> in your Laravel project</span>
                       </div>
                     </div>
                   </>
@@ -598,15 +610,28 @@ const HeroEditor = forwardRef<HeroEditorRef>((props, ref) => {
                   className="object-cover"
                 />
               ) : (
-                <img
-                  src={`http://localhost:8000${formData.secondaryImageUrl}`}
-                  alt="Secondary"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error("Failed to load secondary image:", formData.secondaryImageUrl);
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
+                <>
+                  <img
+                    src={getImageUrl(formData.secondaryImageUrl) ?? ""}
+                    alt="Secondary"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error("Failed to load secondary image:", formData.secondaryImageUrl, "→", getImageUrl(formData.secondaryImageUrl));
+                      e.currentTarget.style.display = "none";
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = "flex";
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-xs text-center p-2 bg-gray-200" style={{ display: "none" }}>
+                    <div>
+                      <svg className="w-8 h-8 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <span className="block font-medium">Image not found</span>
+                      <span className="block mt-1 text-[10px] leading-tight">Run <code className="bg-gray-300 px-1 rounded">php artisan storage:link</code> in your Laravel project</span>
+                    </div>
+                  </div>
+                </>
               )}
               <button
                 onClick={() => handleDeleteImage("secondary")}

@@ -39,7 +39,6 @@ export default function ServicesPageEditor() {
     title: string;
     description: string;
     features: { title: string; description: string }[];
-    button_text: string;
     main_image?: string;
     small_image?: string;
     main_image_file?: File;
@@ -58,8 +57,6 @@ export default function ServicesPageEditor() {
     title: string;
     description: string;
     features: { title: string; description: string }[];
-    button_text: string;
-    button_url: string;
     main_image?: string;
     small_image?: string;
     main_image_file?: File;
@@ -78,8 +75,6 @@ export default function ServicesPageEditor() {
     title: string;
     description: string;
     features: { title: string; description: string }[];
-    button_text: string;
-    button_url: string;
     main_image?: string;
     small_image?: string;
     main_image_file?: File;
@@ -143,6 +138,8 @@ export default function ServicesPageEditor() {
     id?: number;
     section_title: string;
     section_description: string;
+    section_image?: string;
+    section_image_file?: File;
     background_image?: string;
     background_image_file?: File;
     background_image_mobile?: string;
@@ -248,6 +245,8 @@ export default function ServicesPageEditor() {
             console.log('Features sections loaded:', featuresResult);
             if (featuresResult.success && featuresResult.data?.features_sections) {
               setFeaturesSectionsData(featuresResult.data.features_sections);
+            } else if (featuresResult.success && featuresResult.data?.features_section) {
+              setFeaturesSectionsData([featuresResult.data.features_section]);
             }
           }
         } catch (error) {
@@ -461,6 +460,8 @@ export default function ServicesPageEditor() {
                   id: section.id,
                   section_title: section.section_title || '',
                   section_description: section.section_description || '',
+                  section_image: section.section_image || '',
+                  section_image_file: null,
                   background_image: section.background_image || '',
                   background_image_file: null,
                   background_image_mobile: section.background_image_mobile || '',
@@ -492,6 +493,8 @@ export default function ServicesPageEditor() {
                 id: section.id,
                 section_title: section.section_title || '',
                 section_description: section.section_description || '',
+                section_image: section.section_image || '',
+                section_image_file: null,
                 background_image: section.background_image || '',
                 background_image_file: null,
                 background_image_mobile: section.background_image_mobile || '',
@@ -655,27 +658,30 @@ export default function ServicesPageEditor() {
       const token = localStorage.getItem('token');
       console.log('Using token:', token ? 'Token exists' : 'No token found');
 
-      // Test API connection
-      const testResponse = await fetch('http://localhost:8000/api/v1/service-page', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token || ''}`,
-        }
-      });
+      // If no slides exist but user has edited page heading/hero data, create one default slide to save
+      const slidesToSave = heroSectionData.length > 0
+        ? heroSectionData
+        : [{
+            id: undefined,
+            image: '',
+            smallText: heroData.subheading || '',
+            mainHeading: heroData.heading || 'Our Services',
+            outlinedHeading: '',
+            description: heroData.description || '',
+            backgroundText: '',
+            buttonText: 'Get Started Now',
+            buttonUrl: '/contact'
+          }];
 
-      if (!testResponse.ok) {
-        throw new Error(`API Connection failed: ${testResponse.status}`);
-      }
-
-      if (heroSectionData.length === 0) {
+      if (slidesToSave.length === 0) {
         throw new Error('No hero slide data to save');
       }
 
-      console.log('Saving', heroSectionData.length, 'hero slides...');
+      console.log('Saving', slidesToSave.length, 'hero slide(s)...');
       const results = [];
 
-      for (let index = 0; index < heroSectionData.length; index++) {
-        const slide = heroSectionData[index];
+      for (let index = 0; index < slidesToSave.length; index++) {
+        const slide = slidesToSave[index];
         console.log(`\n=== Processing Hero Slide ${index + 1} ===`);
 
         const formData = new FormData();
@@ -686,11 +692,12 @@ export default function ServicesPageEditor() {
         formData.append('description', slide.description || '');
         formData.append('background_text', slide.backgroundText || '');
         formData.append('button_text', slide.buttonText || 'Get Started Now');
-        formData.append('button_url', slide.buttonUrl && slide.buttonUrl.trim() ? slide.buttonUrl : '/contact');
-
-        if (slide.id && typeof slide.id === 'number') {
-          formData.append('_method', 'PUT');
-        }
+        // API expects a valid full URL; convert relative paths (e.g. /contact) to absolute
+        const rawButtonUrl = slide.buttonUrl && slide.buttonUrl.trim() ? slide.buttonUrl : '/contact';
+        const buttonUrlForApi = rawButtonUrl.startsWith('http://') || rawButtonUrl.startsWith('https://')
+          ? rawButtonUrl
+          : `${typeof window !== 'undefined' ? window.location.origin : 'https://localhost:3000'}${rawButtonUrl.startsWith('/') ? rawButtonUrl : '/' + rawButtonUrl}`;
+        formData.append('button_url', buttonUrlForApi);
 
         if (slide.image && slide.image.startsWith('blob:')) {
           try {
@@ -703,9 +710,15 @@ export default function ServicesPageEditor() {
           }
         }
 
-        const url = slide.id && typeof slide.id === 'number'
+        // New slides get id: Date.now() in UI; only use PUT when id looks like a real DB id (small integer)
+        const isExistingSlide = typeof slide.id === 'number' && slide.id < 1e10;
+        const url = isExistingSlide
           ? `http://localhost:8000/api/v1/service-page/${slide.id}`
           : 'http://localhost:8000/api/v1/service-page';
+
+        if (isExistingSlide) {
+          formData.append('_method', 'PUT');
+        }
 
         const apiResponse = await fetch(url, {
           method: 'POST',
@@ -715,21 +728,61 @@ export default function ServicesPageEditor() {
           body: formData
         });
 
+        const result = await apiResponse.json().catch(() => ({}));
+
         if (!apiResponse.ok) {
-          throw new Error(`Failed to save hero slide ${index + 1}: ${apiResponse.status}`);
+          if (apiResponse.status === 429) {
+            throw new Error('Too many requests (429). Please wait a moment and try again.');
+          }
+          // 422 = validation error: show backend message and field errors
+          const msg = result.message || result.error || `Failed to save hero slide ${index + 1}`;
+          const errors = result.errors;
+          const errorDetail = errors && typeof errors === 'object'
+            ? Object.entries(errors).map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`).join('; ')
+            : '';
+          throw new Error(errorDetail ? `${msg} — ${errorDetail}` : msg);
         }
 
-        const result = await apiResponse.json();
         results.push(result);
 
-        if (index < heroSectionData.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+        if (index < slidesToSave.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
+      }
+
+      // If we created the first slide from page heading only, update state so UI shows the new slide
+      if (heroSectionData.length === 0 && results.length > 0) {
+        const newSlides = results.map((r: any) => {
+          const page = r.data?.service_page || r.service_page || r;
+          return {
+            id: page.id,
+            image: page.bg_image ? (page.bg_image.startsWith('http') ? page.bg_image : `http://localhost:8000${page.bg_image}`) : '',
+            smallText: page.small_text || '',
+            mainHeading: page.main_heading || '',
+            outlinedHeading: page.outlined_heading || '',
+            description: page.description || '',
+            backgroundText: page.background_text || '',
+            buttonText: page.button_text || 'Get Started Now',
+            buttonUrl: page.button_url || '/contact'
+          };
+        });
+        setHeroSectionData(newSlides);
+      } else if (results.length === slidesToSave.length) {
+        // Replace temp ids (Date.now()) with real API ids so next save uses PUT not POST
+        setHeroSectionData((prev) =>
+          prev.map((slide, i) => {
+            const r = results[i];
+            const page = r?.data?.service_page || r?.service_page || r;
+            if (page?.id != null && typeof slide.id === 'number' && slide.id >= 1e10)
+              return { ...slide, id: page.id };
+            return slide;
+          })
+        );
       }
 
       console.log('\n=== Hero sections saved successfully! ===');
       setHasUnsavedChanges(false);
-      alert(`Successfully saved ${heroSectionData.length} hero slides!`);
+      alert(`Successfully saved ${slidesToSave.length} hero slide(s)!`);
     } catch (error) {
       console.error("Error saving hero sections:", error);
       alert('Error saving hero sections: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -783,18 +836,21 @@ export default function ServicesPageEditor() {
           formData.append('subtitle', section.subtitle);
           formData.append('title', section.title);
           formData.append('description', section.description);
-          formData.append('button_text', section.button_text);
-
           section.features.forEach((feature, featureIndex) => {
             formData.append(`features[${featureIndex}][title]`, feature.title);
             formData.append(`features[${featureIndex}][description]`, feature.description);
           });
 
+          // Always send image fields so backend can clear them when empty
           if (section.main_image_file) {
             formData.append('main_image', section.main_image_file);
+          } else {
+            formData.append('main_image', section.main_image ?? '');
           }
           if (section.small_image_file) {
             formData.append('small_image', section.small_image_file);
+          } else {
+            formData.append('small_image', section.small_image ?? '');
           }
 
           if (section.id) {
@@ -822,9 +878,8 @@ export default function ServicesPageEditor() {
               title: section.title,
               description: section.description,
               features: section.features,
-              button_text: section.button_text,
-              ...(section.main_image && { main_image: section.main_image }),
-              ...(section.small_image && { small_image: section.small_image })
+              main_image: section.main_image ?? '',
+              small_image: section.small_image ?? ''
             })
           });
         }
@@ -908,19 +963,21 @@ export default function ServicesPageEditor() {
           formData.append('subtitle', section.subtitle);
           formData.append('title', section.title);
           formData.append('description', section.description);
-          formData.append('button_text', section.button_text);
-          formData.append('button_url', section.button_url);
-
           section.features.forEach((feature, featureIndex) => {
             formData.append(`features[${featureIndex}][title]`, feature.title);
             formData.append(`features[${featureIndex}][description]`, feature.description);
           });
 
+          // Always send image fields so backend can clear them when empty
           if (section.main_image_file) {
             formData.append('main_image', section.main_image_file);
+          } else {
+            formData.append('main_image', section.main_image ?? '');
           }
           if (section.small_image_file) {
             formData.append('small_image', section.small_image_file);
+          } else {
+            formData.append('small_image', section.small_image ?? '');
           }
 
           if (section.id) {
@@ -948,10 +1005,8 @@ export default function ServicesPageEditor() {
               title: section.title,
               description: section.description,
               features: section.features,
-              button_text: section.button_text,
-              button_url: section.button_url,
-              ...(section.main_image && { main_image: section.main_image }),
-              ...(section.small_image && { small_image: section.small_image })
+              main_image: section.main_image ?? '',
+              small_image: section.small_image ?? ''
             })
           });
         }
@@ -1044,19 +1099,21 @@ export default function ServicesPageEditor() {
           formData.append('subtitle', section.subtitle);
           formData.append('title', section.title);
           formData.append('description', section.description);
-          formData.append('button_text', section.button_text);
-          formData.append('button_url', section.button_url);
-
           section.features.forEach((feature, featureIndex) => {
             formData.append(`features[${featureIndex}][title]`, feature.title);
             formData.append(`features[${featureIndex}][description]`, feature.description);
           });
 
+          // Always send image fields so backend can clear them when empty
           if (section.main_image_file) {
             formData.append('main_image', section.main_image_file);
+          } else {
+            formData.append('main_image', section.main_image ?? '');
           }
           if (section.small_image_file) {
             formData.append('small_image', section.small_image_file);
+          } else {
+            formData.append('small_image', section.small_image ?? '');
           }
 
           if (section.id) {
@@ -1084,10 +1141,8 @@ export default function ServicesPageEditor() {
               title: section.title,
               description: section.description,
               features: section.features,
-              button_text: section.button_text,
-              button_url: section.button_url,
-              ...(section.main_image && { main_image: section.main_image }),
-              ...(section.small_image && { small_image: section.small_image })
+              main_image: section.main_image ?? '',
+              small_image: section.small_image ?? ''
             })
           });
         }
@@ -1409,8 +1464,9 @@ export default function ServicesPageEditor() {
         console.log('Using URL:', url);
         console.log('Is update operation:', isValidId);
 
-        // Check if any showcase item has files OR if section has background image files
+        // Check if any showcase item has files OR if section has image files
         const hasFiles = (section.showcase_items && section.showcase_items.some((item: any) => !!item.image_file)) ||
+          !!section.section_image_file ||
           !!section.background_image_file ||
           !!section.background_image_mobile_file;
 
@@ -1420,18 +1476,25 @@ export default function ServicesPageEditor() {
           formData.append('section_title', section.section_title);
           formData.append('section_description', section.section_description);
 
-          // Add background images if they exist
+          // Section image: send new file, existing URL, or empty string to clear
+          if (section.section_image_file) {
+            formData.append('section_image', section.section_image_file);
+          } else {
+            formData.append('section_image', section.section_image ?? '');
+          }
+
+          // Background images: send new file, existing URL, or empty string to clear
           if (section.background_image_file) {
             formData.append('background_image', section.background_image_file);
             console.log(`Adding background image file:`, section.background_image_file.name);
-          } else if (section.background_image) {
-            formData.append('background_image', section.background_image);
+          } else {
+            formData.append('background_image', section.background_image ?? '');
           }
           if (section.background_image_mobile_file) {
             formData.append('background_image_mobile', section.background_image_mobile_file);
             console.log(`Adding background image mobile file:`, section.background_image_mobile_file.name);
-          } else if (section.background_image_mobile) {
-            formData.append('background_image_mobile', section.background_image_mobile);
+          } else {
+            formData.append('background_image_mobile', section.background_image_mobile ?? '');
           }
 
           // Add showcase items according to API format
@@ -1455,12 +1518,12 @@ export default function ServicesPageEditor() {
                 console.log(`Adding item ID ${item.id} for item ${itemIndex}`);
               }
 
-              // Add file if exists
+              // Item image: send new file, or existing URL / empty string to clear
               if (item.image_file) {
                 console.log(`Adding file for item ${itemIndex}:`, item.image_file.name);
                 formData.append(`showcase_items[${itemIndex}][image]`, item.image_file);
               } else {
-                console.log(`No file for item ${itemIndex}, using existing image:`, item.image);
+                formData.append(`showcase_items[${itemIndex}][image]`, item.image ?? '');
               }
             });
           }
@@ -1484,13 +1547,10 @@ export default function ServicesPageEditor() {
             showcase_items: []
           };
 
-          // Add background images if they exist
-          if (section.background_image) {
-            jsonData.background_image = section.background_image;
-          }
-          if (section.background_image_mobile) {
-            jsonData.background_image_mobile = section.background_image_mobile;
-          }
+          // Always send image fields so backend can clear them when empty
+          jsonData.section_image = section.section_image ?? '';
+          jsonData.background_image = section.background_image ?? '';
+          jsonData.background_image_mobile = section.background_image_mobile ?? '';
 
           // Add showcase items according to API format
           if (section.showcase_items && Array.isArray(section.showcase_items)) {
@@ -1505,7 +1565,8 @@ export default function ServicesPageEditor() {
               const itemData: any = {
                 title: item.title,
                 description: item.description,
-                order: item.order
+                order: item.order,
+                image: item.image ?? ''
               };
 
               // CRITICAL: Include item ID if it exists (for updates)

@@ -11,7 +11,15 @@ interface CoreValue {
   order: number;
 }
 
+interface CoreValuesSection {
+  id?: number;
+  section_title: string;
+  section_description: string;
+}
+
 export default function CoreValuesEditor() {
+  const [section, setSection] = useState<CoreValuesSection>({ section_title: "", section_description: "" });
+  const [sectionSaving, setSectionSaving] = useState(false);
   const [coreValues, setCoreValues] = useState<CoreValue[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -22,6 +30,7 @@ export default function CoreValuesEditor() {
 
   useEffect(() => {
     fetchCoreValues();
+    fetchCoreValuesSection();
   }, []);
 
   const getToken = () => {
@@ -33,6 +42,62 @@ export default function CoreValuesEditor() {
     if (url.startsWith("http")) return url;
     if (url.startsWith("/storage")) return `http://localhost:8000${url}`;
     return `http://localhost:8000/storage/${url}`;
+  };
+
+  const fetchCoreValuesSection = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/core-values-section", {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.core_values_section) {
+          const s = data.data.core_values_section;
+          setSection({
+            id: s.id,
+            section_title: s.section_title ?? "",
+            section_description: s.section_description ?? "",
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching core values section:", err);
+    }
+  };
+
+  const handleSaveSection = async () => {
+    const token = getToken();
+    if (!token) {
+      setError("Please login to save changes");
+      return;
+    }
+    try {
+      setSectionSaving(true);
+      setError("");
+      const response = await fetch("http://localhost:8000/api/v1/core-values-section", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          section_title: section.section_title,
+          section_description: section.section_description,
+        }),
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to save section");
+      }
+      setSuccess("Core Values section saved successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to save section");
+      setTimeout(() => setError(""), 5000);
+    } finally {
+      setSectionSaving(false);
+    }
   };
 
   const fetchCoreValues = async () => {
@@ -246,8 +311,44 @@ export default function CoreValuesEditor() {
         </div>
       )}
 
+      {/* Core Values Section (title + description above the list) */}
+      <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+        <h3 className="text-sm font-bold text-gray-900 mb-3">Core Values Section (heading above the list)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Section Title</label>
+            <input
+              type="text"
+              value={section.section_title}
+              onChange={(e) => setSection((prev) => ({ ...prev, section_title: e.target.value }))}
+              placeholder="e.g. Our Core Values"
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white"
+              style={{ color: "#111827", WebkitTextFillColor: "#111827", caretColor: "#111827" }}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Section Description</label>
+            <input
+              type="text"
+              value={section.section_description}
+              onChange={(e) => setSection((prev) => ({ ...prev, section_description: e.target.value }))}
+              placeholder="e.g. These principles guide everything we do."
+              className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white"
+              style={{ color: "#111827", WebkitTextFillColor: "#111827", caretColor: "#111827" }}
+            />
+          </div>
+        </div>
+        <button
+          onClick={handleSaveSection}
+          disabled={sectionSaving}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors disabled:opacity-50"
+        >
+          {sectionSaving ? "Saving..." : "Save Section"}
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {coreValues.map((value) => (
+        {coreValues.map((value, index) => (
           <div key={value.id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
             {editingId === value.id ? (
               <div className="space-y-3">
@@ -350,7 +451,7 @@ export default function CoreValuesEditor() {
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="text-sm font-bold">
                     <span className="text-pink-600">CORE VALUE #</span>
-                    <span className="text-gray-900">{value.order}</span>
+                    <span className="text-gray-900">{index + 1}</span>
                   </h3>
                   <div className="flex gap-2">
                     <button

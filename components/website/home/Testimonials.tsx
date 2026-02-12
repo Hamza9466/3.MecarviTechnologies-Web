@@ -18,8 +18,6 @@ interface SectionData {
   client_label: string;
   review_count: string;
   call_to_action_text: string;
-  button_text: string;
-  button_url: string;
   avatar_1: string | null;
   avatar_2: string | null;
   avatar_3: string | null;
@@ -75,8 +73,6 @@ export default function Testimonials() {
             client_label: "Our Client",
             review_count: "5k+",
             call_to_action_text: "Customer experiences that speak for themselves",
-            button_text: "Book Now",
-            button_url: "",
             avatar_1: null,
             avatar_2: null,
             avatar_3: null,
@@ -91,8 +87,6 @@ export default function Testimonials() {
           client_label: "Our Client",
           review_count: "5k+",
           call_to_action_text: "Customer experiences that speak for themselves",
-          button_text: "Book Now",
-          button_url: "",
           avatar_1: null,
           avatar_2: null,
           avatar_3: null,
@@ -108,8 +102,6 @@ export default function Testimonials() {
         client_label: "Our Client",
         review_count: "5k+",
         call_to_action_text: "Customer experiences that speak for themselves",
-        button_text: "Book Now",
-        button_url: "",
         avatar_1: null,
         avatar_2: null,
         avatar_3: null,
@@ -191,8 +183,6 @@ export default function Testimonials() {
   const clientLabel = sectionData?.client_label || "Our Client";
   const reviewCount = sectionData?.review_count || "5k+";
   const heading = sectionData?.call_to_action_text || "Customer experiences that speak for themselves";
-  const buttonText = sectionData?.button_text || "Book Now";
-  const buttonUrl = sectionData?.button_url || "";
 
   if (loading) {
     return (
@@ -220,7 +210,7 @@ export default function Testimonials() {
       <div className="max-w-[95%] mx-auto">
         {/* Header Section */}
         <div className="text-center mb-7">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold uppercase tracking-wide" style={{ color: '#E60F77' }} data-aos="fade-up">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold uppercase tracking-wide" style={{ color: '#E60F77' }} data-aos="fade-up">
             {mainHeading}
           </h2>
         </div>
@@ -229,7 +219,7 @@ export default function Testimonials() {
           {/* Left Side - Stats Card */}
           <div className="rounded-2xl p-4 sm:p-6 md:p-8 lg:p-10 shadow-xl h-full flex flex-col" style={{ backgroundColor: '#FDE7F3' }} data-aos="fade-up">
             {/* Rating */}
-            <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold text-black mb-4 sm:mb-6 text-center" >
+            <div className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem] font-bold text-black mb-4 sm:mb-6 text-center" >
               {averageRating}
             </div>
 
@@ -269,29 +259,9 @@ export default function Testimonials() {
             </div>
 
             {/* Heading */}
-            <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-bold text-black mb-4 sm:mb-6 text-center">
+            <h3 className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-lg font-bold text-black mb-4 sm:mb-6 text-center">
               {heading}
             </h3>
-
-            {/* Book Now Button */}
-            <div className="mt-auto flex justify-center">
-              {buttonUrl ? (
-                <a
-                  href={buttonUrl}
-                  className="text-white font-bold py-2.5 sm:py-3 px-6 sm:px-8 rounded-full hover:opacity-90 transition-opacity text-xs sm:text-sm md:text-base inline-block"
-                  style={{ background: 'linear-gradient(to right, #1B25FF, #B21FF3)' }}
-                >
-                  {buttonText}
-                </a>
-              ) : (
-                <button 
-                  className="text-white font-bold py-2.5 sm:py-3 px-6 sm:px-8 rounded-full hover:opacity-90 transition-opacity text-xs sm:text-sm md:text-base"
-                  style={{ background: 'linear-gradient(to right, #1B25FF, #B21FF3)' }}
-                >
-                  {buttonText}
-                </button>
-              )}
-            </div>
           </div>
 
           {/* Right Side - Testimonials */}
@@ -302,7 +272,7 @@ export default function Testimonials() {
                 {/* Left Testimonial */}
                 <div className="flex-1" >
                   {/* Testimonial Text */}
-                  <p className="text-black text-xs sm:text-sm md:text-base mb-4 sm:mb-6 leading-relaxed line-clamp-3 min-h-[3.75rem] sm:min-h-[4.5rem] md:min-h-[4.875rem]">
+                  <p className="text-black text-sm sm:text-base md:text-lg lg:text-lg xl:text-xl mb-4 sm:mb-6 leading-relaxed line-clamp-3 min-h-[3.75rem] sm:min-h-[4.5rem] md:min-h-[4.875rem] lg:min-h-[5rem] xl:min-h-[5.25rem]">
                     "{currentReview.review_quote}"
                   </p>
 
@@ -380,7 +350,7 @@ export default function Testimonials() {
                 {/* Right Testimonial */}
                 <div className="flex-1">
                   {/* Testimonial Text */}
-                  <p className="text-black text-xs sm:text-sm md:text-base mb-4 sm:mb-6 leading-relaxed line-clamp-3 min-h-[3.75rem] sm:min-h-[4.5rem] md:min-h-[4.875rem]">
+                  <p className="text-black text-sm sm:text-base md:text-lg lg:text-lg xl:text-xl mb-4 sm:mb-6 leading-relaxed line-clamp-3 min-h-[3.75rem] sm:min-h-[4.5rem] md:min-h-[4.875rem] lg:min-h-[5rem] xl:min-h-[5.25rem]">
                     "{nextReview.review_quote}"
                   </p>
 

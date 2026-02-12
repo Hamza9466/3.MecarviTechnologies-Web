@@ -125,7 +125,7 @@ export default function BusinessSuccess() {
         {/* Left Content */}
         <div className="space-y-6 md:space-y-8" data-aos="fade-up">
           {/* Main Heading */}
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-pink-500 leading-tight" data-aos="fade-up">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-pink-500 leading-tight" data-aos="fade-up">
             {content.main_title}
           </h2>
 

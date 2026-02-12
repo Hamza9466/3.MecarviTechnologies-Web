@@ -70,7 +70,7 @@ export default function CareerFAQ() {
       <div className="max-w-[95%] mx-auto">
         {/* Header */}
         <div className="text-center mb-12" data-aos="fade-up">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900">
             {sectionTitle}
           </h2>
         </div>

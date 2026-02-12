@@ -8,8 +8,6 @@ interface ChartData {
   title: string;
   description: string;
   features: string[];
-  buttonText: string;
-  buttonUrl: string;
   mainImage: string;
   smallImage: string;
 }
@@ -117,30 +115,6 @@ export default function ChartEditor({ data, onChange }: ChartEditorProps) {
         >
           Add Feature
         </button>
-      </div>
-
-      {/* Button */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
-          <input
-            type="text"
-            value={data.buttonText}
-            onChange={(e) => handleFieldChange('buttonText', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
-            placeholder="View Charts"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Button URL</label>
-          <input
-            type="text"
-            value={data.buttonUrl}
-            onChange={(e) => handleFieldChange('buttonUrl', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
-            placeholder="/charts"
-          />
-        </div>
       </div>
 
       {/* Images */}

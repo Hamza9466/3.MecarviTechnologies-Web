@@ -58,10 +58,10 @@ export default function AboutFounder() {
   return (
     <section className="bg-white pt-8 sm:pt-12 md:pt-16 pb-0 px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="max-w-[95%] mx-auto" data-aos="fade-up">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600 text-center mb-8 md:mb-12">
+        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-blue-600 text-center mb-8 md:mb-12">
           {displayData.founder_title}
         </h2>
-        <div className="text-gray-700 text-sm sm:text-base md:text-lg leading-relaxed text-left max-w-[95%] mx-auto">
+        <div className="text-gray-700 text-base sm:text-lg md:text-xl leading-relaxed text-left max-w-[95%] mx-auto">
           <p className="mb-0">{displayData.founder_description}</p>
         </div>
       </div>

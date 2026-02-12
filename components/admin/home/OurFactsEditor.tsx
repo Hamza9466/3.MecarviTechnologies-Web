@@ -25,6 +25,7 @@ interface OurFactsEditorRef {
 const OurFactsEditor = forwardRef<OurFactsEditorRef>((props, ref) => {
   const [sectionId, setSectionId] = useState<number | null>(null);
   const [largeNumber, setLargeNumber] = useState("15+");
+  const [smallDescription, setSmallDescription] = useState("");
   const [backgroundImage, setBackgroundImage] = useState<File | null>(null);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState<string | null>(null);
   const [factsTitle, setFactsTitle] = useState("Our Facts");
@@ -67,6 +68,7 @@ const OurFactsEditor = forwardRef<OurFactsEditorRef>((props, ref) => {
         if (response.status === 404) {
           setSectionId(null);
           setLargeNumber("15+");
+          setSmallDescription("");
           setFactsTitle("Our Facts");
           setBackgroundImageUrl(null);
           return;
@@ -80,6 +82,7 @@ const OurFactsEditor = forwardRef<OurFactsEditorRef>((props, ref) => {
         const section = data.data.our_facts_section;
         setSectionId(section.id);
         setLargeNumber(section.large_number || "15+");
+        setSmallDescription(section.small_description || "");
         setFactsTitle(section.section_title || "Our Facts");
         setBackgroundImageUrl(section.background_image || null);
       }
@@ -375,6 +378,7 @@ const OurFactsEditor = forwardRef<OurFactsEditorRef>((props, ref) => {
       const sectionFormData = new FormData();
       sectionFormData.append("section_title", factsTitle || "Our Facts");
       sectionFormData.append("large_number", largeNumber || "15+");
+      sectionFormData.append("small_description", smallDescription || "");
 
       if (backgroundImage) {
         sectionFormData.append("background_image", backgroundImage);
@@ -675,6 +679,19 @@ const OurFactsEditor = forwardRef<OurFactsEditorRef>((props, ref) => {
             onChange={(e) => setLargeNumber(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
             placeholder="15+"
+          />
+        </div>
+        <div>
+          <label htmlFor="smallDescription" className="block text-sm font-medium text-gray-700 mb-2">
+            Small Description (tagline for the section)
+          </label>
+          <input
+            type="text"
+            id="smallDescription"
+            value={smallDescription}
+            onChange={(e) => setSmallDescription(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent text-gray-900 bg-white"
+            placeholder="A short tagline or description for the section"
           />
         </div>
       </div>

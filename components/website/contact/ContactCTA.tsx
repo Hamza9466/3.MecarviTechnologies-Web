@@ -121,7 +121,7 @@ export default function ContactCTA() {
               </div>
             ) : (
               <>
-                <h2 className="text-3xl sm:text-4xl md:text-3xl font-bold text-black mb-6">
+                <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-black mb-6">
                   {heading}
                 </h2>
                 <p className="text-black text-sm md:text-base leading-relaxed mb-8 max-w-2xl">
@@ -130,23 +130,26 @@ export default function ContactCTA() {
 
                 {/* Social Media Icons */}
                 {links.length > 0 ? (
-                  <div className="flex justify-start mb-8 flex-wrap gap-6 sm:gap-8">
+                  <div
+                    className="grid w-full mb-8 gap-6 sm:gap-8 justify-items-center"
+                    style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}
+                  >
                     {links.map((link) => {
                       const iconUrl = getImageUrl(link.icon);
                       const platformColor = getPlatformColor(link.platform_name);
                       const cardId = `link-${link.id}`;
 
                       return (
-                        <a
-                          key={link.id}
-                          href={link.platform_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="relative w-full h-[107px] cursor-pointer block mx-auto sm:mx-0"
-                          style={{ perspective: '1000px', maxWidth: '190px', width: '100%' }}
-                          onMouseEnter={() => setHoveredCard(cardId)}
-                          onMouseLeave={() => setHoveredCard(null)}
-                        >
+                          <a
+                            key={link.id}
+                            href={link.platform_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="relative w-full h-[107px] cursor-pointer block"
+                            style={{ perspective: '1000px' }}
+                            onMouseEnter={() => setHoveredCard(cardId)}
+                            onMouseLeave={() => setHoveredCard(null)}
+                          >
                           <div
                             className="absolute inset-0 w-full h-full transition-transform duration-500 ease-out"
                             style={{

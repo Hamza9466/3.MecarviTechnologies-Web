@@ -229,7 +229,7 @@ const WhyChooseUsEditor = forwardRef<WhyChooseUsEditorRef>((props, ref) => {
       order: tab.order || 0,
     };
 
-    const isUpdate = !!tab.id;
+    const isUpdate = tab.id > 0;
     const url = isUpdate 
       ? `http://localhost:8000/api/v1/why-choose-us-tabs/${tab.id}`
       : "http://localhost:8000/api/v1/why-choose-us-tabs";
@@ -255,11 +255,11 @@ const WhyChooseUsEditor = forwardRef<WhyChooseUsEditorRef>((props, ref) => {
     const responseData = await response.json();
     const savedTab = responseData.data?.why_choose_us_tab || responseData.why_choose_us_tab;
     
-    // Update tab with new ID if it was created
-    if (!tab.id && savedTab?.id) {
+    // Update tab with new ID if it was created (new tabs have id <= 0)
+    if ((!tab.id || tab.id < 0) && savedTab?.id) {
       setTabs((prev) =>
         prev.map((t) =>
-          t === tab ? { ...t, id: savedTab.id, order: savedTab.order || t.order } : t
+          t.id === tab.id ? { ...t, id: savedTab.id, order: savedTab.order ?? t.order } : t
         )
       );
     }
@@ -454,9 +454,10 @@ const WhyChooseUsEditor = forwardRef<WhyChooseUsEditorRef>((props, ref) => {
     const maxOrder = tabs.length > 0 
       ? Math.max(...tabs.map((t) => t.order || 0))
       : 0;
-    
+    // Unique negative id so each new tab has its own identity (fixes first tab updating when editing second)
+    const tempId = -Date.now();
     const newTab: Tab = {
-      id: 0, // Temporary ID for new tabs
+      id: tempId,
       title: "New Tab",
       description: "",
       order: maxOrder + 1,
@@ -466,8 +467,8 @@ const WhyChooseUsEditor = forwardRef<WhyChooseUsEditorRef>((props, ref) => {
   };
 
   const handleDeleteTab = async (tabId: number) => {
-    if (!tabId || tabId === 0) {
-      // Just remove from state if it's a new tab
+    if (tabId <= 0) {
+      // Just remove from state if it's a new unsaved tab (negative or zero id)
       setTabs((prev) => prev.filter((tab) => tab.id !== tabId));
       return;
     }
@@ -778,10 +779,10 @@ const WhyChooseUsEditor = forwardRef<WhyChooseUsEditorRef>((props, ref) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {tabs.map((tab) => (
-            <div key={tab.id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+            <div key={tab.id > 0 ? tab.id : `tab-temp-${tab.id}`} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
               <div className="flex justify-between items-start mb-3">
                 <h5 className="text-sm font-bold text-gray-900">
-                  TAB # {tab.id}
+                  TAB # {tab.id > 0 ? tab.id : tab.order}
                 </h5>
                 <div className="flex gap-2">
                   <button

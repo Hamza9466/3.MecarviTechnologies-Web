@@ -15,6 +15,8 @@ interface ShowcaseSectionData {
   id?: number;
   section_title: string;
   section_description: string;
+  section_image?: string;
+  section_image_file?: File;
   background_image?: string;
   background_image_file?: File;
   background_image_mobile?: string;
@@ -165,6 +167,23 @@ export default function ShowcaseSectionEditor({ data, onChange }: ShowcaseSectio
     handleFieldChange('showcase_items', updatedItems);
   };
 
+  const handleSectionImageChange = (file: File) => {
+    const updated = {
+      ...currentSection,
+      section_image_file: file,
+      section_image: currentSection.section_image
+    };
+    setCurrentSection(updated);
+    if (editingIndex !== null) {
+      if (data.length === 0) onChange([updated]);
+      else {
+        const newData = [...data];
+        newData[editingIndex] = updated;
+        onChange(newData);
+      }
+    }
+  };
+
   const handleBackgroundImageChange = (file: File) => {
     console.log('ShowcaseSectionEditor - handleBackgroundImageChange:', {
       fileName: file.name,
@@ -236,6 +255,55 @@ export default function ShowcaseSectionEditor({ data, onChange }: ShowcaseSectio
     handleFieldChange('showcase_items', updatedItems);
   };
 
+  const removeItemImage = (itemIndex: number) => {
+    const updatedItems = currentSection.showcase_items.map((item, index) => {
+      if (index === itemIndex) {
+        return { ...item, image: '', image_file: undefined };
+      }
+      return item;
+    });
+    handleFieldChange('showcase_items', updatedItems);
+  };
+
+  const removeBackgroundImage = () => {
+    const updated = { ...currentSection, background_image: '', background_image_file: undefined };
+    setCurrentSection(updated);
+    if (editingIndex !== null) {
+      if (data.length === 0) onChange([updated]);
+      else {
+        const newData = [...data];
+        newData[editingIndex] = updated;
+        onChange(newData);
+      }
+    }
+  };
+
+  const removeBackgroundImageMobile = () => {
+    const updated = { ...currentSection, background_image_mobile: '', background_image_mobile_file: undefined };
+    setCurrentSection(updated);
+    if (editingIndex !== null) {
+      if (data.length === 0) onChange([updated]);
+      else {
+        const newData = [...data];
+        newData[editingIndex] = updated;
+        onChange(newData);
+      }
+    }
+  };
+
+  const removeSectionImage = () => {
+    const updated = { ...currentSection, section_image: '', section_image_file: undefined };
+    setCurrentSection(updated);
+    if (editingIndex !== null) {
+      if (data.length === 0) onChange([updated]);
+      else {
+        const newData = [...data];
+        newData[editingIndex] = updated;
+        onChange(newData);
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Showcase Section Content</h3>
@@ -264,6 +332,58 @@ export default function ShowcaseSectionEditor({ data, onChange }: ShowcaseSectio
         />
       </div>
 
+      {/* Section Image (Hero) */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Section Image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleSectionImageChange(file);
+          }}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-gray-700 file:text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold"
+        />
+        {currentSection.section_image && !currentSection.section_image_file && (
+          <div className="mt-2 flex items-start gap-2">
+            <img
+              src={currentSection.section_image.startsWith('http') ? currentSection.section_image : `http://localhost:8000${currentSection.section_image}`}
+              alt="Section image"
+              className="h-20 w-20 object-cover rounded"
+              onError={(e) => {
+                e.currentTarget.src = '/assets/images/placeholder.png';
+              }}
+            />
+            <button
+              type="button"
+              onClick={removeSectionImage}
+              className="px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+            >
+              Delete
+            </button>
+          </div>
+        )}
+        {currentSection.section_image_file && (
+          <div className="mt-2 flex items-start gap-2">
+            <img
+              src={URL.createObjectURL(currentSection.section_image_file)}
+              alt="Section image preview"
+              className="h-20 w-20 object-cover rounded"
+            />
+            <div>
+              <p className="text-xs text-green-600">New file: {currentSection.section_image_file.name}</p>
+              <button
+                type="button"
+                onClick={removeSectionImage}
+                className="mt-1 px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Background Image */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Background Image </label>
@@ -279,25 +399,41 @@ export default function ShowcaseSectionEditor({ data, onChange }: ShowcaseSectio
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-gray-700 file:text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold"
         />
         {currentSection.background_image && !currentSection.background_image_file && (
-          <div className="mt-2">
+          <div className="mt-2 flex items-start gap-2">
             <img
               src={currentSection.background_image.startsWith('http') ? currentSection.background_image : `http://localhost:8000${currentSection.background_image}`}
               alt="Background desktop"
-              className="mt-2 h-20 w-20 object-cover rounded"
+              className="h-20 w-20 object-cover rounded"
               onError={(e) => {
                 e.currentTarget.src = '/assets/images/placeholder.png';
               }}
             />
+            <button
+              type="button"
+              onClick={removeBackgroundImage}
+              className="px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+            >
+              Delete
+            </button>
           </div>
         )}
         {currentSection.background_image_file && (
-          <div className="mt-2">
-            <p className="text-xs text-green-600">New file: {currentSection.background_image_file.name}</p>
+          <div className="mt-2 flex items-start gap-2">
             <img
               src={URL.createObjectURL(currentSection.background_image_file)}
               alt="Background desktop preview"
-              className="mt-2 h-20 w-20 object-cover rounded"
+              className="h-20 w-20 object-cover rounded"
             />
+            <div>
+              <p className="text-xs text-green-600">New file: {currentSection.background_image_file.name}</p>
+              <button
+                type="button"
+                onClick={removeBackgroundImage}
+                className="mt-1 px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -317,25 +453,41 @@ export default function ShowcaseSectionEditor({ data, onChange }: ShowcaseSectio
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-gray-700 file:text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold"
         />
         {currentSection.background_image_mobile && !currentSection.background_image_mobile_file && (
-          <div className="mt-2">
+          <div className="mt-2 flex items-start gap-2">
             <img
               src={currentSection.background_image_mobile.startsWith('http') ? currentSection.background_image_mobile : `http://localhost:8000${currentSection.background_image_mobile}`}
               alt="Background mobile"
-              className="mt-2 h-20 w-20 object-cover rounded"
+              className="h-20 w-20 object-cover rounded"
               onError={(e) => {
                 e.currentTarget.src = '/assets/images/placeholder.png';
               }}
             />
+            <button
+              type="button"
+              onClick={removeBackgroundImageMobile}
+              className="px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+            >
+              Delete
+            </button>
           </div>
         )}
         {currentSection.background_image_mobile_file && (
-          <div className="mt-2">
-            <p className="text-xs text-green-600">New file: {currentSection.background_image_mobile_file.name}</p>
+          <div className="mt-2 flex items-start gap-2">
             <img
               src={URL.createObjectURL(currentSection.background_image_mobile_file)}
               alt="Background mobile preview"
-              className="mt-2 h-20 w-20 object-cover rounded"
+              className="h-20 w-20 object-cover rounded"
             />
+            <div>
+              <p className="text-xs text-green-600">New file: {currentSection.background_image_mobile_file.name}</p>
+              <button
+                type="button"
+                onClick={removeBackgroundImageMobile}
+                className="mt-1 px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -404,25 +556,41 @@ export default function ShowcaseSectionEditor({ data, onChange }: ShowcaseSectio
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500 text-gray-700 file:text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold"
               />
               {item.image && !item.image_file && (
-                <div className="mt-2">
+                <div className="mt-2 flex items-start gap-2">
                   <img
                     src={item.image.startsWith('http') ? item.image : `http://localhost:8000${item.image}`}
                     alt="Showcase item"
-                    className="mt-2 h-20 w-20 object-cover rounded"
+                    className="h-20 w-20 object-cover rounded"
                     onError={(e) => {
                       e.currentTarget.src = '/assets/images/placeholder.png';
                     }}
                   />
+                  <button
+                    type="button"
+                    onClick={() => removeItemImage(index)}
+                    className="px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                  >
+                    Delete
+                  </button>
                 </div>
               )}
               {item.image_file && (
-                <div className="mt-2">
-                  <p className="text-xs text-green-600">New file: {item.image_file.name}</p>
+                <div className="mt-2 flex items-start gap-2">
                   <img
                     src={URL.createObjectURL(item.image_file)}
                     alt="Showcase item preview"
-                    className="mt-2 h-20 w-20 object-cover rounded"
+                    className="h-20 w-20 object-cover rounded"
                   />
+                  <div>
+                    <p className="text-xs text-green-600">New file: {item.image_file.name}</p>
+                    <button
+                      type="button"
+                      onClick={() => removeItemImage(index)}
+                      className="mt-1 px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

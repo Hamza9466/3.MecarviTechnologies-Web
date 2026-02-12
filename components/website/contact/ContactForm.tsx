@@ -291,12 +291,12 @@ export default function ContactForm() {
     return (
       <div
         key={card.id}
-        className="bg-white p-6 rounded-4xl border-12 border-[#F0ECF8] shadow-xl transition-all duration-300 hover:shadow-2xl flex flex-col w-full max-w-[320px] mx-auto sm:mx-0"
+        className="bg-white p-6 rounded-4xl border-12 border-[#F0ECF8] shadow-xl transition-all duration-300 hover:shadow-2xl flex flex-col w-full h-full"
         style={{ height: cardHeight }}
       >
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-indigo-600 shrink-0">
+            <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-50 text-indigo-600 shrink-0">
               {iconUrl ? (
                 <img
                   src={iconUrl}
@@ -317,7 +317,7 @@ export default function ContactForm() {
               )}
             </div>
             {label && (
-              <h4 className="text-gray-900 font-bold text-lg" style={{ fontFamily: 'Montserrat', fontWeight: 700 }}>
+              <h4 className="text-gray-900 font-bold text-xl md:text-2xl" style={{ fontFamily: 'Montserrat', fontWeight: 700 }}>
                 {label}:
               </h4>
             )}
@@ -330,7 +330,7 @@ export default function ContactForm() {
                   setShowEmailPopup(true);
                 }
               }}
-              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[10px] px-3 py-1 rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-semibold shadow-sm uppercase tracking-wider"
+              className="bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[11px] md:text-xs px-3 py-1 rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-semibold shadow-sm uppercase tracking-wider"
             >
               {card.secondary_badge}
             </button>
@@ -377,29 +377,29 @@ export default function ContactForm() {
         return (
           <>
             {card.phone_number_1 && (
-              <p className="text-gray-600 text-[15px] truncate font-medium">{card.phone_number_1}</p>
+              <p className="text-gray-600 text-base md:text-lg truncate font-medium">{card.phone_number_1}</p>
             )}
             {card.phone_number_2 && (
-              <p className="text-gray-600 text-[15px] truncate font-medium">{card.phone_number_2}</p>
+              <p className="text-gray-600 text-base md:text-lg truncate font-medium">{card.phone_number_2}</p>
             )}
           </>
         );
       case 'fax':
         return card.fax_number ? (
-          <p className="text-gray-600 text-[15px] truncate font-medium">{card.fax_number}</p>
+          <p className="text-gray-600 text-base md:text-lg truncate font-medium">{card.fax_number}</p>
         ) : null;
       case 'email':
         return card.email_address ? (
-          <p className="text-gray-600 text-[15px] truncate font-medium">{card.email_address}</p>
+          <p className="text-gray-600 text-base md:text-lg truncate font-medium">{card.email_address}</p>
         ) : null;
       case 'visit':
         return (
           <>
             {card.street_address && (
-              <p className="text-gray-600 text-[15px] truncate font-medium">{card.street_address}</p>
+              <p className="text-gray-600 text-base md:text-lg truncate font-medium">{card.street_address}</p>
             )}
             {(card.state_postal_code || card.country) && (
-              <p className="text-gray-600 text-[15px] truncate font-medium">
+              <p className="text-gray-600 text-base md:text-lg truncate font-medium">
                 {[card.state_postal_code, card.country].filter(Boolean).join(', ')}
               </p>
             )}
@@ -410,13 +410,13 @@ export default function ContactForm() {
         return (
           <>
             {card.monday_friday_hours && (
-              <p className="text-gray-600 text-[15px] font-medium">Monday-Friday: {card.monday_friday_hours}</p>
+              <p className="text-gray-600 text-base md:text-lg font-medium">Monday-Friday: {card.monday_friday_hours}</p>
             )}
             {card.saturday_hours && (
-              <p className="text-gray-600 text-[15px] font-medium">Saturday: {card.saturday_hours}</p>
+              <p className="text-gray-600 text-base md:text-lg font-medium">Saturday: {card.saturday_hours}</p>
             )}
             {card.sunday_hours && (
-              <p className="text-gray-600 text-[15px] font-medium">Sunday: {card.sunday_hours}</p>
+              <p className="text-gray-600 text-base md:text-lg font-medium">Sunday: {card.sunday_hours}</p>
             )}
           </>
         );
@@ -520,9 +520,9 @@ export default function ContactForm() {
 
   return (
     <>
-      <section className="bg-white pt-16 sm:pt-20 md:pt-24 pb-15 px-1 sm:px-2 md:px-4 lg:px-6 lg:mt-[-70px]">
-        <div className="max-w-[95%] mx-auto">
-          <div className="rounded-lg p-8 md:p-10 lg:pt-12 lg:px-12 lg:pb-0">
+      <section className="bg-white pt-16 sm:pt-20 md:pt-24 pb-15 px-1 sm:px-2 md:px-4 lg:px-8 lg:mt-[-70px]">
+        <div className="w-full mx-auto">
+          <div className="rounded-lg p-4 md:p-6 lg:pt-8 lg:px-8 lg:pb-0">
             {/* Section Header */}
             <div className="text-center mb-12" data-aos="fade-up">
               {heroLoading ? (
@@ -537,11 +537,11 @@ export default function ContactForm() {
                     </h3>
                   )}
                   {heroData?.description ? (
-                    <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+                    <p className="text-gray-600 text-base sm:text-lg max-w-7xl mx-auto w-full">
                       {heroData.description}
                     </p>
                   ) : (
-                    <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">
+                    <p className="text-gray-600 text-base sm:text-lg max-w-7xl mx-auto w-full">
                       Feel free to reach out to us for any inquiries, collaborations, or support. We're here to help and will get back to you as soon as possible.
                     </p>
                   )}
@@ -588,7 +588,7 @@ export default function ContactForm() {
 
               {/* Right Column - Contact Form */}
               <div className="bg-gray-50 rounded-lg p-4 sm:p-6 md:p-8 flex flex-col min-h-[530px]" data-aos="fade-up">
-                <h2 className="text-gray-900 text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
+                <h2 className="text-gray-900 text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold mb-4">
                   Contact Form
                 </h2>
 

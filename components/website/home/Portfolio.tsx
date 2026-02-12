@@ -351,7 +351,7 @@ export default function Portfolio() {
     return (
       <section className="bg-white relative py-12">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-center text-4xl font-bold text-gray-900 uppercase mb-4">PORTFOLIO</h2>
+          <h2 className="text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 uppercase mb-4">PORTFOLIO</h2>
           <p className="text-center text-gray-600 mb-8">No portfolio items available yet. Please add portfolio items through the admin panel.</p>
         </div>
       </section>
@@ -363,7 +363,7 @@ export default function Portfolio() {
     return (
       <section className="bg-white relative py-12">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-center text-4xl font-bold text-gray-900 uppercase mb-4">PORTFOLIO</h2>
+          <h2 className="text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 uppercase mb-4">PORTFOLIO</h2>
           <p className="text-center text-gray-600 mb-8">Portfolio items exist but no images are available. Please add images to portfolio items through the admin panel.</p>
         </div>
       </section>
@@ -388,7 +388,7 @@ export default function Portfolio() {
       <div className="relative bg-white px-1 sm:px-2 md:px-4 lg:px-6 py-3 md:py-4 lg:py-5">
         <div className="max-w-[95%] mx-auto relative z-10 px-2 sm:px-0" data-aos="fade-up">
           {/* PORTFOLIO Title */}
-          <h2 className="text-center text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 uppercase mb-2 sm:mb-3">
+          <h2 className="text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 uppercase mb-2 sm:mb-3">
             {mainHeading}
           </h2>
 

@@ -226,7 +226,7 @@ const ServicesEditor = forwardRef<ServicesEditorRef>((props, ref) => {
       formDataToSend.append("image", card.image);
     }
 
-    const isUpdate = !!card.id;
+    const isUpdate = card.id > 0;
     const url = isUpdate 
       ? `http://localhost:8000/api/v1/service-cards/${card.id}`
       : "http://localhost:8000/api/v1/service-cards";
@@ -253,11 +253,11 @@ const ServicesEditor = forwardRef<ServicesEditorRef>((props, ref) => {
     const responseData = await response.json();
     const savedCard = responseData.data?.service_card || responseData.service_card;
     
-    // Update card with new ID if it was created
-    if (!card.id && savedCard?.id) {
+    // Update card with new ID if it was created (new cards have id <= 0)
+    if ((!card.id || card.id < 0) && savedCard?.id) {
       setServiceCards((prev) =>
         prev.map((c) =>
-          c === card ? { ...c, id: savedCard.id, image: null, imageUrl: savedCard.image || null } : c
+          c.id === card.id ? { ...c, id: savedCard.id, image: null, imageUrl: savedCard.image || null } : c
         )
       );
     } else if (savedCard?.image) {
@@ -312,11 +312,12 @@ const ServicesEditor = forwardRef<ServicesEditorRef>((props, ref) => {
     const maxOrder = serviceCards.length > 0 
       ? Math.max(...serviceCards.map((c) => c.order || 0))
       : 0;
-    
+    // Use unique negative id so each new card has its own identity (fixes first card updating when editing second)
+    const tempId = -Date.now();
     setServiceCards((prev) => [
       ...prev,
       {
-        id: 0, // Temporary ID for new cards
+        id: tempId,
         subtitle: "",
         description: "",
         image: null,
@@ -406,8 +407,8 @@ const ServicesEditor = forwardRef<ServicesEditorRef>((props, ref) => {
   };
 
   const handleDeleteCard = async (cardId: number) => {
-    if (!cardId || cardId === 0) {
-      // Just remove from state if it's a new card
+    if (cardId <= 0) {
+      // Just remove from state if it's a new unsaved card (negative or zero id)
       setServiceCards((prev) => prev.filter((c) => c.id !== cardId));
       return;
     }
@@ -611,10 +612,10 @@ const ServicesEditor = forwardRef<ServicesEditorRef>((props, ref) => {
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {serviceCards.map((card) => (
-            <div key={card.id || `temp-${card.order}`} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+            <div key={card.id > 0 ? card.id : `temp-${card.order}-${card.id}`} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
               <div className="flex justify-between items-start mb-3">
                 <h4 className="text-sm font-bold text-pink-600">
-                  SERVICE #{card.id || card.order}
+                  SERVICE #{card.id > 0 ? card.id : card.order}
                 </h4>
                 <div className="flex gap-2">
                   <button

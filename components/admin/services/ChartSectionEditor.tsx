@@ -14,8 +14,6 @@ interface ChartSectionData {
   title: string;
   description: string;
   features: Feature[];
-  button_text: string;
-  button_url: string;
   main_image?: string;
   small_image?: string;
   main_image_file?: File;
@@ -36,8 +34,6 @@ export default function ChartSectionEditor({ data, onChange }: ChartSectionEdito
     title: '',
     description: '',
     features: [],
-    button_text: '',
-    button_url: '',
     main_image: '',
     small_image: ''
   });
@@ -60,8 +56,6 @@ export default function ChartSectionEditor({ data, onChange }: ChartSectionEdito
         title: '',
         description: '',
         features: [],
-        button_text: '',
-        button_url: '',
         main_image: '',
         small_image: ''
       });
@@ -297,29 +291,6 @@ export default function ChartSectionEditor({ data, onChange }: ChartSectionEdito
           </div>
 
           {/* Button */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
-              <input
-                type="text"
-                value={currentSection.button_text}
-                onChange={(e) => handleFieldChange('button_text', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
-                placeholder="View Charts"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Button URL</label>
-              <input
-                type="text"
-                value={currentSection.button_url}
-                onChange={(e) => handleFieldChange('button_url', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
-                placeholder="/charts"
-              />
-            </div>
-          </div>
-
           {/* Main Image */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Main Image</label>
@@ -471,29 +442,6 @@ export default function ChartSectionEditor({ data, onChange }: ChartSectionEdito
           </div>
 
           {/* Button */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
-              <input
-                type="text"
-                value={currentSection.button_text}
-                onChange={(e) => handleFieldChange('button_text', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
-                placeholder="View Charts"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Button URL</label>
-              <input
-                type="text"
-                value={currentSection.button_url}
-                onChange={(e) => handleFieldChange('button_url', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
-                placeholder="/charts"
-              />
-            </div>
-          </div>
-
           {/* Main Image */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Main Image</label>

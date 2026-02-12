@@ -117,7 +117,7 @@ const AnalyticsSection: React.FC = () => {
             <div className="container mx-auto px-4 w-[95%] relative z-10">
                 {/* Section Title */}
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4" data-aos="fade-up">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 mb-4" data-aos="fade-up">
                         {analyticsData.sectionTitle}
                     </h2>
                     <div className="w-24 h-1 bg-purple-600 mx-auto"></div>
@@ -136,11 +136,11 @@ const AnalyticsSection: React.FC = () => {
                                     e.currentTarget.src = '/assets/images/analytic_img.png';
                                 }}
                             />
-                            <div className="absolute top-1/7 left-5/16 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded-2xl shadow-lg z-10">
+                            <div className="absolute top-1/7 left-5/16 mt-6 transform -translate-x-1/2 -translate-y-1/2 bg-white p-3 rounded-xl shadow-lg z-10 max-w-[200px]">
                                 <img
                                     src={analyticsData.smallImage}
                                     alt="Analytics Chart"
-                                    className="w-64 h-36 object-cover  rounded-2xl"
+                                    className="w-full h-32 object-cover rounded-xl max-w-[180px]"
                                     onError={(e) => {
                                         console.error('Small image failed to load:', analyticsData.smallImage);
                                         e.currentTarget.src = '/assets/images/analytic_small.png';
@@ -153,7 +153,7 @@ const AnalyticsSection: React.FC = () => {
                     {/* Right Content */}
                     <div className="space-y-6 order-2 lg:order-2 ms-25">
                         <p className='text-blue-800 text-xl font-bold'>{analyticsData.subtitle}</p>
-                        <h2 className="text-4xl md:text-4xl font-bold text-gray-900 leading-tight max-w-lg">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 leading-tight max-w-lg">
                             {analyticsData.title}
                         </h2>
 
@@ -174,13 +174,6 @@ const AnalyticsSection: React.FC = () => {
                             ))}
                         </div>
 
-                        <a
-                            href={analyticsData.buttonUrl}
-                            className="text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 inline-block"
-                            style={{ backgroundColor: '#2B5BFD' }}
-                        >
-                            {analyticsData.buttonText}
-                        </a>
                     </div>
                 </div>
             </div>

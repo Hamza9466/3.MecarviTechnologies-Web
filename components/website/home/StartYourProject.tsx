@@ -94,7 +94,7 @@ export default function StartYourProject() {
         {/* Top Section */}
         <div className="text-center mb-12 md:mb-16" data-aos="fade-up">
           {/* Main Heading */}
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-pink-500 mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-pink-500 mb-4">
             {requestQuoteTitle}
           </h2>
           
@@ -122,7 +122,7 @@ export default function StartYourProject() {
         {/* Two Cards Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 mt-12 md:mt-16" data-aos="fade-up">
           {/* Left Card - Dark Green */}
-          <div className="bg-[#2d5016] p-8 md:p-10 lg:p-12 text-white">
+          <div className="bg-[#2d5016] p-8 md:p-10 lg:p-12 text-white rounded-2xl lg:rounded-r-none">
             {/* Icon/Image */}
             <div className="flex justify-center mb-6">
               {image1Url ? (
@@ -154,7 +154,7 @@ export default function StartYourProject() {
           </div>
 
           {/* Right Card - Pink/Magenta */}
-          <div className="bg-[#E60F77] p-8 md:p-10 lg:p-12 text-white">
+          <div className="bg-[#E60F77] p-8 md:p-10 lg:p-12 text-white rounded-2xl lg:rounded-l-none">
             {/* Icon/Image */}
             <div className="flex justify-center mb-6">
               {image2Url ? (

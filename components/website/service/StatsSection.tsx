@@ -14,7 +14,7 @@ const BookAppointmentSection: React.FC = () => {
                             • BOOK APPOINTMENT NOW •
                         </span>
 
-                        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 leading-tight mb-6">
                             Book a Time That Works for <br />
                             You Easy, and Hassle-Free!
                         </h2>

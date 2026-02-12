@@ -134,37 +134,37 @@ const HeroSection: React.FC = () => {
 
             {/* Content */}
             <div className="relative z-10 h-full flex items-end justify-end pb-15">
-                <div className="w-full px-6 md:px-20 lg:pr-32">
-                    <div className="text-white max-w-3xl ml-auto text-left" data-aos="fade-up">
+                <div className="w-full px-6 md:px-20 lg:pr-32 min-w-0">
+                    <div className="text-white max-w-3xl ml-auto text-left min-w-0 break-words ps-12 md:ps-20 lg:ps-28" data-aos="fade-up">
 
                         {/* Small heading */}
-                        <p className="text-sm md:text-base ps-50 font-light tracking-wider mb-2 text-gray-200 uppercase">
+                        <p className="text-xs md:text-sm ps-50 font-light tracking-wider mb-1 text-gray-200 uppercase">
                             {currentSlideData.smallText}
                         </p>
 
                         {/* Main heading */}
-                        <h1 className="text-2xl md:text-4xl ps-50 lg:text-4xl font-bold mb-2 leading-tight">
+                        <h1 className="text-xl md:text-2xl lg:text-3xl ps-50 font-bold mb-1 leading-snug break-words">
                             {currentSlideData.mainHeading}
                         </h1>
 
                         {/* Outlined heading */}
                         <h2
-                            className="text-2xl md:text-4xl ps-50 lg:text-4xl font-bold mb-4 leading-tight text-transparent"
-                            style={{ WebkitTextStroke: '2px white' }}
+                            className="text-xl md:text-2xl lg:text-3xl ps-50 font-bold mb-2 leading-snug text-transparent break-words"
+                            style={{ WebkitTextStroke: '1.5px white' }}
                         >
                             {currentSlideData.outlinedHeading}
                         </h2>
 
                         {/* Description */}
-                        <p className="text-sm ps-50 w-[95%] md:text-base mb-6 text-gray-100 leading-relaxed">
+                        <p className="text-xs ps-50 w-[95%] md:text-sm mb-4 text-gray-100 leading-relaxed">
                             {currentSlideData.description}
                         </p>
 
                         {/* Background Text */}
-                        <div className="relative mb-6">
+                        <div className="relative mb-4">
                             <h2
-                                className="text-4xl md:text-4xl ps-50 font-bold leading-tight text-transparent"
-                                style={{ WebkitTextStroke: '2px #676B78' }}
+                                className="text-2xl md:text-3xl ps-50 font-bold leading-snug text-transparent break-words opacity-80"
+                                style={{ WebkitTextStroke: '1px #676B78' }}
                             >
                                 {currentSlideData.backgroundText}
                             </h2>
@@ -173,7 +173,7 @@ const HeroSection: React.FC = () => {
                         {/* CTA */}
                         <a
                             href={currentSlideData.buttonUrl || '/contact'}
-                            className="bg-purple-600 ms-50 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl inline-block"
+                            className="bg-purple-600 ms-50 hover:bg-purple-700 text-white text-sm px-6 py-2.5 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl inline-block"
                         >
                             {currentSlideData.buttonText || 'Get Started Now'}
                         </a>

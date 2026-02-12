@@ -104,7 +104,7 @@ const FeaturesSection: React.FC = () => {
             <div className="container mx-auto px-4 w-[95%]">
                 {/* Section Title */}
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4" data-aos="fade-up">
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 mb-4" data-aos="fade-up">
                         {displayData.section_title || "Our Features"}
                     </h2>
                     <div className="w-24 h-1 bg-purple-600 mx-auto"></div>
@@ -116,7 +116,7 @@ const FeaturesSection: React.FC = () => {
                         {displayData.subtitle && (
                             <p className='text-blue-800 text-xl font-bold'>{displayData.subtitle}</p>
                         )}
-                        <h2 className="text-4xl md:text-4xl font-bold text-gray-900 leading-tight max-w-lg">
+                        <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 leading-tight max-w-lg">
                             {displayData.title}
                         </h2>
 
@@ -142,11 +142,6 @@ const FeaturesSection: React.FC = () => {
                             ))}
                         </div>
 
-                        {displayData.button_text && (
-                            <button className="text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1" style={{ backgroundColor: '#2B5BFD' }}>
-                                {displayData.button_text}
-                            </button>
-                        )}
                     </div>
 
                     {/* Right Images */}
@@ -168,11 +163,11 @@ const FeaturesSection: React.FC = () => {
 
                             {/* Small Image */}
                             {displayData.small_image && (
-                                <div className="absolute top-1/5 left-1/4 transform -translate-x-1/2 -translate-y-1/2 bg-white p-4 rounded-2xl shadow-lg z-10">
+                                <div className="absolute top-1/5 left-1/4 transform -translate-x-1/2 -translate-y-1/2 bg-white p-3 rounded-xl shadow-lg z-10 max-w-[200px]">
                                     <img
                                         src={displayData.small_image.startsWith('http') ? displayData.small_image : `http://localhost:8000${displayData.small_image}`}
                                         alt="Business Analytics Dashboard"
-                                        className="w-64 h-48 object-cover rounded-2xl"
+                                        className="w-full h-32 object-cover rounded-xl max-w-[180px]"
                                         onError={(e) => {
                                             // Fallback to static image if API image fails
                                             const target = e.target as HTMLImageElement;

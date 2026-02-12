@@ -83,11 +83,11 @@ export default function HoursOfOperation() {
 
     const renderHoursItem = (hour: HoursOfOperation) => {
         return (
-            <div key={hour.id} className="bg-white p-8 rounded-4xl border-12 border-[#F0ECF8] shadow-sm transition-all duration-300 hover:shadow-md flex flex-col w-full max-w-[360px] mx-auto">
+            <div key={hour.id} className="bg-white p-8 rounded-4xl border-12 border-[#F0ECF8] shadow-sm transition-all duration-300 hover:shadow-md flex flex-col w-full min-w-0">
                 {/* Title with Gradient Background like in image */}
                 <div className="mb-6">
                     <div className="inline-block bg-linear-to-r from-indigo-600 to-pink-500 px-6 py-2 rounded-full shadow-md">
-                        <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                        <h3 className="text-sm md:text-base font-bold text-white uppercase tracking-wider">
                             {hour.category_title.replace(':', '')}
                         </h3>
                     </div>
@@ -100,26 +100,26 @@ export default function HoursOfOperation() {
                 <ul className="grid grid-cols-2 gap-x-4 gap-y-4">
                     {hour.monday_friday_hours && (
                         <li className="flex flex-col gap-0.5">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Monday - Friday</span>
-                            <span className="text-sm font-medium text-gray-700">{hour.monday_friday_hours}</span>
+                            <span className="text-[11px] md:text-xs font-bold text-gray-400 uppercase tracking-tight">Monday - Friday</span>
+                            <span className="text-sm md:text-base font-medium text-gray-700">{hour.monday_friday_hours}</span>
                         </li>
                     )}
                     {hour.saturday_hours && (
                         <li className="flex flex-col gap-0.5">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Saturday</span>
-                            <span className="text-sm font-medium text-gray-700">{hour.saturday_hours}</span>
+                            <span className="text-[11px] md:text-xs font-bold text-gray-400 uppercase tracking-tight">Saturday</span>
+                            <span className="text-sm md:text-base font-medium text-gray-700">{hour.saturday_hours}</span>
                         </li>
                     )}
                     {(hour.sunday_hours || hour.sunday_status) && (
                         <li className="flex flex-col gap-0.5">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Sunday</span>
-                            <span className="text-sm font-medium text-gray-700">{hour.sunday_hours || hour.sunday_status}</span>
+                            <span className="text-[11px] md:text-xs font-bold text-gray-400 uppercase tracking-tight">Sunday</span>
+                            <span className="text-sm md:text-base font-medium text-gray-700">{hour.sunday_hours || hour.sunday_status}</span>
                         </li>
                     )}
                     {(hour.public_holidays_hours || hour.public_holidays_status) && (
                         <li className="flex flex-col gap-0.5">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Public Holidays</span>
-                            <span className="text-sm font-medium text-gray-700">{hour.public_holidays_hours || hour.public_holidays_status}</span>
+                            <span className="text-[11px] md:text-xs font-bold text-gray-400 uppercase tracking-tight">Public Holidays</span>
+                            <span className="text-sm md:text-base font-medium text-gray-700">{hour.public_holidays_hours || hour.public_holidays_status}</span>
                         </li>
                     )}
                 </ul>
@@ -128,10 +128,10 @@ export default function HoursOfOperation() {
     };
 
     return (
-        <section className="w-full bg-[#F0EFEB] pt-12 pb-12 relative z-10 flex justify-center">
-            <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="w-full bg-[#F0EFEB] pt-12 pb-12 relative z-10 flex justify-center overflow-x-hidden">
+            <div className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Title */}
-                <h2 className="text-center text-3xl font-bold text-gray-900 mb-16 relative" data-aos="fade-up">
+                <h2 className="text-center text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 mb-16 relative" data-aos="fade-up">
                     {sectionTitle}
                     <span className="absolute bottom-[-16px] left-1/2 -translate-x-1/2 w-16 h-1 bg-linear-to-r from-indigo-600 to-pink-500 rounded-full"></span>
                 </h2>
@@ -143,7 +143,11 @@ export default function HoursOfOperation() {
                         <p className="mt-4 text-gray-500 font-medium">Loading hours of operation...</p>
                     </div>
                 ) : hours.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 justify-items-center" data-aos="fade-up">
+                    <div
+                        className="grid w-full gap-4 md:gap-6 items-stretch justify-items-center"
+                        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}
+                        data-aos="fade-up"
+                    >
                         {hours.map((hour) => renderHoursItem(hour))}
                     </div>
                 ) : (

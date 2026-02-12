@@ -67,42 +67,40 @@ export default function AboutCompany() {
   return (
     <section className="bg-white py-16 sm:py-20 md:py-24 px-1 sm:px-2 md:px-4 lg:px-6">
       <div className="relative grid grid-cols-1 lg:grid-cols-[30%_1fr] gap-0 min-h-[500px] md:min-h-[600px] lg:min-h-[700px]">
-        {/* Left Panel - Dark Blue Background with Logo on Mobile */}
-        <div className="bg-blue-900 p-8 md:p-12 lg:p-16 relative min-h-[300px] lg:min-h-0 flex items-center justify-center lg:block" data-aos="fade-up">
-          {/* White Panel with Logo - Visible on mobile, positioned on desktop */}
-          <div className="lg:absolute lg:top-1/2 lg:left-[calc(30%-4rem)] lg:-translate-y-1/2 lg:z-20 bg-white rounded-2xl p-6 sm:p-8 md:p-10 lg:p-12 shadow-xl max-w-lg w-full max-w-[90%] sm:max-w-[85%] md:max-w-[450px] lg:w-[500px] lg:max-w-none">
-            <div className="relative w-full aspect-[4/2]">
-              <div className="absolute inset-0 flex items-center justify-center">
-                {displayData.company_image ? (
-                  <img
-                    src={displayData.company_image}
-                    alt="Company Logo"
-                    className="object-contain max-w-full max-h-full w-full h-full"
-                    onError={(e) => {
-                      e.currentTarget.src = "/assets/images/yqMS5qrWhHsVPL5l1747744517.jpg";
-                    }}
-                  />
-                ) : (
-                  <Image
-                    src="/assets/images/yqMS5qrWhHsVPL5l1747744517.jpg"
-                    alt="Company Logo"
-                    width={400}
-                    height={400}
-                    className="object-contain max-w-full max-h-full w-full h-full"
-                  />
-                )}
-              </div>
-            </div>
+        {/* Left Panel - Dark Blue */}
+        <div className="bg-blue-900 p-8 md:p-12 lg:p-16 relative min-h-[300px] lg:min-h-0 flex items-center justify-center lg:block" data-aos="fade-up" />
+
+        {/* Image centered on boundary: half on left portion, half on right portion */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-[320px] h-[224px] sm:w-[380px] sm:h-[266px] lg:left-[30%] lg:w-[440px] lg:h-[308px] xl:w-[500px] xl:h-[350px]">
+          <div className="w-full h-full overflow-hidden rounded-2xl bg-transparent shadow-xl">
+            {displayData.company_image ? (
+              <img
+                src={displayData.company_image}
+                alt="Company Logo"
+                className="object-cover w-full h-full block"
+                onError={(e) => {
+                  e.currentTarget.src = "/assets/images/yqMS5qrWhHsVPL5l1747744517.jpg";
+                }}
+              />
+            ) : (
+              <Image
+                src="/assets/images/yqMS5qrWhHsVPL5l1747744517.jpg"
+                alt="Company Logo"
+                width={500}
+                height={350}
+                className="object-cover w-full h-full block"
+              />
+            )}
           </div>
         </div>
 
-        {/* Right Panel - Light Blue Background with Text */}
+        {/* Right Panel - Light Blue with Text */}
         <div className="bg-blue-100 p-8 md:p-12 lg:p-16 flex items-start w-full" data-aos="fade-up">
-          <div className="w-full max-w-2xl ml-4 md:ml-8 lg:ml-22">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-4 sm:mb-6 md:mb-8">
+          <div className="w-full max-w-2xl ml-8 md:ml-12 lg:ml-44 xl:ml-56">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-blue-900 mb-4 sm:mb-6 md:mb-8">
               {displayData.company_title}
             </h2>
-            <div className="text-blue-900 text-xs sm:text-sm md:text-base leading-relaxed space-y-0">
+            <div className="text-blue-900 text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed space-y-0">
               {displayData.company_description.split('\n').map((paragraph, index) => (
                 paragraph.trim() && (
                   <p key={index} className={index === 0 ? "mb-0" : ""}>

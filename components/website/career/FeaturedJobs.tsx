@@ -90,7 +90,7 @@ export default function FeaturedJobs() {
       <div className="max-w-[95%] mx-auto">
         {/* Title and Tagline */}
         <div className="text-center mb-12 md:mb-16" data-aos="fade-up">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-4xl font-bold text-gray-900 mb-4">
             {sectionTitle || "FEATURED JOBS"}
           </h2>
           <p className="text-gray-700 text-lg sm:text-xl md:text-2xl">
