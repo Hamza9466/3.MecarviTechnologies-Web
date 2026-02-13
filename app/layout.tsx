@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AOSProvider from "./providers/AOSProvider";
+import DynamicFavicon from "@/components/website/DynamicFavicon";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans antialiased m-0 p-0 overflow-x-hidden`}
       >
+        <DynamicFavicon />
         <AOSProvider>{children}</AOSProvider>
       </body>
     </html>

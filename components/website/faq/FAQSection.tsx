@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { apiUrl } from "@/lib/api";
 
 interface FAQCategory {
   id: number;
@@ -42,21 +43,21 @@ export default function FAQSection() {
     try {
       setLoading(true);
       
-      // Fetch all data in parallel
+      // Fetch all data in parallel (dynamic from API)
       const [introRes, askQuestionRes, categoriesRes, faqItemsRes] = await Promise.allSettled([
-        fetch("http://localhost:8000/api/v1/faq-intro-paragraph", {
+        fetch(apiUrl("/api/v1/faq-intro-paragraph"), {
           method: "GET",
           headers: { Accept: "application/json" },
         }),
-        fetch("http://localhost:8000/api/v1/faq-ask-question-section", {
+        fetch(apiUrl("/api/v1/faq-ask-question-section"), {
           method: "GET",
           headers: { Accept: "application/json" },
         }),
-        fetch("http://localhost:8000/api/v1/faq-categories", {
+        fetch(apiUrl("/api/v1/faq-categories"), {
           method: "GET",
           headers: { Accept: "application/json" },
         }),
-        fetch("http://localhost:8000/api/v1/faq-items", {
+        fetch(apiUrl("/api/v1/faq-items"), {
           method: "GET",
           headers: { Accept: "application/json" },
         }),
@@ -149,7 +150,7 @@ export default function FAQSection() {
     setSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/user-submitted-questions", {
+      const response = await fetch(apiUrl("/api/v1/user-submitted-questions"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -2548,13 +2548,6 @@ export default function ContactEditor() {
                         </div>
                     )}
                 </div>
-
-                {/* Save Button */}
-                <div className="flex justify-end pt-4">
-                    <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                        Save Changes
-                    </button>
-                </div>
             </div>
 
             {/* Team Management Modal */}

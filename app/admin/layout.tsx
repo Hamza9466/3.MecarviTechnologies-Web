@@ -10,24 +10,22 @@ export default function AdminLayoutWrapper({ children }: { children: React.React
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if user is authenticated
     const checkAuth = () => {
       if (pathname?.startsWith("/admin/auth")) {
         setIsAuthenticated(true);
         return;
       }
-
       const authStatus = localStorage.getItem("isAuthenticated");
       if (authStatus === "true") {
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
-        router.push("/login");
+        router.replace("/login");
       }
     };
-
     checkAuth();
   }, [router, pathname]);
+
 
   // Show loading while checking authentication
   if (isAuthenticated === null) {

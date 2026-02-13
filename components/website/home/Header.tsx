@@ -1,15 +1,75 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { getSiteSettings, DEFAULT_SITE_SETTINGS, type SiteSettings } from "@/lib/site-settings-data";
+import { fetchSiteSettingsFromApi } from "@/lib/site-settings-api";
+import { siteSettingsStorageUrl } from "@/lib/api";
 
 export default function Header() {
   const pathname = usePathname();
-  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const local = getSiteSettings();
+    setSettings(local);
+    fetchSiteSettingsFromApi()
+      .then((apiData) => {
+        if (!cancelled && apiData) {
+          const localNow = getSiteSettings();
+          const localLogo = localNow.logoUrl?.trim() || "";
+          const hasLocalCustomLogo = localLogo && (localLogo.startsWith("data:") || localLogo !== DEFAULT_SITE_SETTINGS.logoUrl);
+          setSettings(hasLocalCustomLogo ? { ...apiData, logoUrl: localNow.logoUrl! } : apiData);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSettings(local);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Sync when another tab saves (storage) or admin saves (custom event), and when tab becomes visible
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "mecarvi_site_settings" && e.newValue) {
+        try {
+          setSettings(JSON.parse(e.newValue) as SiteSettings);
+        } catch {
+          setSettings(getSiteSettings());
+        }
+      }
+    };
+    const handleSettingsUpdated = (e: Event) => {
+      const detail = (e as CustomEvent<SiteSettings>).detail;
+      if (detail) setSettings(detail);
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") setSettings(getSiteSettings());
+    };
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("mecarvi_site_settings_updated", handleSettingsUpdated);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("mecarvi_site_settings_updated", handleSettingsUpdated);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
+  // Always set document title from current effective settings (title is dynamic)
+  const effectiveSettings = settings ?? getSiteSettings();
+  useEffect(() => {
+    if (effectiveSettings.siteTitle) document.title = effectiveSettings.siteTitle;
+  }, [effectiveSettings.siteTitle]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +86,19 @@ export default function Header() {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
+  // Only read from localStorage after mount to avoid hydration mismatch (server renders default)
+  const s = settings ?? (mounted ? getSiteSettings() : DEFAULT_SITE_SETTINGS);
+  const localForLogo = mounted ? getSiteSettings() : null;
+  const customLogoFromStorage = localForLogo?.logoUrl?.trim() && (localForLogo.logoUrl.startsWith("data:") || localForLogo.logoUrl !== DEFAULT_SITE_SETTINGS.logoUrl);
+  let logoUrl = customLogoFromStorage
+    ? localForLogo!.logoUrl
+    : ((s.logoUrl && s.logoUrl.trim()) ? s.logoUrl : "/assets/images/logo.webp");
+  if (logoUrl === "/assets/images/logo.web" || logoUrl.endsWith("/logo.web")) {
+    logoUrl = "/assets/images/logo.webp";
+  }
+  const headerLinks = (s.headerLinks ?? []).filter((l) => l.enabled);
+  const headerButton = s.button ?? DEFAULT_SITE_SETTINGS.button;
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full">
       {/* Thin dark gray line at top - hide when scrolled */}
@@ -37,16 +110,25 @@ export default function Header() {
         style={!isScrolled ? { background: "linear-gradient(to right, #7E03C3, #C503B4)" } : {}}
       >
         <div className="max-w-[95%] mx-auto flex items-center justify-between relative min-h-[63px]">
-          {/* Logo on Left */}
-          <Link href="/" className="flex items-center z-10">
-            <Image
-              src="/assets/images/logo.webp"
-              alt="Mecarvi Technologies Logo"
-              width={130}
-              height={120}
-              className="max-h-10 sm:max-h-12 w-auto object-contain"
-            />
-          </Link>
+          {/* Logo on Left - full page nav so home opens on first click */}
+          <a href="/" className="flex items-center z-10">
+            {logoUrl.startsWith("http") || logoUrl.startsWith("data:") || logoUrl.startsWith("/storage/") || logoUrl.includes("site-settings/") || logoUrl.includes("logo_") ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={logoUrl.startsWith("http") || logoUrl.startsWith("data:") ? logoUrl : siteSettingsStorageUrl(logoUrl)}
+                alt={s.siteTitle || "Site Logo"}
+                className="max-h-10 sm:max-h-12 w-auto object-contain"
+              />
+            ) : (
+              <Image
+                src={logoUrl}
+                alt={s.siteTitle || "Mecarvi Technologies Logo"}
+                width={130}
+                height={120}
+                className="max-h-10 sm:max-h-12 w-auto object-contain"
+              />
+            )}
+          </a>
 
           {/* Centered Navigation Panel - Hidden on mobile/tablet */}
           <nav
@@ -65,83 +147,24 @@ export default function Header() {
               paddingBottom: '32px',
             }}
           >
-            <Link
-              href="/"
-              className={`text-sm lg:ps-4 xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/" ? "font-semibold" : ""
-                }`}
-            >
-              Home
-            </Link>
-
-            <Link
-              href="/website/pages/about"
-              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/about" ? "font-semibold" : ""
-                }`}
-            >
-              About us
-            </Link>
-
-            <Link
-              href="/website/pages/faq"
-              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/faq" ? "font-semibold" : ""
-                }`}
-            >
-              FAQ
-            </Link>
-
-            <Link
-              href="/website/pages/quote"
-              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/quote" ? "font-semibold" : ""
-                }`}
-            >
-              Quote
-            </Link>
-
-            <Link
-              href="/products"
-              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-sm xl:text-base font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname?.startsWith("/products") ? "font-semibold" : ""
-                }`}
-            >
-              Products
-              <svg className="w-3 h-3 xl:w-4 xl:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </Link>
-
-            <Link
-              href="/website/pages/service"
-              className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-sm xl:text-base font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/service" ? "font-semibold" : ""
-                }`}
-            >
-              Service
-              <svg className="w-3 h-3 xl:w-4 xl:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </Link>
-
-            <Link
-              href="/technologies"
-              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/technologies" ? "font-semibold" : ""
-                }`}
-            >
-              Technologies
-            </Link>
-
-            <Link
-              href="/website/pages/career"
-              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/career" ? "font-semibold" : ""
-                }`}
-            >
-              Career
-            </Link>
-
-            <Link
-              href="/website/pages/contact"
-              className={`text-sm xl:text-base font-medium pt-1 transition-colors whitespace-nowrap text-black hover:text-gray-700 ${pathname === "/website/pages/contact" ? "font-semibold" : ""
-                }`}
-            >
-              Contact
-            </Link>
+            {headerLinks.map((link, index) => {
+              const isActive = pathname === link.url || (link.url !== "/" && pathname?.startsWith(link.url));
+              const isDropdown = link.id === "products" || link.id === "service";
+              return (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-sm font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${index === 0 ? "lg:ps-4 xl:text-base" : "xl:text-base"} ${isActive ? "font-semibold" : ""}`}
+                >
+                  {link.label}
+                  {isDropdown && (
+                    <svg className="w-3 h-3 xl:w-4 xl:h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  )}
+                </a>
+              );
+            })}
           </nav>
 
           {/* Mobile Menu Backdrop */}
@@ -156,107 +179,61 @@ export default function Header() {
           {isMobileMenuOpen && (
             <nav className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-lg z-50 py-4 px-2 border-t">
               <div className="flex flex-col gap-2 max-h-[80vh] overflow-y-auto">
-                <Link
-                  href="/"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname === "/" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
-                    }`}
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/website/pages/about"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname === "/website/pages/about" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
-                    }`}
-                >
-                  About us
-                </Link>
-                <Link
-                  href="/website/pages/faq"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname === "/website/pages/faq" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
-                    }`}
-                >
-                  FAQ
-                </Link>
-                <Link
-                  href="/website/pages/quote"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname === "/website/pages/quote" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
-                    }`}
-                >
-                  Quote
-                </Link>
-                <Link
-                  href="/products"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname?.startsWith("/products") ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
-                    }`}
-                >
-                  Products
-                </Link>
-                <Link
-                  href="/website/pages/service"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname === "/website/pages/service" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
-                    }`}
-                >
-                  Service
-                </Link>
-                <Link
-                  href="/technologies"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname === "/technologies" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
-                    }`}
-                >
-                  Technologies
-                </Link>
-                <Link
-                  href="/website/pages/career"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname === "/website/pages/career" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
-                    }`}
-                >
-                  Career
-                </Link>
-                <Link
-                  href="/website/pages/contact"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${pathname === "/website/pages/contact" ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"
-                    }`}
-                >
-                  Contact
-                </Link>
+                {headerButton?.name && headerButton?.url && (
+                  <a
+                    href={headerButton.url}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="mx-2 px-4 py-3 text-sm font-medium rounded-lg text-white text-center hover:opacity-90 transition-opacity"
+                    style={{ background: 'linear-gradient(to right, #FD02A9, #7E03C3)' }}
+                  >
+                    {headerButton.name}
+                  </a>
+                )}
+                {headerLinks.map((link) => {
+                  const isActive = pathname === link.url || (link.url !== "/" && pathname?.startsWith(link.url));
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors ${isActive ? "text-orange-600 bg-orange-50 font-semibold" : "text-black hover:bg-gray-100"}`}
+                    >
+                      {link.label}
+                    </a>
+                  );
+                })}
               </div>
             </nav>
           )}
 
           {/* Right Side - CTA Button and Menu Icon */}
           <div className="flex items-center gap-2 sm:gap-4 md:gap-6 z-10">
-            {/* Try For Free Button - Hidden on mobile, visible on tablet+ */}
-            <button
-              className="hidden sm:flex items-center gap-1.5 md:gap-2 text-white px-3 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-full hover:opacity-90 transition-opacity text-xs sm:text-sm font-medium"
-              style={{ background: 'linear-gradient(to right, #FD02A9, #7E03C3)' }}
-            >
-              <span className="hidden md:inline">Try For Free</span>
-              <span className="md:hidden">Try Free</span>
-              <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-white/20 flex items-center justify-center">
-                <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </div>
-            </button>
+            {/* Header CTA Button - from site settings (e.g. Contact Us) */}
+            {headerButton?.name && headerButton?.url && (
+              <a
+                href={headerButton.url}
+                className="hidden sm:inline-flex items-center gap-1.5 md:gap-2 text-white px-3 sm:px-4 md:px-6 py-2 md:py-2.5 rounded-full hover:opacity-90 transition-opacity text-xs sm:text-sm font-medium"
+                style={{ background: 'linear-gradient(to right, #FD02A9, #7E03C3)' }}
+              >
+                <span className="hidden md:inline">{headerButton.name}</span>
+                <span className="md:hidden">{headerButton.name.length > 8 ? headerButton.name.slice(0, 6) + "…" : headerButton.name}</span>
+                <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-white/20 flex items-center justify-center">
+                  <svg className="w-2.5 h-2.5 md:w-3 md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </a>
+            )}
 
-            {/* Login Button */}
-            <button
-              onClick={() => router.push("/login")}
-              className="px-5 sm:px-4 py-2.5 sm:py-2 rounded-full text-white text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity min-w-[70px] sm:min-w-auto"
+            {/* Login Button - full page navigation so login page opens reliably */}
+            <a
+              href="/login"
+              className="px-5 sm:px-4 py-2.5 sm:py-2 rounded-full text-white text-xs sm:text-sm font-medium hover:opacity-90 transition-opacity min-w-[70px] sm:min-w-auto inline-flex items-center justify-center"
               style={{ background: 'linear-gradient(to right, #FD02A9, #7E03C3)' }}
             >
               <span className="hidden sm:inline">Login</span>
               <span className="sm:hidden">Log</span>
-            </button>
+            </a>
 
             {/* Mobile Menu Button */}
             <button

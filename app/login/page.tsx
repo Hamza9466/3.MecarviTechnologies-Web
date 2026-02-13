@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { apiUrl } from "@/lib/api";
+import { apiUrl, siteSettingsStorageUrl } from "@/lib/api";
+import { getSiteSettings, DEFAULT_SITE_SETTINGS } from "@/lib/site-settings-data";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,12 +13,36 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(DEFAULT_SITE_SETTINGS.logoUrl);
+
+  useEffect(() => setMounted(true), []);
 
   // Check authentication status (for display purposes only)
   useEffect(() => {
     const authStatus = localStorage.getItem("isAuthenticated");
     setIsAuthenticated(authStatus === "true");
   }, []);
+
+  // Logo from site settings – after mount use latest from localStorage so it stays dynamic
+  useEffect(() => {
+    if (!mounted) return;
+    const apply = () => setLogoUrl(getSiteSettings().logoUrl || DEFAULT_SITE_SETTINGS.logoUrl);
+    apply();
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "mecarvi_site_settings" && e.newValue) apply();
+    };
+    const onSettingsUpdated = () => apply();
+    const onVisibility = () => { if (document.visibilityState === "visible") apply(); };
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("mecarvi_site_settings_updated", onSettingsUpdated);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("mecarvi_site_settings_updated", onSettingsUpdated);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [mounted]);
   
   // Login form state
   const [loginData, setLoginData] = useState({
@@ -96,10 +121,11 @@ export default function LoginPage() {
         localStorage.setItem("userId", data.data.user?.id?.toString() || "");
         
         console.log("Login successful, redirecting...");
-        
-        // Redirect to dashboard
+        // Full page navigation so admin layout loads with fresh auth check
+        const url = typeof window !== "undefined" ? window.location.origin + "/admin/dashboard" : "/admin/dashboard";
         setLoading(false);
-        router.push("/admin/dashboard");
+        setTimeout(() => window.location.replace(url), 0);
+        return;
       } else {
         setError(data.message || "Login failed. Please try again.");
         setLoading(false);
@@ -197,10 +223,10 @@ export default function LoginPage() {
         localStorage.setItem("userId", data.data.user.id.toString());
         
         console.log("Registration successful, redirecting...");
-        
-        // Redirect to dashboard
+        const url = typeof window !== "undefined" ? window.location.origin + "/admin/dashboard" : "/admin/dashboard";
         setLoading(false);
-        router.push("/admin/dashboard");
+        setTimeout(() => window.location.replace(url), 0);
+        return;
       } else {
         setError(data.message || "Registration failed. Please try again.");
         setLoading(false);
@@ -222,16 +248,35 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
+        {/* Logo from site settings (dynamic – same as header) */}
         <div className="flex justify-center mb-8">
           <Link href="/">
-            <Image
-              src="/assets/images/logo.webp"
-              alt="Mecarvi Technologies Logo"
-              width={150}
-              height={150}
-              className="h-20 w-auto object-contain"
-            />
+            {(() => {
+              const url = mounted ? (getSiteSettings().logoUrl || DEFAULT_SITE_SETTINGS.logoUrl) : logoUrl;
+              const isStoragePath = url?.startsWith("/storage/") || url?.includes("site-settings/") || url?.includes("logo_");
+              const src = isStoragePath ? siteSettingsStorageUrl(url!) : url;
+              const useImg = url?.startsWith("http") || url?.startsWith("data:") || isStoragePath;
+              const imgSrc = url && url !== "/assets/images/logo.web" ? url : "/assets/images/logo.webp";
+              if (useImg) {
+                return (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={src || "/assets/images/logo.webp"}
+                    alt="Site Logo"
+                    className="h-20 w-auto object-contain"
+                  />
+                );
+              }
+              return (
+                <Image
+                  src={imgSrc}
+                  alt="Site Logo"
+                  width={150}
+                  height={150}
+                  className="h-20 w-auto object-contain"
+                />
+              );
+            })()}
           </Link>
         </div>
 
@@ -285,7 +330,7 @@ export default function LoginPage() {
                       
                       if (token) {
                         // Call logout API
-                        await fetch("http://localhost:8000/api/v1/logout", {
+                        await fetch(apiUrl("/api/v1/logout"), {
                           method: "POST",
                           headers: {
                             "Content-Type": "application/json",
@@ -450,11 +495,11 @@ export default function LoginPage() {
             </form>
           )}
 
-          {/* Back to Home */}
+          {/* Back to Home - full page nav so home opens on first click */}
           <div className="mt-6 text-center">
-            <Link href="/" className="text-sm text-gray-600 hover:text-orange-600 transition-colors">
+            <a href="/" className="text-sm text-gray-600 hover:text-orange-600 transition-colors">
               ← Back to Home
-            </Link>
+            </a>
           </div>
         </div>
       </div>
