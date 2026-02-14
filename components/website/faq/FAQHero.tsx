@@ -42,7 +42,7 @@ export default function FAQHero() {
             </linearGradient>
           </defs>
           <path
-            d="M0,110 L1440,0 L1440,650 L0,800 Z"
+            d="M0,0 L1440,0 L1440,650 L0,800 Z"
             fill="url(#curveGradient)"
             stroke="none"
             vectorEffect="non-scaling-stroke"
@@ -51,9 +51,9 @@ export default function FAQHero() {
         </svg>
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
-        {/* Main Title */}
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center w-full pt-16 sm:pt-12 md:pt-16" data-aos="fade-up">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4">
+        {/* Main Title - centered on x and y */}
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center w-full" data-aos="fade-up">
           {loading ? "Loading..." : heroTitle}
         </h1>
       </div>

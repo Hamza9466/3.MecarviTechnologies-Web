@@ -84,7 +84,7 @@ export default function AboutHero() {
             </linearGradient>
           </defs>
           <path
-            d="M0,110 L1440,0 L1440,650 L0,800 Z"
+            d="M0,0 L1440,0 L1440,650 L0,800 Z"
             fill="url(#aboutCurveGradient)"
             stroke="none"
             vectorEffect="non-scaling-stroke"
@@ -93,9 +93,9 @@ export default function AboutHero() {
         </svg>
       </div>
 
-      <div className="max-w-[95%] mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
-        {/* Content */}
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white text-center leading-tight pt-16 sm:pt-12 md:pt-16" data-aos="fade-up">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4">
+        {/* Content - centered on x and y */}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white text-center leading-tight" data-aos="fade-up">
           {displayData.title_part_1}
         </h1>
       </div>

@@ -141,13 +141,13 @@ export default function TabSectionEditor({ data, onChange }: TabSectionEditorPro
       // Tab 3: Add feature with title and description
       updatedTabs[tabIndex] = {
         ...updatedTabs[tabIndex],
-        features: [...features, { title: '', description: '' }]
+        features: ([...features, { title: '', description: '' }] as { title: string; description: string }[])
       };
     } else {
       // Tabs 1 & 2: Add simple string feature
       updatedTabs[tabIndex] = {
         ...updatedTabs[tabIndex],
-        features: [...features, '']
+        features: ([...features, ''] as string[])
       };
     }
     handleFieldChange('tabs', updatedTabs);
@@ -158,7 +158,7 @@ export default function TabSectionEditor({ data, onChange }: TabSectionEditorPro
     const features = updatedTabs[tabIndex].features || [];
     updatedTabs[tabIndex] = {
       ...updatedTabs[tabIndex],
-      features: features.filter((_, i) => i !== featureIndex)
+      features: features.filter((_, i) => i !== featureIndex) as string[] | { title: string; description: string }[]
     };
     handleFieldChange('tabs', updatedTabs);
   };
@@ -354,7 +354,7 @@ export default function TabSectionEditor({ data, onChange }: TabSectionEditorPro
                             onChange={(e) => {
                               const updatedFeature = typeof feature === 'object'
                                 ? { ...feature, description: e.target.value }
-                                : { heading: feature, description: e.target.value };
+                                : { title: feature, description: e.target.value };
                               updateFeature(tabIndex, featureIndex, updatedFeature);
                             }}
                             rows={2}
@@ -367,7 +367,7 @@ export default function TabSectionEditor({ data, onChange }: TabSectionEditorPro
                         <div className="flex gap-2">
                           <input
                             type="text"
-                            value={feature}
+                            value={typeof feature === 'object' ? feature.title : feature}
                             onChange={(e) => updateFeature(tabIndex, featureIndex, e.target.value)}
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
                             placeholder="Feature description"
@@ -568,7 +568,7 @@ export default function TabSectionEditor({ data, onChange }: TabSectionEditorPro
                             onChange={(e) => {
                               const updatedFeature = typeof feature === 'object'
                                 ? { ...feature, description: e.target.value }
-                                : { heading: feature, description: e.target.value };
+                                : { title: feature, description: e.target.value };
                               updateFeature(tabIndex, featureIndex, updatedFeature);
                             }}
                             rows={2}
@@ -581,7 +581,7 @@ export default function TabSectionEditor({ data, onChange }: TabSectionEditorPro
                         <div className="flex gap-2">
                           <input
                             type="text"
-                            value={feature}
+                            value={typeof feature === 'object' ? feature.title : feature}
                             onChange={(e) => updateFeature(tabIndex, featureIndex, e.target.value)}
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
                             placeholder="Feature description"

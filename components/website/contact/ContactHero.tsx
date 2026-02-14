@@ -89,7 +89,7 @@ export default function ContactHero() {
             </linearGradient>
           </defs>
           <path
-            d="M0,110 L1440,0 L1440,650 L0,800 Z"
+            d="M0,0 L1440,0 L1440,650 L0,800 Z"
             fill="url(#careerCurveGradient)"
             stroke="none"
             vectorEffect="non-scaling-stroke"
@@ -98,15 +98,15 @@ export default function ContactHero() {
         </svg>
       </div>
 
-      <div className="max-w-[95%] mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4">
         {loading ? (
-          <div className="text-center py-12">
+          <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
           </div>
         ) : (
           <>
-            {/* Main Title */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center w-full pt-20 sm:pt-24 md:pt-28 mb-8" data-aos="fade-up">
+            {/* Main Title - centered on x and y */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center w-full mb-8" data-aos="fade-up">
               {heroData?.heading || "Contact Us"}
             </h1>
           </>

@@ -303,7 +303,7 @@ const TabSection: React.FC = () => {
                                                 />
                                             </svg>
                                         </div>
-                                        <p className="text-gray-200">{item}</p>
+                                        <p className="text-gray-200">{typeof item === 'object' ? `${item.heading}: ${item.text}` : item}</p>
                                     </div>
                                 ))}
                             </div>

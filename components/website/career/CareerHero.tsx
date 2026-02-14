@@ -54,7 +54,7 @@ export default function CareerHero() {
             </linearGradient>
           </defs>
           <path
-            d="M0,110 L1440,0 L1440,650 L0,800 Z"
+            d="M0,0 L1440,0 L1440,650 L0,800 Z"
             fill="url(#careerCurveGradient)"
             stroke="none"
             vectorEffect="non-scaling-stroke"
@@ -63,11 +63,11 @@ export default function CareerHero() {
         </svg>
       </div>
 
-      <div className="max-w-[95%] mx-auto relative z-10 pt-12 sm:pt-8 md:pt-12 flex flex-col items-center justify-center">
-        {/* Title and Subtitle */}
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4">
+        {/* Title and Subtitle - centered on x and y */}
         {heroData.title && heroData.subtitle && (
           <div className="text-center" data-aos="fade-up">
-            <h1 className="text-2xl sm:text-3xl lg:pt-[-15px] md:text-4xl lg:text-5xl font-bold text-white text-center w-full pt-16 sm:pt-12 md:pt-16 mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white text-center w-full mb-6">
               {heroData.title}
             </h1>
             <p className="text-white lg:pb-10 text-base sm:text-lg md:text-xl leading-relaxed text-center max-w-4xl">

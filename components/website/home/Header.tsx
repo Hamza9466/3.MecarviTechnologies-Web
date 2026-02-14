@@ -9,7 +9,6 @@ import { siteSettingsStorageUrl } from "@/lib/api";
 
 export default function Header() {
   const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -72,16 +71,6 @@ export default function Header() {
   }, [effectiveSettings.siteTitle]);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      setIsScrolled(scrollTop > 50);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
     // Close mobile menu when route changes
     setIsMobileMenuOpen(false);
   }, [pathname]);
@@ -100,14 +89,14 @@ export default function Header() {
   const headerButton = s.button ?? DEFAULT_SITE_SETTINGS.button;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full">
-      {/* Thin dark gray line at top - hide when scrolled */}
-      {!isScrolled && <div className="h-0.5 bg-gray-900"></div>}
+    <header className="relative z-50 w-full">
+      {/* Thin dark gray line at top */}
+      <div className="h-0.5 bg-gray-900"></div>
 
-      {/* Gradient background */}
+      {/* Gradient background - no change on scroll */}
       <div
-        className={`${isScrolled ? "bg-white shadow-md" : ""} py-3 px-1 md:px-2 lg:px-4 overflow-visible transition-all duration-1000`}
-        style={!isScrolled ? { background: "linear-gradient(to right, #7E03C3, #C503B4)" } : {}}
+        className="py-3 px-1 md:px-2 lg:px-4 overflow-visible transition-all duration-1000"
+        style={{ background: "linear-gradient(to right, #7E03C3, #C503B4)" }}
       >
         <div className="max-w-[95%] mx-auto flex items-center justify-between relative min-h-[63px]">
           {/* Logo on Left - full page nav so home opens on first click */}
@@ -130,9 +119,9 @@ export default function Header() {
             )}
           </a>
 
-          {/* Centered Navigation Panel - Hidden on mobile/tablet */}
+          {/* Centered Navigation Panel - lg/laptop: 640px; PC (xl/2xl) only: wider bg */}
           <nav
-            className={`hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/3 -translate-y-1/2 rounded-none rounded-bl-2xl rounded-br-2xl px-4 xl:px-8 py-8 xl:py-12 items-center gap-3 xl:gap-6 z-20 whitespace-nowrap transition-all duration-1000`}
+            className="hidden lg:flex absolute left-1/2 -translate-x-1/2 top-1/3 -translate-y-1/2 rounded-none rounded-bl-2xl rounded-br-2xl w-[640px] xl:w-[820px] 2xl:w-[960px] max-w-[95vw] px-4 xl:px-8 py-8 xl:py-7 mt-[10px] items-center justify-center gap-3 xl:gap-6 z-20 whitespace-nowrap transition-all duration-1000"
             style={{
               borderTopLeftRadius: 0,
               borderTopRightRadius: 0,
@@ -140,11 +129,6 @@ export default function Header() {
               backgroundSize: '100% 100%',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              width: '640px',
-              maxWidth: '95vw',
-              marginTop: '10px',
-              paddingTop: '32px',
-              paddingBottom: '32px',
             }}
           >
             {headerLinks.map((link, index) => {
@@ -154,7 +138,7 @@ export default function Header() {
                 <a
                   key={link.id}
                   href={link.url}
-                  className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-sm font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 ${index === 0 ? "lg:ps-4 xl:text-base" : "xl:text-base"} ${isActive ? "font-semibold" : ""}`}
+                  className={`flex items-center pt-1 gap-1 xl:gap-1.5 text-sm font-medium transition-colors whitespace-nowrap text-black hover:text-gray-700 xl:text-base ${isActive ? "font-semibold" : ""}`}
                 >
                   {link.label}
                   {isDropdown && (
@@ -241,9 +225,9 @@ export default function Header() {
               className="lg:hidden w-6 h-6 flex flex-col justify-center gap-1.5 relative z-30"
               aria-label="Toggle mobile menu"
             >
-              <span className={`w-full h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} style={{ color: isScrolled || isMobileMenuOpen ? '#000' : '#fff' }}></span>
-              <span className={`w-full h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`} style={{ color: isScrolled || isMobileMenuOpen ? '#000' : '#fff' }}></span>
-              <span className={`w-full h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} style={{ color: isScrolled || isMobileMenuOpen ? '#000' : '#fff' }}></span>
+              <span className={`w-full h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} style={{ color: isMobileMenuOpen ? '#000' : '#fff' }}></span>
+              <span className={`w-full h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`} style={{ color: isMobileMenuOpen ? '#000' : '#fff' }}></span>
+              <span className={`w-full h-0.5 bg-current transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} style={{ color: isMobileMenuOpen ? '#000' : '#fff' }}></span>
             </button>
           </div>
         </div>

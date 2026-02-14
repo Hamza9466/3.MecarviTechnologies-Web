@@ -2,7 +2,7 @@ export interface TeamMember {
   id: number;
   name: string;
   avatar: string | null;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 }
 
 export interface Meeting {
@@ -27,7 +27,7 @@ export interface Project {
   allHours: string; // Format: "530 / 281:30"
   todayHours: string; // Format: "2:45"
   projectIcon: string | null;
-  projectIconUrl?: string;
+  projectIconUrl?: string | null;
   teamMembers: TeamMember[];
   tasksCompleted: number;
   totalTasks: number;

@@ -68,7 +68,7 @@ export default function CreateTaskForm({ task }: CreateTaskFormProps) {
 
   const handleMultiSelect = (field: "assignedToMulti" | "tagsMulti", value: number | string) => {
     setFormData((prev) => {
-      const current = prev[field] || [];
+      const current: (number | string)[] = prev[field] || [];
       if (current.includes(value)) {
         return { ...prev, [field]: current.filter((item) => item !== value) };
       } else {
@@ -79,7 +79,7 @@ export default function CreateTaskForm({ task }: CreateTaskFormProps) {
 
   const removeMultiSelectItem = (field: "assignedToMulti" | "tagsMulti", value: number | string) => {
     setFormData((prev) => {
-      const current = prev[field] || [];
+      const current: (number | string)[] = prev[field] || [];
       return { ...prev, [field]: current.filter((item) => item !== value) };
     });
   };

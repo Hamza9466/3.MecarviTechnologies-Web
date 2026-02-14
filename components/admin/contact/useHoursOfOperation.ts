@@ -65,12 +65,12 @@ export function useHoursOfOperation() {
                     setHours([]);
                 }
             } else {
-                let errorData = {};
+                let errorData: { message?: string; error?: string } = {};
                 let errorText = '';
                 try {
                     errorText = await response.text().catch(() => '');
                     console.error("Hours of operation API error:", response.status, errorText);
-                    errorData = errorText ? JSON.parse(errorText) : {};
+                    errorData = errorText ? (JSON.parse(errorText) as { message?: string; error?: string }) : {};
                 } catch (e) {
                     console.error("Error parsing response:", e);
                     errorData = { message: `Server error (${response.status}). Please check the server logs.` };
@@ -220,7 +220,7 @@ export function useHoursOfOperation() {
                 setHours((prev) => prev.filter((hour) => hour.id !== id));
                 return { success: true };
             } else {
-                const errorData = await response.json().catch(() => ({}));
+                const errorData = await response.json().catch(() => ({})) as { message?: string };
                 throw new Error(errorData.message || `Failed to delete hours of operation (${response.status})`);
             }
         } catch (err: any) {

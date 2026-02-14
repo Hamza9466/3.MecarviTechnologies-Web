@@ -14,6 +14,8 @@ interface AnalyticsSectionData {
   title: string;
   description: string;
   features: Feature[];
+  button_text?: string;
+  button_url?: string;
   main_image?: string;
   small_image?: string;
   main_image_file?: File;

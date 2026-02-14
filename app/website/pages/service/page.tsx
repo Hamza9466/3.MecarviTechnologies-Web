@@ -19,9 +19,9 @@ export default function ServicePage() {
             <div className="bg-white p-8 mt-0 rounded-2xl shadow-xl">
                 <HeroSection />
             </div>
-            <FeaturesSection />
-            <AnalyticsSection />
-            <ChartSection />
+            <div className="mb-8"><FeaturesSection /></div>
+            <div className="mt-8 mb-8"><AnalyticsSection /></div>
+            <div className="mt-8"><ChartSection /></div>
             <TabSection />
             <ShowcaseSection />
             <Footer />

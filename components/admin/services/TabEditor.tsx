@@ -251,7 +251,7 @@ export default function TabEditor({ data, onChange }: TabEditorProps) {
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        value={feature}
+                        value={typeof feature === 'object' ? feature.text : feature}
                         onChange={(e) => updateFeature(tabIndex, featureIndex, e.target.value)}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
                         placeholder="Feature description"

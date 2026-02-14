@@ -56,7 +56,8 @@ export default function TaskKanban({
     })
   );
 
-  const tasksByStatus = {
+  const tasksByStatus: Record<TaskStatus, Task[]> = {
+    new: localTasks.filter((t) => t.status === "new"),
     todo: localTasks.filter((t) => t.status === "todo"),
     in_progress: localTasks.filter((t) => t.status === "in_progress"),
     review: localTasks.filter((t) => t.status === "review"),

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from "@/lib/api";
 import AdminTabs from "@/components/admin/AdminTabs";
 import HeroSectionEditor from '@/components/admin/services/HeroSectionEditor';
 import FeaturesSectionEditor from '@/components/admin/services/FeaturesSectionEditor';
@@ -57,6 +58,8 @@ export default function ServicesPageEditor() {
     title: string;
     description: string;
     features: { title: string; description: string }[];
+    button_text?: string;
+    button_url?: string;
     main_image?: string;
     small_image?: string;
     main_image_file?: File;
@@ -75,6 +78,8 @@ export default function ServicesPageEditor() {
     title: string;
     description: string;
     features: { title: string; description: string }[];
+    button_text?: string;
+    button_url?: string;
     main_image?: string;
     small_image?: string;
     main_image_file?: File;
@@ -233,13 +238,15 @@ export default function ServicesPageEditor() {
 
   // Load existing data on component mount
   useEffect(() => {
+    const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
     const loadServicePageData = async () => {
       try {
         console.log('=== Starting to load service page data ===');
 
         // Load Features Sections
         try {
-          const featuresResponse = await fetch('http://localhost:8000/api/v1/features-sections');
+          const featuresResponse = await fetch(apiUrl('/api/v1/features-sections'));
           if (featuresResponse.ok) {
             const featuresResult = await featuresResponse.json();
             console.log('Features sections loaded:', featuresResult);
@@ -252,10 +259,11 @@ export default function ServicesPageEditor() {
         } catch (error) {
           console.error('Error loading features sections:', error);
         }
+        await delay(120);
 
         // Load Analytics Sections
         try {
-          const analyticsResponse = await fetch('http://localhost:8000/api/v1/analytics-sections');
+          const analyticsResponse = await fetch(apiUrl('/api/v1/analytics-sections'));
           console.log('Analytics API Response Status:', analyticsResponse.status);
 
           if (analyticsResponse.ok) {
@@ -275,16 +283,17 @@ export default function ServicesPageEditor() {
               console.log('❌ No analytics sections found in response');
               console.log('Response structure:', analyticsResult);
             }
-          } else {
+          } else if (analyticsResponse.status !== 429) {
             console.error('Analytics API failed:', analyticsResponse.status, analyticsResponse.statusText);
           }
         } catch (error) {
           console.error('Error loading analytics sections:', error);
         }
+        await delay(120);
 
         // Load Chart Sections
         try {
-          const chartResponse = await fetch('http://localhost:8000/api/v1/chart-sections');
+          const chartResponse = await fetch(apiUrl('/api/v1/chart-sections'));
           console.log('Chart API Response Status:', chartResponse.status);
 
           if (chartResponse.ok) {
@@ -317,19 +326,20 @@ export default function ServicesPageEditor() {
                 });
               }
             }
+          } else if (chartResponse.status === 429) {
+            console.warn('Chart API: too many requests (429). Skipping chart sections for now.');
           } else {
             console.error('Chart API failed:', chartResponse.status, chartResponse.statusText);
-            const errorText = await chartResponse.text();
-            console.error('Error response:', errorText);
           }
         } catch (error) {
           console.error('Error loading chart sections:', error);
         }
+        await delay(120);
 
         // Load Tab Sections
         try {
           console.log('=== Loading Tab Sections ===');
-          const tabResponse = await fetch('http://localhost:8000/api/v1/tab-sections');
+          const tabResponse = await fetch(apiUrl('/api/v1/tab-sections'));
           console.log('Tab API Response Status:', tabResponse.status);
 
           if (tabResponse.ok) {
@@ -416,19 +426,18 @@ export default function ServicesPageEditor() {
                 });
               }
             }
-          } else {
+          } else if (tabResponse.status !== 429) {
             console.error('Tab API failed:', tabResponse.status, tabResponse.statusText);
-            const errorText = await tabResponse.text();
-            console.error('Error response:', errorText);
           }
         } catch (error) {
           console.error('Error loading tab sections:', error);
         }
+        await delay(120);
 
         // Load Showcase Sections
         try {
           console.log('=== Loading Showcase Sections ===');
-          const showcaseResponse = await fetch('http://localhost:8000/api/v1/showcase-sections');
+          const showcaseResponse = await fetch(apiUrl('/api/v1/showcase-sections'));
           console.log('Showcase API Response Status:', showcaseResponse.status);
 
           if (showcaseResponse.ok) {
@@ -510,16 +519,15 @@ export default function ServicesPageEditor() {
               console.log('❌ No showcase sections found in response');
               console.log('Response structure:', showcaseResult);
             }
-          } else {
+          } else if (showcaseResponse.status !== 429) {
             console.error('Showcase API failed:', showcaseResponse.status, showcaseResponse.statusText);
-            const errorText = await showcaseResponse.text();
-            console.error('Error response:', errorText);
           }
         } catch (error) {
           console.error('Error loading showcase sections:', error);
         }
+        await delay(120);
 
-        const response = await fetch('http://localhost:8000/api/v1/service-page');
+        const response = await fetch(apiUrl('/api/v1/service-page'));
         console.log('API Response Status:', response.status);
         console.log('API Response Headers:', response.headers);
 
@@ -678,7 +686,7 @@ export default function ServicesPageEditor() {
       }
 
       console.log('Saving', slidesToSave.length, 'hero slide(s)...');
-      const results = [];
+      const results: unknown[] = [];
 
       for (let index = 0; index < slidesToSave.length; index++) {
         const slide = slidesToSave[index];
@@ -771,8 +779,8 @@ export default function ServicesPageEditor() {
         // Replace temp ids (Date.now()) with real API ids so next save uses PUT not POST
         setHeroSectionData((prev) =>
           prev.map((slide, i) => {
-            const r = results[i];
-            const page = r?.data?.service_page || r?.service_page || r;
+            const r = results[i] as { data?: { service_page?: { id?: number } }; service_page?: { id?: number } } | undefined;
+            const page = (r?.data?.service_page || r?.service_page || r) as { id?: number } | undefined;
             if (page?.id != null && typeof slide.id === 'number' && slide.id >= 1e10)
               return { ...slide, id: page.id };
             return slide;

@@ -75,12 +75,12 @@ export function useContactPageCards() {
                         setCards([]);
                     }
                 } else {
-                    let errorData = {};
+                    let errorData: { message?: string; error?: string } = {};
                     let errorText = '';
                     try {
                         errorText = await publicResponse.text().catch(() => '');
                         console.error("Contact cards API error (public):", publicResponse.status, errorText);
-                        errorData = errorText ? JSON.parse(errorText) : {};
+                        errorData = errorText ? (JSON.parse(errorText) as { message?: string; error?: string }) : {};
                     } catch (e) {
                         console.error("Error parsing public response:", e);
                         errorData = { message: `Failed to fetch contact cards (${publicResponse.status})` };
@@ -90,12 +90,12 @@ export function useContactPageCards() {
                     setCards([]);
                 }
             } else {
-                let errorData = {};
+                let errorData: { message?: string; error?: string } = {};
                 let errorText = '';
                 try {
                     errorText = await response.text().catch(() => '');
                     console.error("Contact cards API error:", response.status, errorText);
-                    errorData = errorText ? JSON.parse(errorText) : {};
+                    errorData = errorText ? (JSON.parse(errorText) as { message?: string; error?: string }) : {};
                 } catch (e) {
                     console.error("Error parsing response:", e);
                     errorData = { message: `Server error (${response.status}). Please check the server logs.` };

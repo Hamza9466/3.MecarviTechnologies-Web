@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChatContact, ChatGroup, ChatMessage, ChatConversation, ChatsResponse, SharedFile, SharedPhoto } from "./types";
+import { ChatContact, ChatGroup, ChatMessage, ChatConversation, ChatsResponse, SharedFile, SharedPhoto, type MessageType } from "./types";
 
 // Mock data matching the design
 const getMockContacts = (): ChatContact[] => {

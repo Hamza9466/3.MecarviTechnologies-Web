@@ -68,12 +68,12 @@ export function useSocialMedia() {
                     setLinks([]);
                 }
             } else {
-                let errorData = {};
+                let errorData: { message?: string; error?: string } = {};
                 let errorText = '';
                 try {
                     errorText = await response.text().catch(() => '');
                     console.error("Social media API error:", response.status, errorText);
-                    errorData = errorText ? JSON.parse(errorText) : {};
+                    errorData = errorText ? (JSON.parse(errorText) as { message?: string; error?: string }) : {};
                 } catch (e) {
                     console.error("Error parsing response:", e);
                     errorData = { message: `Server error (${response.status}). Please check the server logs.` };
@@ -314,7 +314,7 @@ export function useSocialMedia() {
                 setLinks((prev) => prev.filter((link) => link.id !== id));
                 return { success: true };
             } else {
-                const errorData = await response.json().catch(() => ({}));
+                const errorData = await response.json().catch(() => ({})) as { message?: string };
                 throw new Error(errorData.message || `Failed to delete social link (${response.status})`);
             }
         } catch (err: any) {

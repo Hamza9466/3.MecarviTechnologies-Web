@@ -195,7 +195,7 @@ const ShowcaseSection: React.FC = () => {
                                             : '/assets/images/gallery-8.webp'
                                     }
                                     alt="Showcase"
-                                    className="w-full h-auto object-cover scale-120 relative z-10"
+                                    className="w-full h-auto object-cover scale-120 relative z-10 mt-8"
                                 />
                             </div>
 

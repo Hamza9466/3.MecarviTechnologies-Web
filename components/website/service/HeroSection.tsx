@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { apiUrl } from '@/lib/api';
+
+const SERVICE_SLIDES_CACHE_KEY = "service_hero_slides";
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes – avoids 429 rate limit
 
 interface ServicePageSlide {
     id: number;
@@ -26,55 +30,78 @@ interface SlideData {
     buttonUrl: string;
 }
 
+function getCachedSlides(): SlideData[] | null {
+    if (typeof window === "undefined") return null;
+    try {
+        const raw = sessionStorage.getItem(SERVICE_SLIDES_CACHE_KEY);
+        if (!raw) return null;
+        const { data, ts } = JSON.parse(raw) as { data: SlideData[]; ts: number };
+        if (Date.now() - ts > CACHE_TTL_MS) return null;
+        return Array.isArray(data) ? data : null;
+    } catch {
+        return null;
+    }
+}
+
+function setCachedSlides(data: SlideData[]) {
+    if (typeof window === "undefined") return;
+    try {
+        sessionStorage.setItem(SERVICE_SLIDES_CACHE_KEY, JSON.stringify({ data, ts: Date.now() }));
+    } catch {
+        // ignore
+    }
+}
+
 const HeroSection: React.FC = () => {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [slides, setSlides] = useState<SlideData[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const cached = getCachedSlides();
+        if (cached && cached.length > 0) {
+            setSlides(cached);
+            setLoading(false);
+            return;
+        }
+
         const fetchSlides = async () => {
             try {
                 setLoading(true);
-                console.log("Fetching service page slides from API...");
 
-                const response = await fetch("http://localhost:8000/api/v1/service-page", {
+                const response = await fetch(apiUrl("/api/v1/service-page"), {
                     method: "GET",
-                    headers: {
-                        "Accept": "application/json",
-                    },
+                    headers: { Accept: "application/json" },
                 });
-
-                console.log("Service slides API response status:", response.status);
 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log("Service slides API response data:", data);
-
                     if (data.success && data.data?.service_pages?.length > 0) {
-                        // Convert service pages to slide format
                         const serviceSlides = data.data.service_pages.map((page: ServicePageSlide) => ({
                             id: page.id,
-                            image: page.bg_image.startsWith('http') ? page.bg_image : `http://localhost:8000${page.bg_image}`,
+                            image: page.bg_image?.startsWith("http") ? page.bg_image : apiUrl(page.bg_image?.startsWith("/") ? page.bg_image : `/${page.bg_image || ""}`),
                             smallText: page.small_text,
                             mainHeading: page.main_heading,
                             outlinedHeading: page.outlined_heading,
                             description: page.description,
                             backgroundText: page.background_text,
                             buttonText: page.button_text,
-                            buttonUrl: page.button_url
+                            buttonUrl: page.button_url,
                         }));
-
-                        console.log("Setting slides data:", serviceSlides);
                         setSlides(serviceSlides);
-                    } else {
-                        console.warn("No service pages found in API response");
+                        setCachedSlides(serviceSlides);
                     }
+                } else if (response.status === 429) {
+                    console.warn("Service slides: too many requests (429). Using cached or default.");
+                    const fallback = getCachedSlides();
+                    if (fallback?.length) setSlides(fallback);
                 } else {
-                    const errorText = await response.text().catch(() => "Unknown error");
-                    console.error("Failed to fetch service slides:", response.status, errorText);
+                    console.error("Failed to fetch service slides:", response.status);
                 }
             } catch (err) {
                 console.error("Error fetching service slides:", err);
+                const fallback = getCachedSlides();
+                if (fallback?.length) setSlides(fallback);
             } finally {
                 setLoading(false);
             }
